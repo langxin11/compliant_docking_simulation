@@ -317,8 +317,8 @@ class TaskSpaceController:
         # current_vel = np.concatenate([current_vel,np.zeros(3) ])  # 加上重力速度
         force_ext = np.array(force_ext).reshape(3)
         m = 10
-        d = 400
-        k = 1500
+        d = 50
+        k = 100
 
         force_desired = np.array([0,0,0])
 
@@ -328,9 +328,9 @@ class TaskSpaceController:
 
         #print('u_pos:',u_pos)
 
-        m2 = 10
-        d2 = 200
-        k2 = 1000
+        m2 = 1
+        d2 = 10
+        k2 = 25
 
        #torque_ext = np.zeros(3)
 

@@ -1,5 +1,5 @@
 <mujoco model="iiwa14">
-  <compiler angle="radian" meshdir="assets" />
+  <compiler angle="degree" meshdir="assets" />
 
   <option integrator="implicitfast"  gravity="0 0 0" timestep="0.001" cone = "elliptic" sdf_iterations = "2" sdf_initpoints = "200"/>
   <size nconmax="100000"/>
@@ -173,7 +173,7 @@
                     <body name="dock1" pos="0 0 0.06" quat="1 0 0 0">
                       <site pos="0 0 0" name="sensor_site"/>
 
-                      <body name='rev' pos="0 0 0" euler = " 0 0 40">
+                      <body name='rev' pos="0 0 0" euler = " 0 0 45">
                         <inertial mass="1" pos="0 0 0" diaginertia="0.1 0.1 0.1"/>
                         <geom name="dock1_geom" type="sdf" mesh="dock1" material="part_material">
 
