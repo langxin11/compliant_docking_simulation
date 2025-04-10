@@ -92,10 +92,20 @@ class MujRobot:
         render_options.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = True
         
         if self.record:
-            if self.headless:
-                self.renderer = mujoco.Renderer(self.model, height=1080, width=1920) #, offscreen=True)
-            else:
-                self.renderer = mujoco.Renderer(self.model, height=1080, width=1920)
+            try:
+                print(f"Setting up renderer in {'headless' if self.headless else 'display'} environment")
+                if self.headless:
+                    self.renderer = mujoco.Renderer(self.model, height=1080, width=1920, offscreen=True)
+                    print("Successfully created offscreen renderer")
+                else:
+                    self.renderer = mujoco.Renderer(self.model, height=1080, width=1920)
+                    print("Successfully created regular renderer")
+            except Exception as e:
+                print(f"Failed to create renderer: {e}")
+                import traceback
+                traceback.print_exc()
+                warnings.warn(f"Failed to create renderer: {e}. Recording disabled.")
+                self.record = True
                 
         return render_options
 
@@ -114,7 +124,8 @@ class MujRobot:
         if self.render and self.viewer:
             self.viewer.sync()
 
-        if self.record and hasattr(self, 'renderer'):
+        if self.record:
+            print(1)
             # 视频以50hz保存
             if self.steps % 20 == 0:
                 if self.steps % 1000 == 0:
@@ -124,6 +135,7 @@ class MujRobot:
                     self.renderer.update_scene(self.data, camera='track_cam', scene_option=self.renderer_options)
                     frame = self.renderer.render()
                     self.frames.append(frame)
+                    print(len(self.frames))
                     if self.steps == 0:
                         print(f"First frame collected, shape: {frame.shape}")
                 except Exception as e:
@@ -216,12 +228,12 @@ def test_record():
     robot = MujRobot(model_path,render=False,record=True)
     init_qpos = np.array([0, -np.pi/2, 0, 0, 0, 0,0])
     robot.init_simulators(init_qpos)
-    for i in range(10):
+    for i in range(1000):
         tau = np.zeros(7)
         qpos,qvel,eef_pos = robot.step(tau)
-        print("qpos:",qpos)
-        print("qvel:",qvel)
-        print("eef_pos:",eef_pos)
+        # print("qpos:",qpos)
+        # print("qvel:",qvel)
+        # print("eef_pos:",eef_pos)
     robot.to_mp4("result/video/simulation.mp4")
 
 if __name__ == "__main__":

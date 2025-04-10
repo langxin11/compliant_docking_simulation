@@ -14,15 +14,12 @@ The simulation includes:
 Author: RQM
 Date: 2024
 """
-import os
-os.environ["MUJOCO_GL"] = "egl"  # 试试 osmesa，也可以改成 egl
-
 import numpy as np
 import pinocchio as pin
 import matplotlib.pyplot as plt
 from time import sleep
 from typing import Callable, Optional
-
+import os
 import mujoco.viewer
 from typing import Tuple, List
 
