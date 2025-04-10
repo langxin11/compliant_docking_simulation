@@ -14,8 +14,6 @@ The simulation includes:
 Author: RQM
 Date: 2024
 """
-
-import mujoco
 import numpy as np
 import pinocchio as pin
 import matplotlib.pyplot as plt
@@ -25,7 +23,7 @@ import os
 import mujoco.viewer
 from typing import Tuple, List
 
-from Relate_class import TaskSpaceController,TaskSpaceTrajectory,DecoupledQuinticTrajectory
+from Relate_class import TaskSpaceController,TaskSpaceTrajectory,DecoupledQuinticTrajectory,compute_ik
 from muj_class import MujRobot
 from log_class import Log
     
@@ -90,12 +88,12 @@ def run_simulation(muj_robot:MujRobot,
         #log.store_data(t, pos_des, q, v, tau, np.linalg.norm(current_pos - pos_des))
 
         log.store_data(t, q, v, current_pos, current_vel, np.linalg.norm(current_pos - pos_des),pos_des,vel_des,acc_des,tau ,force_external,torque_external)
-                #    v: np.ndarray, pos_actual: np.ndarray, 
-                #    vel_actual: np.ndarray, error: float,
-                #    pos_desired: np.ndarray,vel_desired: np.ndarray,
-                #    acc_desired: np.ndarray)
 
-    log.plot_results()
+
+    log.plot_results(save_path="figure/")
+
+    if muj_robot.record:
+        muj_robot.to_mp4("video/docking.mp4")
 
 
 
@@ -130,24 +128,22 @@ def main():
     H_init = pin_data.oMf[pin_model.getFrameId("cylinder_link")]
     print(f"Initial end-effector position: {H_init.translation}")
 
-    
-
     print(f"Initial joint positions: {q_init}",success)
 
-    
     # 设置目标位置（相对运动）
     target_pos = init_pos + np.array([0.00, -0.00,-0.18])
 
-    muj_robot = MujRobot(model_path="kuka_xml_urdf/iiwa14_dock.xml",render=True,dt=dt ,target_pos = target_pos)
+    muj_robot = MujRobot(model_path="kuka_xml_urdf/iiwa14_dock.xml",render=True,record=True,dt=dt ,target_pos = target_pos)
+
     print(f"Target position: {target_pos}")
     #target_pos = np.array([0.25,0.25,0.5,])
     traj_duration = 15.0
     trajector_planner = DecoupledQuinticTrajectory(init_pos ,target_pos ,traj_duration)
 
-    run_simulation(muj_robot,task_dynamics,trajector_planner,log,duration=20,dt=dt,q_init = q_init)
+    run_simulation(muj_robot,task_dynamics,trajector_planner,log,duration=0.1,dt=dt,q_init = q_init)
 
 if __name__ == '__main__':
-    main()
+    main(render=True,record=True,dt=0.001,traj_duration=15.0,duration=18)
 
     
 

@@ -17,6 +17,7 @@ Date: 2024
 
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 class Log:
     def __init__(self):
@@ -83,7 +84,7 @@ class Log:
 
 
 
-    def plot_results(self):
+    def plot_results(self,save_path:str):
         
         """绘制仿真结果"""
         pos_actual = np.array(self.pos_actual).reshape(-1, 3)
@@ -151,18 +152,10 @@ class Log:
             ax4.grid(True)
             ax4.set_title('Impedance Torque')
 
-        # for i in range(6):
-        #     ax3.plot(self.t_list, np.rad2deg(joint_angles[:, i]), label=f'Joint {i+1}')
-        # ax3.set_xlabel('Time [s]')
-        # ax3.set_ylabel('Joint Angle [deg]')
-        # ax3.legend()
-        # ax3.grid(True)
-        # ax3.set_title('Joint Angles')
+        os.makedirs(save_path, exist_ok=True)
 
-        # ax4 = fig.add_subplot(gs[2, 1])
+        fig.savefig(save_path + "tracking_error.png",dpi=1200)
 
-
-        plt.show()
         fig = plt.figure(figsize=(15, 12))
         gs = plt.GridSpec(7, 1)
 
@@ -175,4 +168,4 @@ class Log:
             ax1.grid(True)
             ax1.set_title('Joint Torques')
 
-        plt.show()
+        fig.savefig(save_path + "torque.png",dpi=1200)

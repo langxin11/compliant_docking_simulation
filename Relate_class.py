@@ -548,46 +548,6 @@ class TaskSpaceController:
             grad[i] = (manipulability_delta - manipulability_current) / delta
         return grad
 
-def compute_ik(pin_model, pin_data, target_pose, initial_q=np.ones(7)*0.3, max_iters=1000, eps=1e-6):
-    if initial_q is None:
-        q = pin.neutral(pin_model)
-    else:
-        q = initial_q.copy()
-        
-    ee_frame_id = pin_model.getFrameId("cylinder_link")
-    damp = 1e-8
-    
-    for i in range(max_iters):
-        pin.forwardKinematics(pin_model, pin_data, q)
-        pin.updateFramePlacements(pin_model, pin_data)
-        
-        current_pose = pin_data.oMf[ee_frame_id]
-        
-        error_pos = target_pose.translation - current_pose.translation
-        error_rot = pin.log3(target_pose.rotation @ current_pose.rotation.T)
-        
-        error = np.concatenate([error_pos, error_rot])
-        
-        if np.linalg.norm(error) < eps:
-            print(f"IK converged in {i+1} iterations")
-            return q, True
-            
-        pin.computeJointJacobians(pin_model, pin_data, q)
-        J = pin.getFrameJacobian(pin_model, pin_data, ee_frame_id, pin.ReferenceFrame.LOCAL_WORLD_ALIGNED)
-        
-        Jt = J.T
-        JJt = J @ Jt
-        lambda_eye = damp * np.eye(6)
-        
-        v = np.linalg.solve(JJt + lambda_eye, error)
-        dq = Jt @ v
-        
-        q = pin.integrate(pin_model, q, dq)
-        q = np.clip(q, pin_model.lowerPositionLimit, pin_model.upperPositionLimit)
-    
-    print("IK failed to converge")
-    return q, False
-
 
 class RobotSimulator:
     def __init__(self, robot_model: pin.Model, dt: float):
