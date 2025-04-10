@@ -72,12 +72,12 @@ To use this repository, follow these steps:
    ### Main simulation script
 
    ```bash
-   python task_dynamics_mujoco_control.py
+   python main_simulation.py
    ```
 
 ## result
 ![docking error](demo/tracking_error.png)
-📽️ [点击观看演示视频](demo/docking.mp4)
+[![Docking Demo](demo/docking_preview.gif)](demo/docking.mp4)
 
 
 
