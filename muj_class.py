@@ -93,12 +93,24 @@ class MujRobot:
         
         if self.record:
             try:
+                print(f"Setting up renderer in {'headless' if self.headless else 'display'} environment")
                 if self.headless:
                     # Use offscreen rendering for headless environments
+                    try:
+                        import mujoco._render
+                        print("Successfully imported mujoco._render module")
+                    except ImportError as e:
+                        print(f"Failed to import mujoco._render: {e}")
+                        
                     self.renderer = mujoco.Renderer(self.model, height=1080, width=1920, offscreen=True)
+                    print("Successfully created offscreen renderer")
                 else:
                     self.renderer = mujoco.Renderer(self.model, height=1080, width=1920)
+                    print("Successfully created regular renderer")
             except Exception as e:
+                print(f"Failed to create renderer: {e}")
+                import traceback
+                traceback.print_exc()
                 warnings.warn(f"Failed to create renderer: {e}. Recording disabled.")
                 self.record = False
                 
@@ -124,13 +136,18 @@ class MujRobot:
             if self.steps % 20 == 0:
                 if self.steps % 1000 == 0:
                     self.renderer_options.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = not self.renderer_options.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT]
+                    print(f"Frames collected so far: {len(self.frames)}")
                 try:
                     self.renderer.update_scene(self.data, camera='track_cam', scene_option=self.renderer_options)
                     frame = self.renderer.render()
                     self.frames.append(frame)
+                    if self.steps == 0:
+                        print(f"First frame collected, shape: {frame.shape}")
                 except Exception as e:
-                    if self.steps == 0:  # Only show warning once
-                        warnings.warn(f"Failed to render frame: {e}")
+                    if self.steps % 1000 == 0:  # Show warning periodically
+                        print(f"Failed to render frame at step {self.steps}: {e}")
+                        import traceback
+                        traceback.print_exc()
 
         self.steps += 1
         return qpos,qvel,eef_pos
@@ -156,9 +173,19 @@ class MujRobot:
         # Extract directory path
         directory = os.path.dirname(filepath)
         
+        print(f"Attempting to save video to {filepath}")
+        print(f"Directory: {directory}")
+        print(f"Total frames collected: {len(self.frames)}")
+        
         # Create directory if it doesn't exist
         if directory and not os.path.exists(directory):
-            os.makedirs(directory)
+            try:
+                os.makedirs(directory)
+                print(f"Created directory: {directory}")
+            except Exception as e:
+                print(f"Failed to create directory {directory}: {e}")
+                import traceback
+                traceback.print_exc()
         
         # Check if we have frames to save
         if not self.frames:
@@ -166,8 +193,27 @@ class MujRobot:
             return
             
         # Save video file
-        imageio.mimsave(filepath, self.frames, fps=50)
-        print(f"Video saved to {filepath}")
+        try:
+            imageio.mimsave(filepath, self.frames, fps=50)
+            print(f"Video saved to {filepath}")
+        except Exception as e:
+            print(f"Failed to save video: {e}")
+            import traceback
+            traceback.print_exc()
+            
+            # Try to save frames as individual images as a fallback
+            try:
+                print("Attempting to save frames as individual images...")
+                img_dir = os.path.join(directory, "frames")
+                if not os.path.exists(img_dir):
+                    os.makedirs(img_dir)
+                for i, frame in enumerate(self.frames):
+                    if i % 10 == 0:  # Save every 10th frame to avoid too many files
+                        imageio.imwrite(os.path.join(img_dir, f"frame_{i:04d}.png"), frame)
+                print(f"Sample frames saved to {img_dir}")
+            except Exception as e2:
+                print(f"Failed to save individual frames: {e2}")
+                traceback.print_exc()
 
 def test_render():
     model_path = "kuka_xml_urdf/iiwa14.xml"

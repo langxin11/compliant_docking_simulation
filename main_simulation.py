@@ -93,7 +93,19 @@ def run_simulation(muj_robot:MujRobot,
     log.plot_results(save_path="figure/")
 
     if muj_robot.record:
-        muj_robot.to_mp4("video/docking.mp4")
+        # 创建绝对路径以确保视频保存在正确位置
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        video_dir = os.path.join(current_dir, "video")
+        if not os.path.exists(video_dir):
+            try:
+                os.makedirs(video_dir)
+                print(f"Created video directory: {video_dir}")
+            except Exception as e:
+                print(f"Error creating video directory: {e}")
+                
+        video_path = os.path.join(video_dir, "docking.mp4")
+        print(f"Saving video to absolute path: {video_path}")
+        muj_robot.to_mp4(video_path)
 
 
 
