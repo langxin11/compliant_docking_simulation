@@ -92,27 +92,10 @@ class MujRobot:
         render_options.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = True
         
         if self.record:
-            try:
-                print(f"Setting up renderer in {'headless' if self.headless else 'display'} environment")
-                if self.headless:
-                    # Use offscreen rendering for headless environments
-                    try:
-                        import mujoco._render
-                        print("Successfully imported mujoco._render module")
-                    except ImportError as e:
-                        print(f"Failed to import mujoco._render: {e}")
-                        
-                    self.renderer = mujoco.Renderer(self.model, height=1080, width=1920, offscreen=True)
-                    print("Successfully created offscreen renderer")
-                else:
-                    self.renderer = mujoco.Renderer(self.model, height=1080, width=1920)
-                    print("Successfully created regular renderer")
-            except Exception as e:
-                print(f"Failed to create renderer: {e}")
-                import traceback
-                traceback.print_exc()
-                warnings.warn(f"Failed to create renderer: {e}. Recording disabled.")
-                self.record = False
+            if self.headless:
+                self.renderer = mujoco.Renderer(self.model, height=1080, width=1920, offscreen=True)
+            else:
+                self.renderer = mujoco.Renderer(self.model, height=1080, width=1920)
                 
         return render_options
 
