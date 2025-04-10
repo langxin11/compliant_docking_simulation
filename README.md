@@ -76,10 +76,8 @@ To use this repository, follow these steps:
    ```
 
 ## result
-<video src="demo/docking.mp4" controls width="600"/>
-
 ![docking error](demo/tracking_error.png)
-
+📽️ [点击观看演示视频](demo/docking.mp4)
 
 
 
