@@ -79,7 +79,7 @@ def run_simulation(muj_robot:MujRobot,
 
         torque_external = current_ori @ torque_sensor
 
-        #print(f"current_time:{t},force_external:{force_exteral},current_ori:{current_ori_log}")
+        print(f"current_time:{t},force_external:{force_external}")
 
         #print('current:',current_pos,"current_ori:",current_ori)
 
@@ -97,20 +97,23 @@ def run_simulation(muj_robot:MujRobot,
 
 
 
-def main():
-
-    dt = 0.001
-
+def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0):
+    """
+    Main function that sets up and runs the robot control simulation.
     
+    Args:
+        render (bool): Whether to render the simulation visually
+        record (bool): Whether to record the simulation to a video file
+        dt (float): Simulation time step in seconds
+        traj_duration (float): Duration of the trajectory execution in seconds
+        duration (float): Total simulation duration in seconds
+    """
     log = Log()
 
     pin_model = pin.buildModelFromUrdf("kuka_xml_urdf/iiwa14_dock.urdf")
-    #pin_model = pin.buildModelFromMJCF("kuka_xml_urdf/iiwa14_dock.xml")
     pin_data = pin_model.createData()
 
-
     task_dynamics = TaskSpaceController(pin_model, pin_data)
-
 
     init_pos = np.array([0.0, 0.5, 0.5])
     init_ori = np.array([
@@ -121,29 +124,43 @@ def main():
 
     init_pose = pin.SE3(init_ori, init_pos)
 
-    q_init , success = compute_ik(pin_model, pin_data, init_pose)
+    q_init, success = compute_ik(pin_model, pin_data, init_pose)
 
     pin.forwardKinematics(pin_model, pin_data, q_init)
     pin.updateFramePlacements(pin_model, pin_data)
     H_init = pin_data.oMf[pin_model.getFrameId("cylinder_link")]
     print(f"Initial end-effector position: {H_init.translation}")
+    print(f"Initial joint positions: {q_init}", success)
 
-    print(f"Initial joint positions: {q_init}",success)
-
-    # 设置目标位置（相对运动）
-    target_pos = init_pos + np.array([0.00, -0.00,-0.18])
-
-    muj_robot = MujRobot(model_path="kuka_xml_urdf/iiwa14_dock.xml",render=True,record=True,dt=dt ,target_pos = target_pos)
-
+    # Set target position (relative motion)
+    target_pos = init_pos + np.array([0.00, -0.00, -0.18])
     print(f"Target position: {target_pos}")
-    #target_pos = np.array([0.25,0.25,0.5,])
-    traj_duration = 15.0
-    trajector_planner = DecoupledQuinticTrajectory(init_pos ,target_pos ,traj_duration)
 
-    run_simulation(muj_robot,task_dynamics,trajector_planner,log,duration=0.1,dt=dt,q_init = q_init)
+    # Initialize robot simulation with parameters
+    muj_robot = MujRobot(
+        model_path="kuka_xml_urdf/iiwa14_dock.xml",
+        render=render,
+        record=record,
+        dt=dt,
+        target_pos=target_pos
+    )
+
+    # Create trajectory planner with specified duration
+    trajector_planner = DecoupledQuinticTrajectory(init_pos, target_pos, traj_duration)
+
+    # Run simulation with specified duration
+    run_simulation(
+        muj_robot,
+        task_dynamics,
+        trajector_planner,
+        log,
+        duration=duration,
+        dt=dt,
+        q_init=q_init
+    )
 
 if __name__ == '__main__':
-    main(render=True,record=True,dt=0.001,traj_duration=15.0,duration=18)
+    main(render=False, record=True, dt=0.001, traj_duration=15.0, duration=18.0)
 
     
 
