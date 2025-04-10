@@ -11,6 +11,8 @@ This project is designed to provide a comprehensive solution for trajectory plan
 - [Features](#features)
 - [Instruction](#instruction)
 - [Usage](#usage)
+- [Result](#result)
+- [Trouble shooting](#trouble-shooting)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -72,6 +74,22 @@ To use this repository, follow these steps:
    ```bash
    python task_dynamics_mujoco_control.py
    ```
+
+## result
+<video src="demo/docking.mp4" controls width="600"/>
+
+![docking error](demo/tracking_error.png)
+
+
+
+
+## Trouble shooting
+How to render on headless device?
+```bash
+sudo apt update
+sudo apt install libegl1 libegl-dev
+export MUJOCO_GL=egl
+```
 
 ## Contributing
 
