@@ -1,0 +1,178 @@
+"""
+log_class.py - Simulation Data Logging and Visualization Library
+
+This module provides a comprehensive logging system for robot control simulations.
+It captures time-series data for joint angles, velocities, end-effector positions,
+control torques, and external forces/torques during simulation runs.
+
+Features:
+- Data collection for robot state variables during simulation
+- Visualization of tracking performance and control inputs
+- Multiple plot types for analyzing different aspects of control performance
+- Support for external force/torque measurement visualization
+
+Author: RQM
+Date: 2024
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+class Log:
+    def __init__(self):
+
+        self.nq = 7
+
+    def reset_logs(self):
+        """重置记录数据"""
+
+        self.t_list = []
+
+        self.joint_angles = []
+        self.joint_velocities = []
+
+        self.pos_actual = []
+        self.vel_actual = []
+
+        self.error =[]
+
+        self.pos_desired = []
+        self.vel_desired = []
+        self.acc_desired = []
+
+        self.tau_hist = []
+        self.force_externals = []
+        self.torque_externals = []
+
+
+
+    def store_data(self, t: float, q: np.ndarray, 
+                   v: np.ndarray, pos_actual: np.ndarray, 
+                   vel_actual: np.ndarray, error: float,
+                   pos_desired: np.ndarray,vel_desired: np.ndarray,
+                   acc_desired: np.ndarray,tau: np.ndarray,
+                   external_force: np.ndarray,external_torque: np.ndarray):
+        """
+        存储数据
+        Args:
+            t: 时间
+            q_d: 期望的位置
+            q: 实际的位置
+            dq: 实际的速度
+            tau: 实际的控制力矩
+            error: 跟踪误差
+        """
+
+        self.t_list.append(t)
+
+        self.joint_angles.append(q)
+        self.joint_velocities.append(v)
+
+        self.pos_actual.append(pos_actual)
+        self.vel_actual.append(vel_actual)
+
+        self.error.append(error)
+
+        self.pos_desired.append(pos_desired)
+        self.vel_desired.append(vel_desired)
+        self.acc_desired.append(acc_desired)
+
+        self.tau_hist.append(tau)
+        self.force_externals.append(external_force)
+        self.torque_externals.append(external_torque)
+
+
+
+    def plot_results(self):
+        
+        """绘制仿真结果"""
+        pos_actual = np.array(self.pos_actual).reshape(-1, 3)
+        pos_desired = np.array(self.pos_desired)
+        joint_angles = np.array(self.joint_angles)
+        joint_velocities = np.array(self.joint_velocities)
+
+        virtual_force_list = np.zeros_like(pos_actual)
+        # array(self.virtual_force_list)
+
+
+        tau_hist = np.array(self.tau_hist)
+        external_forces = np.array(self.force_externals)
+        external_torques = np.array(self.torque_externals)
+
+        if len(self.force_externals) < 1:
+            external_forces = np.zeros_like(pos_actual)
+            external_torques = np.zeros_like(pos_actual)
+            
+        
+        # 创建三个子图
+        fig = plt.figure(figsize=(15, 12))
+        gs = plt.GridSpec(3, 2)
+        
+        # 1. 位置跟踪
+        ax1 = fig.add_subplot(gs[0, :])
+        labels = ['X', 'Y', 'Z']
+        color = ['r', 'g', 'b']
+        for i in range(3):
+            ax1.plot(self.t_list, pos_actual[:, i], '-', label=f'Actual {labels[i]}', color=color[i])
+            ax1.plot(self.t_list, pos_desired[:, i], '--', label=f'Desired {labels[i]}', color=color[i])
+        ax1.set_xlabel('Time [s]')
+        ax1.set_ylabel('Position [m]')
+        ax1.legend()
+        ax1.grid(True)
+        ax1.set_title('End-effector Position Tracking')
+        
+        # 2. 跟踪误差
+        ax2 = fig.add_subplot(gs[1, :])
+        for i in range(3):
+            error = pos_desired[:, i] - pos_actual[:, i]
+            ax2.plot(self.t_list, error, label=f'{labels[i]} Error')
+        ax2.set_xlabel('Time [s]')
+        ax2.set_ylabel('Error [m]')
+        ax2.legend()
+        ax2.grid(True)
+        ax2.set_title('Position Tracking Error')
+        
+        # 3. 关节角度和速度
+        ax3 = fig.add_subplot(gs[2, 0])
+        for i in range(3):
+            ax3.plot(self.t_list[:], external_forces[:, i], label=f'axis {i+1}')
+            ax3.set_xlabel('Time [s]')
+            ax3.set_ylabel('Virtual Force [N]')
+            ax3.legend()
+            ax3.grid(True)
+            ax3.set_title('Impedance Force')
+
+        ax4 = fig.add_subplot(gs[2, 1])
+        for i in range(3):
+            ax4.plot(self.t_list[:], external_torques[:, i], label=f'axis {i+1}')
+            ax4.set_xlabel('Time [s]')
+            ax4.set_ylabel('Virtual Force [N]')
+            ax4.legend()
+            ax4.grid(True)
+            ax4.set_title('Impedance Torque')
+
+        # for i in range(6):
+        #     ax3.plot(self.t_list, np.rad2deg(joint_angles[:, i]), label=f'Joint {i+1}')
+        # ax3.set_xlabel('Time [s]')
+        # ax3.set_ylabel('Joint Angle [deg]')
+        # ax3.legend()
+        # ax3.grid(True)
+        # ax3.set_title('Joint Angles')
+
+        # ax4 = fig.add_subplot(gs[2, 1])
+
+
+        plt.show()
+        fig = plt.figure(figsize=(15, 12))
+        gs = plt.GridSpec(7, 1)
+
+        for i in range(7):
+            ax1 = fig.add_subplot(gs[i, 0])
+            ax1.plot(self.t_list, tau_hist[:, i], label=f'Joint {i+1}')
+            ax1.set_xlabel('Time [s]')
+            ax1.set_ylabel('Torque [Nm]')
+            ax1.legend()
+            ax1.grid(True)
+            ax1.set_title('Joint Torques')
+
+        plt.show()
