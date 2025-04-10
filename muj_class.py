@@ -20,6 +20,7 @@ import mujoco
 import numpy as np
 import os
 import imageio
+import warnings
 
 class MujRobot:
     def __init__(self, model_path: str,
@@ -35,6 +36,12 @@ class MujRobot:
         self.setup_mujoco()
         self.viewer = None
         self.render = render 
+
+        # Check if we're in a headless environment
+        self.headless = "DISPLAY" not in os.environ or not os.environ["DISPLAY"]
+        if self.headless and render:
+            warnings.warn("Running in headless environment. Interactive rendering disabled.")
+            self.render = False
 
         self.setup_viewer()
         self.record = record
@@ -65,22 +72,36 @@ class MujRobot:
         self.frames = []
 
     def setup_viewer(self):
-        if self.render:
-            self.viewer = mujoco.viewer.launch_passive(self.model, self.data)
-            self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_PERTFORCE] = True
-            self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = True
-            self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = True
-            self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = True
+        if self.render and not self.headless:
+            try:
+                self.viewer = mujoco.viewer.launch_passive(self.model, self.data)
+                self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_PERTFORCE] = True
+                self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = True
+                self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = True
+                self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = True
+            except Exception as e:
+                warnings.warn(f"Failed to create viewer: {e}. Rendering disabled.")
+                self.render = False
 
     def setup_renderer(self):
-        if self.record:
-            self.renderer =  mujoco.Renderer(self.model, width=1920, height=1080)
         render_options = mujoco.MjvOption()
         mujoco.mjv_defaultOption(render_options)
         render_options.flags[mujoco.mjtVisFlag.mjVIS_PERTFORCE] = True
         render_options.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = True
         render_options.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = True
         render_options.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = True
+        
+        if self.record:
+            try:
+                if self.headless:
+                    # Use offscreen rendering for headless environments
+                    self.renderer = mujoco.Renderer(self.model, height=1080, width=1920, offscreen=True)
+                else:
+                    self.renderer = mujoco.Renderer(self.model, height=1080, width=1920)
+            except Exception as e:
+                warnings.warn(f"Failed to create renderer: {e}. Recording disabled.")
+                self.record = False
+                
         return render_options
 
     def step(self,tau:np.ndarray = np.zeros(7)):
@@ -95,18 +116,23 @@ class MujRobot:
         eef_pos = self.data.xpos[self.eef_id]
         self.data.site_xpos[self.vis_id] = self.target_pos
         self.data.site_xpos[self.eef_marker_id] = eef_pos
-        if self.render:
+        if self.render and self.viewer:
             self.viewer.sync()
 
-        if self.record:
+        if self.record and hasattr(self, 'renderer'):
             # 视频以50hz保存
             if self.steps % 20 == 0:
                 if self.steps % 1000 == 0:
                     self.renderer_options.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = not self.renderer_options.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT]
-                self.renderer.update_scene(self.data,camera='track_cam',scene_option=self.renderer_options)
-                frame = self.renderer.render()
-                self.frames.append(frame)
+                try:
+                    self.renderer.update_scene(self.data, camera='track_cam', scene_option=self.renderer_options)
+                    frame = self.renderer.render()
+                    self.frames.append(frame)
+                except Exception as e:
+                    if self.steps == 0:  # Only show warning once
+                        warnings.warn(f"Failed to render frame: {e}")
 
+        self.steps += 1
         return qpos,qvel,eef_pos
     
     def get_ee_state(self):
@@ -133,6 +159,11 @@ class MujRobot:
         # Create directory if it doesn't exist
         if directory and not os.path.exists(directory):
             os.makedirs(directory)
+        
+        # Check if we have frames to save
+        if not self.frames:
+            warnings.warn("No frames to save. Video not created.")
+            return
             
         # Save video file
         imageio.mimsave(filepath, self.frames, fps=50)
