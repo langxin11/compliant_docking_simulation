@@ -15,7 +15,8 @@ Author: RQM
 Date: 2024
 """
 import os
-os.environ["MUJOCO_GL"] = "egl"  # 试试 osmesa，也可以改成 egl
+if "DISPLAY" not in os.environ or not os.environ["DISPLAY"]:
+    os.environ["MUJOCO_GL"] = "egl"  # 试试 osmesa，也可以改成 egl
 
 import numpy as np
 import pinocchio as pin
