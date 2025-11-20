@@ -10,7 +10,7 @@ import mujoco.viewer
 class RobotController:
     def __init__(self, model_path: str, urdf_path: str):
         """
-        初始化机器人控制器
+        初始化机器人控制器（MuJoCo + Pinocchio）：用于物理仿真与动力学计算
         Args:
             model_path: MuJoCo模型文件路径
             urdf_path: URDF文件路径
@@ -21,21 +21,21 @@ class RobotController:
         if not os.path.exists(urdf_path):
             raise FileNotFoundError(f"URDF file not found: {urdf_path}")
             
-        # 加载MuJoCo模型
+        # 加载MuJoCo模型（用于物理仿真）
         try:
             self.model = mujoco.MjModel.from_xml_path(model_path)
             self.data = mujoco.MjData(self.model)
         except Exception as e:
             raise RuntimeError(f"Failed to load MuJoCo model: {str(e)}")
         
-        # 创建Pinocchio模型
+        # 创建Pinocchio模型（用于动力学/雅可比计算）
         try:
             self.pin_model = pin.buildModelFromUrdf(urdf_path)
             self.pin_data = self.pin_model.createData()
         except Exception as e:
             raise RuntimeError(f"Failed to load Pinocchio model: {str(e)}")
         gravity_vector: np.ndarray = np.array([0, 0, 0])
-        self.pin_model.gravity.linear = gravity_vector
+        self.pin_model.gravity.linear = gravity_vector  # 控制侧去重力（仿真环境可能仍生效）
         
         # 控制参数
         self.Kp = 100.0  # P增益
@@ -50,7 +50,7 @@ class RobotController:
             'torque': self.pin_model.effortLimit
         }
         
-        # 记录数据用于绘图
+        # 记录数据用于绘图（关节角/速度/力矩/误差）
         self.reset_logs()
 
     def reset_logs(self):
@@ -64,8 +64,7 @@ class RobotController:
         
     def forward_dynamics(self, q: np.ndarray, dq: np.ndarray, tau: np.ndarray) -> np.ndarray:
         """
-        计算前向动力学
-        返回：关节加速度
+        计算前向动力学（ABA）：返回关节加速度
         """
         pin.computeAllTerms(self.pin_model, self.pin_data, q, dq)
         ddq = pin.aba(self.pin_model, self.pin_data, q, dq, tau)
@@ -73,8 +72,7 @@ class RobotController:
         
     def inverse_dynamics(self, q: np.ndarray, dq: np.ndarray, ddq: np.ndarray) -> np.ndarray:
         """
-        计算逆动力学
-        返回：关节力矩
+        计算逆动力学（RNEA）：返回关节力矩
         """
         tau = pin.rnea(self.pin_model, self.pin_data, q, dq, ddq)
         return tau
@@ -86,7 +84,7 @@ class RobotController:
     def compute_control(self, q_desired: np.ndarray, dq_desired: np.ndarray, 
                        ddq_desired: np.ndarray, q_current: np.ndarray, 
                        dq_current: np.ndarray) -> np.ndarray:
-        """计算控制输出"""
+        """计算控制输出（关节空间 PD + 逆动力学前馈）"""
         # 检查输入维度
         if any(arr.shape != (self.nq,) for arr in [q_desired, dq_desired, ddq_desired, q_current, dq_current]):
             raise ValueError("Input arrays must match the number of joints")
@@ -98,8 +96,9 @@ class RobotController:
         # 计算期望加速度（PD控制）
         ddq = ddq_desired + self.Kp * q_error + self.Kd * dq_error
         
-        # 计算所需关节力矩
-        #tau = self.inverse_dynamics(q_current, dq_current, ddq)
+        # 计算所需关节力矩（推荐：使用当前状态与期望加速度）
+        # tau = self.inverse_dynamics(q_current, dq_current, ddq)
+        # 当前实现使用期望状态/加速度，偏差大时可能不一致；可按上行切换
         tau = self.inverse_dynamics(q_desired, dq_desired, ddq_desired)
         return tau
 
@@ -108,7 +107,7 @@ class RobotController:
                                   v0: np.ndarray = None, vf: np.ndarray = None,
                                   a0: np.ndarray = None, af: np.ndarray = None) -> tuple:
         """
-        生成五次多项式轨迹
+        生成五次多项式轨迹（满足端点速度/加速度为零）
         Args:
             t: 当前时间点
             t0: 起始时间
@@ -210,31 +209,69 @@ class RobotController:
             return self.generate_quintic_trajectory(t, t0, tf, q0, qf, v0, vf, a0, af)
             
         elif trajectory_type == 'sine':
+            omega = 2 * np.pi  # 角频率
             q = np.array([
-                0.5 * np.sin(2 * np.pi * t),
-                0.3 * np.sin(2 * np.pi * t + np.pi/4),
-                0.4 * np.sin(2 * np.pi * t + np.pi/3),
-                0.3 * np.sin(2 * np.pi * t + np.pi/2),
-                0.2 * np.sin(2 * np.pi * t + 2*np.pi/3),
-                0.3 * np.sin(2 * np.pi * t + 3*np.pi/4),
-                0.4 * np.sin(2 * np.pi * t + np.pi)
+                0.5 * np.sin(omega * t),
+                0.3 * np.sin(omega * t + np.pi/4),
+                0.4 * np.sin(omega * t + np.pi/3),
+                0.3 * np.sin(omega * t + np.pi/2),
+                0.2 * np.sin(omega * t + 2*np.pi/3),
+                0.3 * np.sin(omega * t + 3*np.pi/4),
+                0.4 * np.sin(omega * t + np.pi)
             ])
-            dq = np.zeros_like(q)  # 可以计算实际的速度
-            ddq = np.zeros_like(q)  # 可以计算实际的加速度
+            # 计算速度（一阶导数）：dq/dt = amplitude * omega * cos(omega*t + phase)
+            dq = np.array([
+                0.5 * omega * np.cos(omega * t),
+                0.3 * omega * np.cos(omega * t + np.pi/4),
+                0.4 * omega * np.cos(omega * t + np.pi/3),
+                0.3 * omega * np.cos(omega * t + np.pi/2),
+                0.2 * omega * np.cos(omega * t + 2*np.pi/3),
+                0.3 * omega * np.cos(omega * t + 3*np.pi/4),
+                0.4 * omega * np.cos(omega * t + np.pi)
+            ])
+            # 计算加速度（二阶导数）：d²q/dt² = -amplitude * omega² * sin(omega*t + phase)
+            ddq = np.array([
+                -0.5 * omega**2 * np.sin(omega * t),
+                -0.3 * omega**2 * np.sin(omega * t + np.pi/4),
+                -0.4 * omega**2 * np.sin(omega * t + np.pi/3),
+                -0.3 * omega**2 * np.sin(omega * t + np.pi/2),
+                -0.2 * omega**2 * np.sin(omega * t + 2*np.pi/3),
+                -0.3 * omega**2 * np.sin(omega * t + 3*np.pi/4),
+                -0.4 * omega**2 * np.sin(omega * t + np.pi)
+            ])
             return q, dq, ddq
         
         elif trajectory_type == 'circle':
+            omega = 2 * np.pi  # 角频率
             q = np.array([
-                0.3 * np.cos(2 * np.pi * t),
-                0.3 * np.sin(2 * np.pi * t),
-                0.2 * np.cos(2 * np.pi * t),
-                0.2 * np.sin(2 * np.pi * t),
-                0.1 * np.cos(2 * np.pi * t),
-                0.1 * np.sin(2 * np.pi * t),
-               # 0.1 * np.cos(2 * np.pi * t)
+                0.3 * np.cos(omega * t),
+                0.3 * np.sin(omega * t),
+                0.2 * np.cos(omega * t),
+                0.2 * np.sin(omega * t),
+                0.1 * np.cos(omega * t),
+                0.1 * np.sin(omega * t),
+                0.1 * np.cos(omega * t)
             ])
-            dq = np.zeros_like(q)
-            ddq = np.zeros_like(q)
+            # 计算速度：cos的导数是-sin，sin的导数是cos
+            dq = np.array([
+                -0.3 * omega * np.sin(omega * t),
+                0.3 * omega * np.cos(omega * t),
+                -0.2 * omega * np.sin(omega * t),
+                0.2 * omega * np.cos(omega * t),
+                -0.1 * omega * np.sin(omega * t),
+                0.1 * omega * np.cos(omega * t),
+                -0.1 * omega * np.sin(omega * t)
+            ])
+            # 计算加速度：再次求导
+            ddq = np.array([
+                -0.3 * omega**2 * np.cos(omega * t),
+                -0.3 * omega**2 * np.sin(omega * t),
+                -0.2 * omega**2 * np.cos(omega * t),
+                -0.2 * omega**2 * np.sin(omega * t),
+                -0.1 * omega**2 * np.cos(omega * t),
+                -0.1 * omega**2 * np.sin(omega * t),
+                -0.1 * omega**2 * np.cos(omega * t)
+            ])
             return q, dq, ddq
             
     def run_simulation(self, trajectory_type: str = 'quintic', 
@@ -296,6 +333,7 @@ class RobotController:
         error_array = np.array(self.error_log)
         
         # 创建子图
+        set_plot_config()
         fig = plt.figure(figsize=(15, 10))
         gs = plt.GridSpec(3, 2)
         
@@ -330,17 +368,85 @@ class RobotController:
             plt.savefig(save_path)
         plt.show()
 
+def set_plot_config():
+    """Set the configuration for matplotlib plots to ensure consistent styling."""
+    config = {
+    # 不启用真实 LaTeX，而是使用 mathtext 模拟 (无需系统安装 LaTeX)
+    "text.usetex": False,
+
+    # =============================
+    # 字体设置（非常重要）
+    # =============================
+
+    # 可以选择 "serif" 或 "sans-serif"（默认类别），系统会在下面列表中匹配字体。
+    "font.family": "serif",  # ✅ 建议设为 serif（衬线体，更接近 LaTeX 风格）
+
+    # serif 字体列表（衬线体，适合论文/公式类）
+    "font.serif": [
+        "SimSun",               # 宋体（Windows 中文字体）
+        "NSimSun",              # 新宋体（Windows 中文字体）
+        "Noto Serif CJK SC",    # Noto Serif 中文（Linux / macOS 常用）
+        "Songti SC",            # macOS 常见宋体
+        "Times New Roman",      # 英文字体（LaTeX 风格）
+        "DejaVu Serif"          # fallback 英文字体
+    ],
+
+    # sans-serif 字体列表（无衬线体，备用用于界面/标签）
+    "font.sans-serif": [
+        "SimHei",               # 黑体（Windows）
+        "Microsoft YaHei",      # 微软雅黑（Windows）
+        "Noto Sans CJK SC",     # Noto Sans 中文（Linux / macOS）
+        "Heiti TC",             # 黑体（macOS）
+        "Arial Unicode MS",     # 旧版 macOS 中文字体
+        "Arial",                # 英文字体（常见）
+        "DejaVu Sans"           # fallback 英文字体
+    ],
+
+    # =============================
+    # 字号控制
+    # =============================
+    "font.size": 10,
+    "axes.labelsize": 10,     # 坐标轴标签字号
+    "legend.fontsize": 8,    # 图例字号
+    "xtick.labelsize": 8,    # x 轴刻度字号
+    "ytick.labelsize": 8,    # y 轴刻度字号
+
+    # =============================
+    # 数学字体设置
+    # =============================
+
+    # STIX 数学字体与 Times Roman 风格接近
+    "mathtext.fontset": "stix",
+    "mathtext.rm": "Times New Roman",
+    "mathtext.it": "Times New Roman:italic",
+    "mathtext.bf": "Times New Roman:bold",
+
+    # =============================
+    # 图像质量与布局
+    # =============================
+    "figure.dpi": 150,        # 屏幕显示分辨率（适中）
+    "savefig.dpi": 300,       # 保存图片的分辨率（论文质量）
+    "figure.autolayout": True,# 自动调整布局，防止标签被裁剪
+
+    # =============================
+    # 显示修正
+    # =============================
+    "axes.unicode_minus": False  # 解决负号 '-' 显示成方块的问题
+    }
+
+    # 应用配置
+    plt.rcParams.update(config)
 
 
 def main():
     # 创建控制器实例
     controller = RobotController(
-        model_path="kuka_xml_urdf/iiwa14_dock.xml",
+        model_path="kuka_xml_urdf/iiwa14.xml",
         urdf_path="kuka_xml_urdf/iiwa14_dock.urdf"
     )
     
     # 运行不同轨迹的仿真
-    trajectories = ['quintic']
+    trajectories = ['sine']
     for traj in trajectories:
         print(f"\nRunning simulation with {traj} trajectory...")
         controller.run_simulation(

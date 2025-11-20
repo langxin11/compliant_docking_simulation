@@ -1,113 +1,86 @@
-# mujoco dynamics docking (sdf version)
+# MuJoCo Dynamics Docking (SDF) / 基于 MuJoCo 的动力学柔顺对接（SDF）
 
-Welcome to the mujodo dynamics docking (sdf version) repository! 
+Welcome! This repository demonstrates trajectory planning and dynamics simulation using MuJoCo, with Pinocchio for efficient kinematics/dynamics, and an operational-space impedance controller for compliant docking.
+欢迎！本仓库使用 MuJoCo 进行轨迹与动力学仿真，结合 Pinocchio 的高效运动学/动力学计算，并实现操作空间阻抗控制以完成柔顺对接。
 
-This project is designed to provide a comprehensive solution for trajectory planning and dynamics simulation in robotics using the Mujoco simulator. It's built on top of the powerful Pinocchio library, which allows for efficient forward kinematics calculations.
+## Table of Contents / 目录
+- Introduction / 简介
+- Features / 特性
+- Instruction / 文件说明
+- Usage / 使用方式
+- Result / 运行结果
+- Trouble shooting / 故障排查
+- Contributing / 贡献方式
+- License / 许可证
 
+## Introduction / 简介
+This is a repository for MuJoCo-based dynamics simulation and compliance control of a KUKA iiwa14 arm.
+本仓库面向 KUKA iiwa14 机械臂的动力学仿真与柔顺控制。
 
-## Table of Contents
+## Features / 特性
+- Signed Distance Field (SDF) collision utilities / 支持 SDF 碰撞工具
+- Dynamics simulation via MuJoCo / 基于 MuJoCo 的动力学仿真
+- Operational-space impedance control / 操作空间阻抗控制
 
-- [Introduction](#introduction)
-- [Features](#features)
-- [Instruction](#instruction)
-- [Usage](#usage)
-- [Result](#result)
-- [Trouble shooting](#trouble-shooting)
-- [Contributing](#contributing)
-- [License](#license)
+## Instruction / 文件说明
+### 1) Model Files / 模型文件
+1. `kuka_xml_urdf/iiwa14_dock.xml`：带 SDF 的 iiwa 模型（MuJoCo XML）
+2. `kuka_xml_urdf/iiwa14_dock.urdf`：对应 URDF，用于 Pinocchio 的动力学计算
 
-## Introduction
-This is a repository for mujoco dynamics simulation and compliance control.
+### 2) Core Scripts / 核心脚本
+1. `dynamics1.py`：验证 Pinocchio 与 MuJoCo 的动力学接口（关节空间）
+2. `Relate_class.py`：轨迹规划、逆运动学与任务空间控制等相关类
+3. `main_simulation.py`：主仿真脚本，运行任务空间动力学+阻抗控制
 
-## Features
+## Usage / 使用方式
+1) Clone / 克隆仓库
+```bash
+git clone https://github.com/ming751/initial_docking_model.git
+cd initial_docking_model
+```
 
-- signed distance field (sdf)
-- dynamics simulation
-- compliance control
+2) Setup dependencies / 安装依赖
+- For dynamics features, install Pinocchio on Linux / 若使用动力学功能，需在 Linux 安装 Pinocchio：
+```bash
+conda create -n pin_mjcf python=3.10
+conda activate pin_mjcf
+pip install pin
+pip install -r requirement.txt
+```
 
-## Instruction
-### 1. Model Files
-1. iiwa14_dock.xml is an iiwa model with sdf linked at the end;
-2. iiwa14_dock.urdf is the urdf version of iiwa14_dock.xml, used for pin's dynamics calculation;
+3) Run main simulation / 运行主仿真
+```bash
+python main_simulation.py
+```
 
-### 2. Core Scripts
-1. dynamics.py - Used to verify the dynamics of pin and mujoco
-2. Relate_class.py - Contains related classes for the simulation,trajectory planning,inverse kinematics,dynamics control,etc;
-3. task_dynamics_mujoco_control.py - Main simulation script for running the dynamics control
-
-## Usage
-
-To use this repository, follow these steps:
-
-1. Clone the repository:
-
-   ```bash
-   git clone https://github.com/ming751/initial_docking_model.git
-   ```
-
-   ```bash
-   cd initial_docking_model
-   ```
-
-2. Install the dependencies(if you use dymamic simulation, you need to install pinocchio,pinocchio must be installed in linux system):
-
-   1) create an conda environment and activate it:
-   ```bash
-   conda create -n pin_mjcf python=3.10
-   conda activate pin_mjcf
-   ```
-   
-   2) install the pinocchio dependencies:
-   ```bash
-   pip install pin
-   ```
-   
-   3) install other dependencies:
-   ```bash
-   pip install -r requirement.txt
-   ```
-
-3. Run the script:
-
-   ### Main simulation script
-
-   ```bash
-   python main_simulation.py
-   ```
-
-## result
+## Result / 运行结果
 ![docking error](demo/tracking_error.png)
 [![Docking Demo](demo/docking_preview.gif)](demo/docking.mp4)
 
-
-
-## Trouble shooting
-How to render on headless device?
+## Trouble shooting / 故障排查
+Render on headless devices / 无显示设备渲染：
 ```bash
 sudo apt update
 sudo apt install libegl1 libegl-dev
 export MUJOCO_GL=egl
 ```
 
-## Contributing
+## Contributing / 贡献方式
+We welcome contributions! / 欢迎贡献！
+1. Fork the repository / Fork 仓库
+2. Create a feature branch / 新建特性分支：
+```bash
+git checkout -b my-feature-branch
+```
+3. Commit changes / 提交修改：
+```bash
+git commit -am 'Add new feature'
+```
+4. Push to your fork / 推送到 fork：
+```bash
+git push origin my-feature-branch
+```
+5. Open a PR on GitHub / 发起 Pull Request
 
-We welcome contributions to the RM Robot project! If you would like to contribute, please follow these steps:
-
-1. Fork the repository.
-2. Create a new branch for your feature or bugfix:
-   ```bash
-   git checkout -b my-feature-branch
-   ```
-3. Make your changes and commit them:
-   ```bash
-   git commit -am 'Add new feature'
-   ```
-4. Push your changes to your fork:
-   ```bash
-   git push origin my-feature-branch
-   ```
-5. Create a pull request on GitHub.
-
-## License
-
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+## License / 许可证
+MIT License. See [LICENSE](LICENSE). / 本项目基于 MIT 许可证，详见 [LICENSE](LICENSE)。
