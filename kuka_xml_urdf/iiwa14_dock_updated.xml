@@ -1,0 +1,231 @@
+<mujoco model="iiwa14">
+  <compiler angle="degree" meshdir="assets" />
+
+  <option integrator="implicitfast" gravity="0 0 0" timestep="0.001" cone="elliptic" sdf_iterations="10" sdf_initpoints="40"/>
+  <size nconmax="500000" njmax="5000"/>
+
+  <visual>
+    <scale forcewidth="0.01" framewidth="0.01" contactwidth="0.01"/>
+    <map force="0.1"/>
+    <global offwidth="1920" offheight="1080"/>
+  </visual>
+
+  <!-- Removed deprecated <extension><plugin mujoco.sdf.sdflib/></extension> block -->
+
+  <default>
+    <default class="iiwa">
+      <material specular="0.5" shininess="0.25"/>
+      <default class="visual">
+        <geom type="mesh" contype="0" conaffinity="0" group="2" material="gray"/>
+      </default>
+      <default class="collision">
+        <geom group="3"/>
+      </default>
+      <site size="0.001" rgba="1 0 0 1" group="4"/>
+    </default>
+    <joint armature="0" damping="0" limited="false"/>
+  </default>
+
+  <asset>
+    <texture name="grid" type="2d" builtin="checker" width="512" height="512" rgb1=".1 .2 .3" rgb2=".2 .3 .4"/>
+    <material name="grid" texture="grid" texrepeat="1 1" texuniform="true" reflectance="0."/>
+
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0" width="512" height="3072"/>
+    <texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3" markrgb="0.8 0.8 0.8" width="300" height="300"/>
+    <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.2"/>
+
+    <material class="iiwa" name="gray" rgba="0.4 0.4 0.4 1"/>
+    <material class="iiwa" name="light_gray" rgba="0.6 0.6 0.6 1"/>
+    <material class="iiwa" name="black" rgba="0 0 0 1"/>
+    <material class="iiwa" name="orange" rgba="1 0.423529 0.0392157 1"/>
+
+    <mesh file="link_0.obj"/>
+    <mesh file="link_1.obj"/>
+    <mesh file="link_2_orange.obj"/>
+    <mesh file="link_2_grey.obj"/>
+    <mesh file="link_3.obj"/>
+    <mesh file="band.obj"/>
+    <mesh file="kuka.obj"/>
+    <mesh file="link_4_orange.obj"/>
+    <mesh file="link_4_grey.obj"/>
+    <mesh file="link_5.obj"/>
+    <mesh file="link_6_orange.obj"/>
+    <mesh file="link_6_grey.obj"/>
+    <mesh file="link_7.obj"/>
+
+    <!-- Dock mesh asset (no plugin needed in newer MuJoCo) -->
+    <mesh name="dock1" file="dock_1_17_new.STL"/>
+
+    <material name="part_material" rgba="0.7 0.7 0.7 1"/>
+  </asset>
+
+  <worldbody>
+    <light pos="0 0 1.5" dir="0 0 -1" directional="true"/>
+    <geom name="floor" size="0 0 0.05" type="plane" material="groundplane"/>
+
+    <body name="base" childclass="iiwa">
+      <inertial mass="5" pos="-0.1 0 0.07" diaginertia="0.05 0.06 0.03"/>
+      <geom class="visual" mesh="link_0"/>
+      <geom class="collision" size="0.12" pos="0 0 0.03"/>
+      <geom class="collision" size="0.08" pos="-0.08 0 0.103"/>
+      <geom class="collision" size="0.08" pos="-0.08 0 0.04"/>
+      <geom class="collision" size="0.1" pos="0 0 0.14"/>
+
+      <body name="link1" pos="0 0 0.1575">
+        <inertial mass="4" pos="0 -0.03 0.12" diaginertia="0.1 0.09 0.02"/>
+        <joint name="joint1" pos="0 0 0" axis="0 0 1"/>
+        <geom class="visual" mesh="link_1"/>
+        <geom class="collision" size="0.08" pos="0 0 -0.0005"/>
+        <geom class="collision" size="0.075" pos="0.01 -0.025 0.0425"/>
+        <geom class="collision" size="0.075" pos="-0.01 -0.025 0.0425"/>
+        <geom class="collision" size="0.07" pos="0.01 -0.045 0.1025"/>
+        <geom class="collision" size="0.07" pos="-0.01 -0.045 0.1025"/>
+
+        <body name="link2" pos="0 0 0.2025" quat="0 0 1 1">
+          <inertial mass="4" pos="0.0003 0.059 0.042" diaginertia="0.05 0.044 0.018" quat="0.707107 0.707107 0 0"/>
+          <joint name="joint2" pos="0 0 0" axis="0 0 1"/>
+          <geom class="visual" material="orange" mesh="link_2_orange"/>
+          <geom class="visual" mesh="link_2_grey"/>
+          <geom class="collision" size="0.095" pos="0 0 -0.01"/>
+          <geom class="collision" size="0.09" pos="0 0 0.045"/>
+          <geom class="collision" size="0.07" pos="-0.01 0.04 0.054"/>
+          <geom class="collision" size="0.065" pos="-0.01 0.09 0.04"/>
+          <geom class="collision" size="0.065" pos="-0.01 0.13 0.02"/>
+          <geom class="collision" size="0.07" pos="0.01 0.04 0.054"/>
+          <geom class="collision" size="0.065" pos="0.01 0.09 0.04"/>
+          <geom class="collision" size="0.065" pos="0.01 0.13 0.02"/>
+          <geom class="collision" size="0.075" pos="0 0.18 0"/>
+
+          <body name="link3" pos="0 0.2045 0" quat="0 0 1 1">
+            <inertial mass="3" pos="0 0.03 0.13" diaginertia="0.025 0.0238 0.0076"/>
+            <joint name="joint3" pos="0 0 0" axis="0 0 1"/>
+            <geom class="visual" mesh="link_3"/>
+            <geom class="visual" material="light_gray" mesh="band"/>
+            <geom class="visual" material="black" mesh="kuka"/>
+            <geom class="collision" size="0.075" pos="0 0 0.0355"/>
+            <geom class="collision" size="0.06" pos="0.01 0.023 0.0855"/>
+            <geom class="collision" size="0.055" pos="0.01 0.048 0.1255"/>
+            <geom class="collision" size="0.06" pos="0.01 0.056 0.1755"/>
+            <geom class="collision" size="0.06" pos="-0.01 0.023 0.0855"/>
+            <geom class="collision" size="0.055" pos="-0.01 0.048 0.1255"/>
+            <geom class="collision" size="0.06" pos="-0.01 0.056 0.1755"/>
+            <geom class="collision" size="0.075" pos="0 0.045 0.2155"/>
+            <geom class="collision" size="0.075" pos="0 0 0.2155"/>
+
+            <body name="link4" pos="0 0 0.2155" quat="1 1 0 0">
+              <inertial mass="2.7" pos="0 0.067 0.034" diaginertia="0.03 0.029 0.01" quat="1 1 0 0"/>
+              <joint name="joint4" pos="0 0 0" axis="0 0 1"/>
+              <geom class="visual" material="orange" mesh="link_4_orange"/>
+              <geom class="visual" mesh="link_4_grey"/>
+              <geom class="collision" size="0.078" pos="0 0.01 0.046"/>
+              <geom class="collision" size="0.06" pos="0.01 0.06 0.052"/>
+              <geom class="collision" size="0.065" pos="0.01 0.12 0.034"/>
+              <geom class="collision" size="0.06" pos="-0.01 0.06 0.052"/>
+              <geom class="collision" size="0.065" pos="-0.01 0.12 0.034"/>
+              <geom class="collision" size="0.075" pos="0 0.184 0"/>
+
+              <body name="link5" pos="0 0.1845 0" quat="0 0 1 1">
+                <inertial mass="1.7" pos="0.0001 0.021 0.076" diaginertia="0.02 0.018 0.005"/>
+                <joint name="joint5" pos="0 0 0" axis="0 0 1"/>
+                <geom class="visual" mesh="link_5"/>
+                <geom class="visual" material="light_gray" mesh="band"/>
+                <geom class="visual" material="black" mesh="kuka"/>
+                <geom class="collision" size="0.075" pos="0 0 0.0335"/>
+                <geom class="collision" size="0.05" pos="-0.012 0.031 0.0755"/>
+                <geom class="collision" size="0.05" pos="0.012 0.031 0.0755"/>
+                <geom class="collision" size="0.04" pos="-0.012 0.06 0.1155"/>
+                <geom class="collision" size="0.04" pos="0.012 0.06 0.1155"/>
+                <geom class="collision" size="0.04" pos="-0.01 0.065 0.1655"/>
+                <geom class="collision" size="0.04" pos="0.01 0.065 0.1655"/>
+                <geom class="collision" size="0.035" pos="-0.012 0.065 0.1855"/>
+                <geom class="collision" size="0.035" pos="0.012 0.065 0.1855"/>
+
+                <body name="link6" pos="0 0 0.2155" quat="1 1 0 0">
+                  <inertial mass="1.8" pos="0 0.0006 0.0004" diaginertia="0.005 0.0047 0.0036" quat="1 1 0 0"/>
+                  <joint name="joint6" pos="0 0 0" axis="0 0 1"/>
+                  <geom class="visual" material="orange" mesh="link_6_orange"/>
+                  <geom class="visual" mesh="link_6_grey"/>
+                  <geom class="collision" size="0.055" pos="0 0 -0.059"/>
+                  <geom class="collision" size="0.065" pos="0 -0.03 0.011"/>
+                  <geom class="collision" size="0.08"/>
+
+                  <body name="link7" pos="0 0.081 0" quat="0 0 1 1">
+                    <inertial mass="0.3" pos="0 0 0.02" diaginertia="0.001 0.001 0.001"/>
+                    <joint name="joint7" pos="0 0 0" axis="0 0 1"/>
+                    <geom class="visual" mesh="link_7"/>
+                    <site pos="0 0 0.045" name="attachment_site"/>
+
+                    <body name="dock1" pos="0 0 0.06" quat="1 0 0 0">
+                      <site pos="0 0 0" name="sensor_site"/>
+
+                      <body name="rev" pos="0 0 0" euler="0 0 40">
+                        <inertial mass="1" pos="0 0 0" diaginertia="0.1 0.1 0.1"/>
+
+                        <!-- Collision SDF geom -->
+                        <geom name="dock1_geom" type="sdf" mesh="dock1" material="part_material"/>
+
+                        <!-- Visual-only mesh for dock1 (no collisions) -->
+                        <geom name="dock1_visual" type="mesh" mesh="dock1" material="part_material" contype="0" conaffinity="0" group="2"/>
+                      </body>
+                    </body>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+
+    <!-- Static target dock -->
+    <body name="dock2" pos="0 0.5 0.35" quat="1 0 0 0">
+      <inertial mass="1" pos="0 0 0" diaginertia="0.1 0.1 0.1"/>
+
+      <!-- Collision SDF geom -->
+      <geom name="dock2_geom" type="sdf" mesh="dock1" material="part_material"/>
+
+      <!-- Visual-only mesh for dock2 (no collisions) -->
+      <geom name="dock2_visual" type="mesh" mesh="dock1" material="part_material" contype="0" conaffinity="0" group="2"/>
+    </body>
+
+    <site name="eef_marker" pos="0 0 0" size="0.015 0.015 0.015" rgba="1 0 0 0.6" type="sphere"/>
+    <site name="vis" pos="0 0 0" size="0.015 0.015 0.015" rgba="0 0 1 0.6" type="sphere"/>
+    <camera name="track_cam" mode="targetbody" pos="0.5 1.3 0.8" target="rev"/>
+  </worldbody>
+
+  <contact>
+    <exclude body1="base" body2="link1"/>
+    <pair
+      name="A_B_collision"
+      geom1="dock1_geom"
+      geom2="dock2_geom"
+      condim="1"
+      friction="0.001 0.001 0.0005 0.0002 0.0002"
+      solref="0.2 1"
+      solimp="0.9 0.95 0.01 0.5 2"
+      gap="-0.1"
+      margin="-0.1"
+    />
+  </contact>
+
+  <actuator>
+    <general name="actuator1" joint="joint1"/>
+    <general name="actuator2" joint="joint2"/>
+    <general name="actuator3" joint="joint3"/>
+    <general name="actuator4" joint="joint4"/>
+    <general name="actuator5" joint="joint5"/>
+    <general name="actuator6" joint="joint6"/>
+    <general name="actuator7" joint="joint7"/>
+  </actuator>
+
+  <keyframe>
+    <key name="home" qpos="  1.06808021  0.34036467 -2.49507952  1.59293802  2.93006762  1.27942644 -1.39355401"/>
+  </keyframe>
+
+  <sensor>
+    <framepos name="body1_position" objtype="body" objname="dock1"/>
+    <force name="force_sensor" site="sensor_site"/>
+    <torque name="torque_sensor" site="sensor_site"/>
+  </sensor>
+
+</mujoco>
