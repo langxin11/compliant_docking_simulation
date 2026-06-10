@@ -382,8 +382,8 @@ class TaskSpaceController:
         # 6) 平动阻抗参数与外力
         force_ext = np.array(force_ext).reshape(3)
         m = 10   # 虚拟质量（平动）
-        d = 80   # 虚拟阻尼（平动）- 增大以提高稳定性
-        k = 150  # 虚拟刚度（平动）- 适度增大响应性
+        d = 50   # 虚拟阻尼（平动）
+        k = 100  # 虚拟刚度（平动）
 
         # 期望外力（此处为0，可根据任务需要设置）
         force_desired = np.array([0, 0, 0])
@@ -394,8 +394,8 @@ class TaskSpaceController:
 
         # 8) 姿态阻抗参数
         m2 = 1   # 虚拟质量（旋转）
-        d2 = 15  # 虚拟阻尼（旋转）- 增大以减少振荡
-        k2 = 30  # 虚拟刚度（旋转）
+        d2 = 10  # 虚拟阻尼（旋转）
+        k2 = 25  # 虚拟刚度（旋转）
 
         # 9) 姿态阻抗：类似 PD，在角速度误差与姿态误差上施加控制
         u_rot = (k2 * (ori_err) + d2 * (vel_rot_err)) / m2 

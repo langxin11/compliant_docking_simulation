@@ -251,7 +251,7 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0):
     )
 
 if __name__ == '__main__':
-    main(render=True, record=False, dt=0.001, traj_duration=15.0, duration=18.0)
+    main(render=False, record=True, dt=0.001, traj_duration=15.0, duration=18.0)
 
     
 
