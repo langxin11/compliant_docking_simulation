@@ -29,6 +29,8 @@ import imageio
 import mujoco
 import numpy as np
 
+from ..models import ASSETS_DIR
+
 
 class MujRobot:
     """高层 MuJoCo 机器人辅助类 / High-level MuJoCo robot helper.
@@ -325,7 +327,7 @@ class MujRobot:
 
 def test_render():
     """小型手动测试：创建机器人并运行交互式渲染循环。"""
-    model_path = "kuka_xml_urdf/iiwa14.xml"
+    model_path = str(ASSETS_DIR / "iiwa14.xml")
     robot = MujRobot(model_path, render=True, record=False)
     init_qpos = np.array([0, -np.pi/2, 0, 0, 0, 0, 0])
     robot.init_simulators(init_qpos)
@@ -340,7 +342,7 @@ def test_render():
 
 def test_record():
     """小型测试：在无交互式 viewer 的情况下录帧。"""
-    model_path = "kuka_xml_urdf/iiwa14.xml"
+    model_path = str(ASSETS_DIR / "iiwa14.xml")
     robot = MujRobot(model_path, render=False, record=True)
     init_qpos = np.array([0, -np.pi/2, 0, 0, 0, 0, 0])
     robot.init_simulators(init_qpos)

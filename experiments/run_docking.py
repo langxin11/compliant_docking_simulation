@@ -1,7 +1,7 @@
 """
-main_simulation.py - Robotic Task Space Control Simulation
+run_docking.py - Robotic Task Space Control Simulation (docking experiment)
 
-This module implements a simulation environment for task space control of a KUKA iiwa14 robot
+This script implements a simulation environment for task space control of a KUKA iiwa14 robot
 using MuJoCo for physics simulation and Pinocchio for dynamics calculations. It demonstrates
 operational space control with impedance for smooth interaction with the environment.
 
@@ -27,19 +27,17 @@ if "DISPLAY" not in os.environ or not os.environ["DISPLAY"]:
 import numpy as np
 import pinocchio as pin
 
-from log_class import Log
-from muj_class import MujRobot
-from Relate_class import (
-    DecoupledQuinticTrajectory,
-    TaskSpaceController,
-    TaskSpaceTrajectory,
-    compute_ik,
-)
+from compliant_docking.control.task_space import TaskSpaceController
+from compliant_docking.models import MUJOCO_MODEL, load_pin_model
+from compliant_docking.planning.kinematics import compute_ik
+from compliant_docking.planning.trajectory import DecoupledQuinticTrajectory
+from compliant_docking.simulation.mujoco_env import MujRobot
+from compliant_docking.telemetry import Log
 
 
 def run_simulation(muj_robot:MujRobot,
                    task_dynamics:TaskSpaceController,
-                   trajector_planner:TaskSpaceTrajectory,
+                   trajector_planner:DecoupledQuinticTrajectory,
                    log:Log,
                    duration:float,
                    dt:float,
@@ -144,8 +142,9 @@ def run_simulation(muj_robot:MujRobot,
     log.plot_results(save_path="figure/")
 
     if muj_robot.record:
-        # 创建绝对路径以确保视频保存在正确位置
-        current_dir = os.path.dirname(os.path.abspath(__file__))
+        # 创建绝对路径以确保视频保存在正确位置（仓库根目录 video/，与迁移前一致）/
+        # Use an absolute path so the video lands in <repo>/video as before the refactor
+        current_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         video_dir = os.path.join(current_dir, "video")
         if not os.path.exists(video_dir):
             try:
@@ -173,9 +172,9 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0):
     """
     log = Log()
 
-    # 1) 构建 Pinocchio 模型/数据（用于雅可比/动力学计算） /
-    # 1) Build Pinocchio model/data (for Jacobians and dynamics)
-    pin_model = pin.buildModelFromUrdf("kuka_xml_urdf/iiwa14_dock.urdf")
+    # 1) 构建 Pinocchio 模型/数据（用于雅可比/动力学计算；重力由 load_pin_model 置零） /
+    # 1) Build Pinocchio model/data (for Jacobians and dynamics; gravity zeroed by load_pin_model)
+    pin_model = load_pin_model()
     pin_data = pin_model.createData()
 
     # 注意：TaskSpaceController 当前实现的 __init__ 形参为 (robot_model, dt) /
@@ -225,7 +224,7 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0):
     # 2) 初始化 MuJoCo 机器人（写 tau、推进仿真、渲染/录帧） /
     # 2) Initialize MuJoCo robot (apply tau, step sim, render/record)
     muj_robot = MujRobot(
-        model_path="kuka_xml_urdf/iiwa14_dock_updated.xml",
+        model_path=str(MUJOCO_MODEL),
         render=render,
         record=record,
         dt=dt,

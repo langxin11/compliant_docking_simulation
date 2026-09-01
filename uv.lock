@@ -241,7 +241,7 @@ wheels = [
 [[package]]
 name = "compliant-docking"
 version = "0.2.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "imageio" },
     { name = "imageio-ffmpeg" },

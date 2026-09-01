@@ -8,7 +8,7 @@
 
 | 引擎 | 职责 |
 |---|---|
-| **MuJoCo** | 物理积分（implicitfast，1 ms 步长）、SDF 非凸接触（elliptic 摩擦锥，`sdf_initpoints=200`）、末端力/力矩传感、渲染与录制 |
+| **MuJoCo** | 物理积分（implicitfast，1 ms 步长）、SDF 非凸接触（elliptic 摩擦锥，`sdf_iterations=10`）、末端力/力矩传感、渲染与录制 |
 | **Pinocchio** | 控制器侧动力学模型：CRBA 质量矩阵 `M`、Coriolis 矩阵 `C`、雅可比 `J` 及其时间导数 `J̇`、阻尼最小二乘逆运动学 |
 
 每个控制周期（1 ms）的闭环数据流：
@@ -23,33 +23,33 @@ MuJoCo 状态 (q, v) ──► Pinocchio FK / J / M / C ──► 操作空间�
 
 关键设计：控制器不依赖 MuJoCo 内部动力学——MuJoCo 只是被施加力矩的"黑盒物理世界"，接触力经虚拟传感器回读，如同真实机器人上的 F/T 传感器。这种解耦使同一套控制器可以无修改地迁移到纯 Pinocchio 仿真（`RobotSimulator`）或真实机器人。
 
-双引擎联动的前提是动力学一致：`dynamics1.py` 在关节空间 PD 跟踪（五次多项式/正弦轨迹）下，将 Pinocchio 前向动力学（`pin.aba`）与 MuJoCo（`mj_step`）的结果交叉验证，确认两套模型同源，为联动闭环的可信度提供依据。
+双引擎联动的前提是动力学一致：`simulation/consistency.py` 在关节空间 PD 跟踪（五次多项式/正弦轨迹）下，将 Pinocchio 前向动力学（`pin.aba`）与 MuJoCo（`mj_step`）的结果交叉验证，确认两套模型同源，为联动闭环的可信度提供依据。
 
 ### 2. 分层抽象的软件架构
 
 ```mermaid
 graph TB
     subgraph L5["实验编排层"]
-        M["main_simulation.py<br/>场景装配 · 仿真主循环 · 参数注入"]
+        M["experiments/run_docking.py<br/>场景装配 · 仿真主循环 · 参数注入"]
     end
     subgraph L4["记录与可视化层"]
-        LOG["log_class.py<br/>跟踪误差 / 接触力 / 关节力矩曲线"]
+        LOG["telemetry.py<br/>跟踪误差 / 接触力 / 关节力矩曲线"]
     end
-    subgraph L3["控制层 — TaskSpaceController"]
+    subgraph L3["控制层 — control/task_space.py"]
         C1["阻抗操作空间控制（主）<br/>力前馈 + 零空间投影"]
         C2["操作空间 PD（对照）"]
         C3["可操作度梯度零空间优化（对照）"]
     end
     subgraph L2["规划层"]
-        T["DecoupledQuinticTrajectory<br/>三轴解耦五次多项式"]
-        IK["compute_ik<br/>阻尼最小二乘 IK"]
+        T["planning/trajectory.py<br/>三轴解耦五次多项式"]
+        IK["planning/kinematics.py<br/>阻尼最小二乘 IK"]
     end
     subgraph L1["仿真层（可互换）"]
-        S1["muj_class.MujRobot<br/>MuJoCo 物理 · SDF 接触 · 力传感"]
-        S2["RobotSimulator<br/>纯 Pinocchio RK4（无接触对照）"]
-        S3["dynamics1.py<br/>双引擎一致性验证"]
+        S1["simulation/mujoco_env.py<br/>MuJoCo 物理 · SDF 接触 · 力传感"]
+        S2["simulation/pinocchio_sim.py<br/>纯 Pinocchio RK4（无接触对照）"]
+        S3["simulation/consistency.py<br/>双引擎一致性验证"]
     end
-    subgraph L0["模型层 — kuka_xml_urdf/"]
+    subgraph L0["模型层 — assets/iiwa14/ + models.py"]
         D1["iiwa14_dock_updated.xml → MuJoCo"]
         D2["iiwa14_dock.urdf → Pinocchio"]
     end
@@ -63,12 +63,12 @@ graph TB
 
 | 层 | 模块 | 职责 | 可替换性 |
 |---|---|---|---|
-| 实验编排层 | `main_simulation.py` | 装配各层组件、运行仿真主循环 | — |
-| 记录与可视化层 | `log_class.py` | 时序数据记录、位置跟踪/接触力/关节力矩绘图 | — |
-| 控制层 | `Relate_class.TaskSpaceController` | 三组控制器实现（见下表） | 控制器间可切换对比 |
-| 规划层 | `DecoupledQuinticTrajectory` / `compute_ik` | 三轴解耦五次多项式轨迹（端点速度/加速度为零）、DLS 逆运动学 | 任意轨迹发生器 |
-| 仿真层 | `MujRobot` / `RobotSimulator` / `dynamics1.py` | MuJoCo 仿真封装、纯 Pinocchio RK4 仿真、双引擎验证 | 仿真器可互换 |
-| 模型层 | `kuka_xml_urdf/` | 同一套 mesh 的双描述：MuJoCo XML（主模型 `iiwa14_dock_updated.xml`）与 Pinocchio URDF | 换机器人只换模型层 |
+| 实验编排层 | `experiments/run_docking.py` | 装配各层组件、运行仿真主循环 | — |
+| 记录与可视化层 | `compliant_docking.telemetry` | 时序数据记录、位置跟踪/接触力/关节力矩绘图 | — |
+| 控制层 | `compliant_docking.control.task_space` | 三组控制器实现（见下表） | 控制器间可切换对比 |
+| 规划层 | `compliant_docking.planning`（`trajectory` / `kinematics`） | 三轴解耦五次多项式轨迹（端点速度/加速度为零）、DLS 逆运动学 | 任意轨迹发生器 |
+| 仿真层 | `compliant_docking.simulation`（`mujoco_env` / `pinocchio_sim` / `consistency`） | MuJoCo 仿真封装、纯 Pinocchio RK4 仿真、双引擎验证 | 仿真器可互换 |
+| 模型层 | `compliant_docking.models` + `assets/iiwa14/` | 同一套 mesh 的双描述：MuJoCo XML（主模型 `iiwa14_dock_updated.xml`）与 Pinocchio URDF，统一加载入口 | 换机器人只换模型层 |
 
 各层之间只通过标准量（`q, v, τ, SE(3), J`）交互，替换任何一层不影响其它层——例如把 MuJoCo 仿真器换成纯 Pinocchio 仿真器做无接触验证、或在多组控制器之间切换做对比实验，都只改动编排层一行装配代码。
 
@@ -76,8 +76,8 @@ graph TB
 
 场景：iiwa14 末端安装锥形对接头（SDF 非凸 mesh），对固定对接座沿 z 向下压完成对接。指令行程 18 cm，五次多项式轨迹 15 s，总仿真 18 s，控制频率 1 kHz。
 
-- 操作空间阻抗控制 + 接触力前馈：接触后 Z 向按阻抗参数柔顺让位，无冲击尖峰；
-- 接触力（MuJoCo 力传感器实测）：稳态约 **2.5 N**，瞬态峰值约 **2.7 N**；
+- 操作空间阻抗控制 + 接触力前馈：接触后 Z 向按阻抗参数柔顺让位，无持续冲击；
+- 接触力（MuJoCo 力传感器实测）：稳态约 **2.5 N**（首次接触瞬态约 19 N，在阻尼作用下迅速衰减至稳态）；
 - 非接触方向跟踪：X/Y 误差保持在 **±2 mm** 以内；
 - 主循环含力矩限幅与异常捕获，接触丰富的场景下长时仿真稳定。
 
@@ -101,14 +101,14 @@ git clone https://github.com/langxin11/compliant_docking_simulation.git
 cd compliant_docking_simulation
 
 uv sync                     # 创建环境并锁定依赖（uv.lock）
-uv run python main_simulation.py
+uv run python experiments/run_docking.py
 ```
 
 没有 uv 时也可以直接用 pip 安装依赖：
 
 ```bash
 pip install mujoco pin numpy scipy matplotlib imageio imageio-ffmpeg
-python main_simulation.py
+python experiments/run_docking.py
 ```
 
 无显示器（headless）环境渲染：
@@ -121,19 +121,27 @@ export MUJOCO_GL=egl
 ## 仓库结构
 
 ```
-├── main_simulation.py      # 实验编排层：场景装配 + 仿真主循环
-├── Relate_class.py         # 规划层 + 控制层：轨迹、IK、操作空间控制器、纯 Pinocchio 仿真器
-├── muj_class.py            # 仿真层：MuJoCo 封装（step / 传感器 / 渲染 / 录制）
-├── log_class.py            # 记录层：数据记录与结果绘图
-├── dynamics1.py            # 双引擎动力学一致性验证
-├── test_environment.py     # 仿真环境自检脚本
-├── docs/                   # 理论文档（见"延伸阅读"）
-├── kuka_xml_urdf/          # 模型层：MuJoCo XML 与 Pinocchio URDF（同一套 mesh）
-│   ├── iiwa14_dock_updated.xml      # 主仿真模型：SDF 对接头/对接座 + 力传感器
-│   ├── iiwa14_dock.xml / iiwa14_dock_sdf_tamed.xml  # 模型变体
-│   └── iiwa14_dock.urdf             # Pinocchio 动力学计算用
-├── demo/                   # 演示视频与结果图
-└── figure/                 # 最近一次运行输出
+├── src/compliant_docking/          # 核心 Python 包
+│   ├── models.py                   # 模型层入口：XML/URDF 路径与加载（重力置零统一管理）
+│   ├── planning/
+│   │   ├── trajectory.py           # 三轴解耦五次多项式轨迹
+│   │   └── kinematics.py           # 阻尼最小二乘逆运动学
+│   ├── control/
+│   │   └── task_space.py           # 操作空间控制器（三组可切换实现）
+│   ├── simulation/
+│   │   ├── mujoco_env.py           # MuJoCo 封装（step / 传感器 / 渲染 / 录制）
+│   │   ├── pinocchio_sim.py        # 纯 Pinocchio RK4 仿真器（无接触对照）
+│   │   └── consistency.py          # 双引擎动力学一致性验证
+│   └── telemetry.py                # 数据记录与结果绘图
+├── experiments/
+│   ├── run_docking.py              # 对接任务编排：场景装配 + 仿真主循环
+│   └── check_env.py                # 仿真环境自检脚本
+├── assets/iiwa14/                  # 模型资产：MuJoCo XML 与 Pinocchio URDF（同一套 mesh）
+│   ├── iiwa14_dock_updated.xml     # 主仿真模型：SDF 对接头/对接座 + 力传感器
+│   └── iiwa14_dock.urdf            # Pinocchio 动力学计算用
+├── tests/                          # pytest 测试
+├── docs/                           # 理论文档（见"延伸阅读"）
+└── demo/                           # 演示视频与结果图
 ```
 
 ## 延伸阅读

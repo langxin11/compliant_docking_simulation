@@ -1,3 +1,4 @@
+"""consistency.py - MuJoCo × Pinocchio 一致性控制器（关节空间 PD + 逆动力学）。"""
 import os
 from typing import Optional
 
@@ -6,6 +7,8 @@ import mujoco
 import mujoco.viewer
 import numpy as np
 import pinocchio as pin
+
+from ..models import ASSETS_DIR, PIN_URDF, load_pin_model
 
 
 class RobotController:
@@ -21,22 +24,21 @@ class RobotController:
             raise FileNotFoundError(f"MuJoCo model file not found: {model_path}")
         if not os.path.exists(urdf_path):
             raise FileNotFoundError(f"URDF file not found: {urdf_path}")
-            
+
         # 加载MuJoCo模型（用于物理仿真）
         try:
             self.model = mujoco.MjModel.from_xml_path(model_path)
             self.data = mujoco.MjData(self.model)
         except Exception as e:
             raise RuntimeError(f"Failed to load MuJoCo model: {str(e)}")
-        
-        # 创建Pinocchio模型（用于动力学/雅可比计算）
+
+        # 创建Pinocchio模型（用于动力学/雅可比计算）；
+        # 重力置零由 load_pin_model 统一处理（控制侧去重力，仿真环境可能仍生效）
         try:
-            self.pin_model = pin.buildModelFromUrdf(urdf_path)
+            self.pin_model = load_pin_model(urdf_path)
             self.pin_data = self.pin_model.createData()
         except Exception as e:
             raise RuntimeError(f"Failed to load Pinocchio model: {str(e)}")
-        gravity_vector: np.ndarray = np.array([0, 0, 0])
-        self.pin_model.gravity.linear = gravity_vector  # 控制侧去重力（仿真环境可能仍生效）
         
         # 控制参数
         self.Kp = 100.0  # P增益
@@ -442,8 +444,8 @@ def set_plot_config():
 def main():
     # 创建控制器实例
     controller = RobotController(
-        model_path="kuka_xml_urdf/iiwa14.xml",
-        urdf_path="kuka_xml_urdf/iiwa14_dock.urdf"
+        model_path=str(ASSETS_DIR / "iiwa14.xml"),
+        urdf_path=str(PIN_URDF)
     )
     
     # 运行不同轨迹的仿真

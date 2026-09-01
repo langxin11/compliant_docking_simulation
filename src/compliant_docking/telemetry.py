@@ -1,5 +1,5 @@
 """
-log_class.py - Simulation Data Logging and Visualization Library
+telemetry.py - Simulation Data Logging and Visualization Library
 
 This module provides a comprehensive logging system for robot control simulations.
 It captures time-series data for joint angles, velocities, end-effector positions,

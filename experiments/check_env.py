@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 环境测试脚本 - 验证项目依赖是否正确安装
-使用方法: python test_environment.py
+使用方法: python experiments/check_env.py
 """
 
 import importlib
@@ -68,11 +68,11 @@ def main():
     
     # 测试项目文件
     project_files = [
-        ("main_simulation.py", "主仿真程序"),
-        ("muj_class.py", "MuJoCo接口类"),
-        ("Relate_class.py", "控制算法类"),
-        ("log_class.py", "数据记录类"),
-        ("requirement.txt", "依赖文件"),
+        ("experiments/run_docking.py", "主仿真程序"),
+        ("src/compliant_docking/simulation/mujoco_env.py", "MuJoCo接口类"),
+        ("src/compliant_docking/control/task_space.py", "控制算法类"),
+        ("src/compliant_docking/telemetry.py", "数据记录类"),
+        ("pyproject.toml", "项目配置文件"),
     ]
     
     for file_path, description in project_files:
@@ -83,8 +83,8 @@ def main():
     
     # 测试模型文件
     model_files = [
-        ("kuka_xml_urdf/iiwa14_dock.xml", "MuJoCo模型"),
-        ("kuka_xml_urdf/iiwa14_dock.urdf", "URDF模型"),
+        ("assets/iiwa14/iiwa14_dock_updated.xml", "MuJoCo模型"),
+        ("assets/iiwa14/iiwa14_dock.urdf", "URDF模型"),
     ]
     
     for file_path, description in model_files:
@@ -120,7 +120,8 @@ def main():
         
         # 测试Pinocchio基本功能
         try:
-            model = pin.buildModelFromUrdf("kuka_xml_urdf/iiwa14_dock.urdf")
+            from compliant_docking.models import PIN_URDF
+            model = pin.buildModelFromUrdf(str(PIN_URDF))
             print(f"✅ Pinocchio URDF加载: {model.nq} 关节")
         except Exception as e:
             print(f"❌ Pinocchio URDF加载失败: {e}")
@@ -134,7 +135,7 @@ def main():
     if all_passed:
         print("🎉 所有测试通过！环境配置正确。")
         print("\n可以运行以下命令启动仿真:")
-        print("python main_simulation.py")
+        print("python experiments/run_docking.py")
     else:
         print("❌ 部分测试失败，请检查环境配置。")
         print("\n请参考以下文档:")

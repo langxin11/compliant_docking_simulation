@@ -1,3 +1,7 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
 [project]
 name = "compliant-docking"
 version = "0.2.0"
@@ -20,7 +24,10 @@ dev = [
 ]
 
 [tool.uv]
-package = false
+package = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/compliant_docking"]
 
 [tool.ruff]
 line-length = 100
