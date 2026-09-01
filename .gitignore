@@ -1,2 +1,25 @@
-.vscode
-__pycache__
+# --- Python ---
+__pycache__/
+*.pyc
+*.egg-info/
+dist/
+build/
+.venv/
+
+# --- Editor / OS junk ---
+.ipynb_checkpoints/
+**/*Zone.Identifier
+.DS_Store
+.vscode/
+
+# --- Project outputs (generated at runtime; demo/ keeps its tracked assets) ---
+figure/
+video/
+runs/
+*.mp4
+!demo/*.mp4
+
+# --- Tool caches ---
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/

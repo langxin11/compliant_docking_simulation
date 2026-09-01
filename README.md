@@ -100,11 +100,14 @@ graph TB
 git clone https://github.com/langxin11/compliant_docking_simulation.git
 cd compliant_docking_simulation
 
-conda create -n pin_mjcf python=3.10
-conda activate pin_mjcf
-pip install pin                # Pinocchio（Linux）
-pip install -r requirement.txt
+uv sync                     # 创建环境并锁定依赖（uv.lock）
+uv run python main_simulation.py
+```
 
+没有 uv 时也可以直接用 pip 安装依赖：
+
+```bash
+pip install mujoco pin numpy scipy matplotlib imageio imageio-ffmpeg
 python main_simulation.py
 ```
 

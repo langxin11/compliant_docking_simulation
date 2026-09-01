@@ -1,11 +1,12 @@
+import os
+from typing import Optional
+
+import matplotlib.pyplot as plt
 import mujoco
+import mujoco.viewer
 import numpy as np
 import pinocchio as pin
-import matplotlib.pyplot as plt
-from time import sleep
-from typing import Callable, Optional
-import os
-import mujoco.viewer
+
 
 class RobotController:
     def __init__(self, model_path: str, urdf_path: str):

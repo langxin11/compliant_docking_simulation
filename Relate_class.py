@@ -15,12 +15,12 @@ Author: langxin11
 Date: 2025
 """
 
-import pinocchio as pin
-import numpy as np
-from scipy.linalg import pinv,inv
-import matplotlib.pyplot as plt
-from typing import Tuple, List
+from typing import List, Tuple
 
+import matplotlib.pyplot as plt
+import numpy as np
+import pinocchio as pin
+from scipy.linalg import pinv
 
 
 class DecoupledQuinticTrajectory:

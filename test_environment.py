@@ -4,9 +4,10 @@
 使用方法: python test_environment.py
 """
 
-import sys
 import importlib
 import os
+import sys
+
 
 def test_module(module_name, min_version=None):
     """测试模块是否可以导入"""

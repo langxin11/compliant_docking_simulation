@@ -15,6 +15,7 @@ Author: langxin11
 Date: 2025
 """
 import os
+
 # 在无显示环境（如服务器/CI）下，指定 MuJoCo 使用 EGL 离屏渲染后端 /
 # In headless environments (e.g., server/CI), set MuJoCo to use EGL offscreen backend
 # 若本机有显示并安装了驱动，也可改为 'glfw'；某些环境需使用 'osmesa' /
@@ -22,22 +23,19 @@ import os
 if "DISPLAY" not in os.environ or not os.environ["DISPLAY"]:
     os.environ["MUJOCO_GL"] = "egl"  # 试试 osmesa，也可以改成 egl
 
+
 import numpy as np
 import pinocchio as pin
-import matplotlib.pyplot as plt
-from time import sleep
-from typing import Callable, Optional
 
-import mujoco.viewer
-from typing import Tuple, List
-
-from Relate_class import TaskSpaceController,TaskSpaceTrajectory,DecoupledQuinticTrajectory,compute_ik
-from muj_class import MujRobot
 from log_class import Log
-    
+from muj_class import MujRobot
+from Relate_class import (
+    DecoupledQuinticTrajectory,
+    TaskSpaceController,
+    TaskSpaceTrajectory,
+    compute_ik,
+)
 
-
-        
 
 def run_simulation(muj_robot:MujRobot,
                    task_dynamics:TaskSpaceController,
