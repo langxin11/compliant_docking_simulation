@@ -195,18 +195,9 @@
 
   <contact>
     <exclude body1="base" body2="link1"/>
-    <pair
-      name="A_B_collision"
-      geom1="dock1_geom"
-      geom2="dock2_geom"
-      condim="1"
-      friction="0.001 0.001 0.0005 0.0002 0.0002"
-      solref="0.2 1"
-      solimp="0.9 0.95 0.01 0.5 2"
-      gap="-0.1"
-      margin="-0.1"
-    />
-  </contact>
+<!-- 对接接触使用 MuJoCo 原生 SDF 默认参数：旧 sdflib 插件时代的 pair 覆盖
+         (负 margin/gap + solref 0.2) 在原生 SDF 下会使接触力失效，故移除 -->
+      </contact>
 
   <actuator>
     <general name="actuator1" joint="joint1"/>
