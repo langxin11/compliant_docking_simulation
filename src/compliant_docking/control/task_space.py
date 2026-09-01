@@ -17,16 +17,23 @@ import numpy as np
 import pinocchio as pin
 from scipy.linalg import pinv
 
+from ..config import ImpedanceConfig
+
 
 class TaskSpaceController:
     """
     任务空间动力学控制器（平动+姿态阻抗，动力学一致映射，零空间阻尼）/
     Task-space dynamics controller (translation + rotation impedance; dynamics-consistent mapping; null damping)
     """
-    def __init__(self, robot_model: pin.Model, dt: float):
+    def __init__(self, robot_model: pin.Model, dt: float, impedance: ImpedanceConfig | None = None):
         """
-        初始化控制器：设定 Pinocchio 模型、步长与基础参数 /
-        Initialize controller: set Pinocchio model, time step and basic params
+        初始化控制器：设定 Pinocchio 模型、步长与阻抗参数 /
+        Initialize controller: set Pinocchio model, time step and impedance params
+
+        参数 / Args:
+            robot_model: Pinocchio 模型 / Pinocchio model
+            dt: 控制步长 [s] / control time step
+            impedance: 阻抗参数（None 时取 ImpedanceConfig 默认值） / impedance params
 
         注意：重力置零由 compliant_docking.models.load_pin_model 负责（加载时统一处理）/
         Note: gravity zeroing is owned by compliant_docking.models.load_pin_model
@@ -34,6 +41,7 @@ class TaskSpaceController:
         self.model = robot_model
         self.data = self.model.createData()
         self.dt = dt
+        self.impedance = impedance or ImpedanceConfig()
 
         self.Kp = np.diag([0.] * 3)
         self.Kd = np.diag([0.] * 3)
@@ -131,26 +139,22 @@ class TaskSpaceController:
         C = C @ v.reshape(7, 1)  # 广义科氏/离心项乘以速度，得到广义力形式
         C = C.reshape(7)
 
-        # 6) 平动阻抗参数与外力
+        # 6) 平动阻抗参数与外力（参数由 ImpedanceConfig 集中管理） /
+        # 6) Translational impedance params and external force (owned by ImpedanceConfig)
         force_ext = np.array(force_ext).reshape(3)
-        m = 10   # 虚拟质量（平动）
-        d = 50   # 虚拟阻尼（平动）
-        k = 100  # 虚拟刚度（平动）
+        imp = self.impedance
 
         # 期望外力（此处为0，可根据任务需要设置）
         force_desired = np.array([0, 0, 0])
 
         # 7) 平动阻抗：Md (xdd - xdd_des) + Dd (xd - xd_des) + Kd (x - x_des) = F_ext - F_des
         #    整理得到期望操作空间加速度/力输入 u_pos
-        u_pos = acc_des + (force_ext - force_desired - d * (current_vel - vel_des) - k * (current_pos - pos_des)) / m
+        u_pos = (acc_des + (force_ext - force_desired - imp.d * (current_vel - vel_des)
+                            - imp.k * (current_pos - pos_des)) / imp.m)
 
-        # 8) 姿态阻抗参数
-        m2 = 1   # 虚拟质量（旋转）
-        d2 = 10  # 虚拟阻尼（旋转）
-        k2 = 25  # 虚拟刚度（旋转）
-
-        # 9) 姿态阻抗：类似 PD，在角速度误差与姿态误差上施加控制
-        u_rot = (k2 * (ori_err) + d2 * (vel_rot_err)) / m2
+        # 8) 姿态阻抗：类似 PD，在角速度误差与姿态误差上施加控制 /
+        # 8) Rotational impedance: PD-like control on orientation/angular-velocity errors
+        u_rot = (imp.k_rot * (ori_err) + imp.d_rot * (vel_rot_err)) / imp.m_rot
 
         # 防止旋转控制过大（对 z 轴分量做简单限幅示例）
         if np.linalg.norm(u_rot) > 0.1:
@@ -164,8 +168,9 @@ class TaskSpaceController:
         # 动力学一致映射矩阵（操作空间惯性的变体实现），将任务输入映射为关节力矩
         lambda_ = W @ M_inv.T @ J_full.T @ pinv(J_full @ M_inv @ W @ M_inv.T @ J_full.T)
 
-        # 11) 零空间阻尼：抑制未约束自由度的速度振荡
-        D_null = 10 * np.eye(7)
+        # 11) 零空间阻尼：抑制未约束自由度的速度振荡（阻尼由 ImpedanceConfig 提供） /
+        # 11) Null-space damping (coefficient from ImpedanceConfig)
+        D_null = imp.null_damping * np.eye(7)
         v_null = v
         N = (np.eye(7) - lambda_ @ J_full @ M_inv)
         null_term2 = -N @ D_null @ v_null.reshape(7)

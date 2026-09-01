@@ -15,6 +15,7 @@ Author: langxin11
 Date: 2025
 """
 import os
+from dataclasses import replace
 
 # 在无显示环境（如服务器/CI）下，指定 MuJoCo 使用 EGL 离屏渲染后端 /
 # In headless environments (e.g., server/CI), set MuJoCo to use EGL offscreen backend
@@ -27,6 +28,7 @@ if "DISPLAY" not in os.environ or not os.environ["DISPLAY"]:
 import numpy as np
 import pinocchio as pin
 
+from compliant_docking.config import DockingConfig, ImpedanceConfig
 from compliant_docking.control.task_space import TaskSpaceController
 from compliant_docking.models import MUJOCO_MODEL, load_pin_model
 from compliant_docking.planning.kinematics import compute_ik
@@ -39,8 +41,7 @@ def run_simulation(muj_robot:MujRobot,
                    task_dynamics:TaskSpaceController,
                    trajector_planner:DecoupledQuinticTrajectory,
                    log:Log,
-                   duration:float,
-                   dt:float,
+                   cfg:DockingConfig,
                    q_init:np.ndarray):
     """
     执行主仿真循环：读取轨迹 → 计算任务空间阻抗控制力矩 → MuJoCo 步进 → 记录/绘图 /
@@ -51,10 +52,13 @@ def run_simulation(muj_robot:MujRobot,
     - task_dynamics: 任务空间控制器（Pinocchio 提供雅可比/动力学项） / Task-space controller (uses Pinocchio for Jacobians/dynamics)
     - trajector_planner: 轨迹规划器（解耦 5 次多项式，输出 pos/vel/acc） / Trajectory planner (decoupled quintic; pos/vel/acc)
     - log: 日志记录与绘图类 / Logger for data capture and plotting
-    - duration/dt: 总时长与步长 / Total duration and time step
+    - cfg: 任务/仿真参数（时长、步长、力矩限幅等） / Task & simulation config (duration, dt, torque clamp, ...)
     - q_init: 初始关节位置（由 IK 求得） / Initial joint configuration (from IK)
+
+    返回 / Returns:
+    - log: 记录了完整时序数据的日志对象 / The populated Log object
     """
-    
+
     log.reset_logs()
 
     muj_robot.init_simulators(q_init)
@@ -70,7 +74,7 @@ def run_simulation(muj_robot:MujRobot,
     torque_external = np.zeros(3)
 
 
-    while muj_robot.data.time < duration:
+    while muj_robot.data.time < cfg.duration:
         # while True:
         t = muj_robot.data.time
         # 1) 根据当前仿真时间采样期望的末端位置/速度/加速度 /
@@ -82,12 +86,11 @@ def run_simulation(muj_robot:MujRobot,
         # 2) Task-space control (translation/rotation impedance + external force) → joint torques tau
         tau = task_dynamics.compute_control_task_space_with_orientation_and_imp(
             q, v, pos_des, vel_des, acc_des, current_pos, current_vel, force_external, torque_external)
-        
+
         # 力矩限幅以防止过大的控制输入导致碰撞检测失败 /
         # Clamp torques to prevent excessive control inputs that cause collision detection failure
-        max_torque = 10.0  # 根据机器人规格调整 / Adjust based on robot specs
-        tau = np.clip(tau, -max_torque, max_torque)
-                                                                
+        tau = np.clip(tau, -cfg.max_torque, cfg.max_torque)
+
         # 3) 将 tau 写入 MuJoCo，并推进一步物理仿真 /
         # 3) Apply tau to MuJoCo and advance one simulation step
         try:
@@ -118,7 +121,7 @@ def run_simulation(muj_robot:MujRobot,
         # 6) Rotate sensor data with current EE rotation to controller’s reference frame
         # 注意：变换方向取决于 `current_ori` 的参考系定义，需与传感器坐标系一致 /
         # Note: direction depends on `current_ori` definition and sensor frame
-        force_external = current_ori @ force_sensor 
+        force_external = current_ori @ force_sensor
 
         torque_external = current_ori @ torque_sensor
 
@@ -152,7 +155,7 @@ def run_simulation(muj_robot:MujRobot,
                 print(f"Created video directory: {video_dir}")
             except Exception as e:
                 print(f"Error creating video directory: {e}")
-                
+
         video_path = os.path.join(video_dir, "docking_update.mp4")
         print(f"Saving video to absolute path: {video_path}")
         muj_robot.to_mp4(video_path)
@@ -162,14 +165,21 @@ def run_simulation(muj_robot:MujRobot,
 def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0):
     """
     Main function that sets up and runs the robot control simulation.
-    
+
     Args:
         render (bool): Whether to render the simulation visually
         record (bool): Whether to record the simulation to a video file
         dt (float): Simulation time step in seconds
         traj_duration (float): Duration of the trajectory execution in seconds
         duration (float): Total simulation duration in seconds
+
+    Returns:
+        Log: 记录了完整仿真时序数据的日志对象 / populated telemetry log
     """
+    # 参数集中管理：函数入参覆盖 DockingConfig 默认值 /
+    # Centralized params: function args override DockingConfig defaults
+    cfg = replace(DockingConfig(), dt=dt, traj_duration=traj_duration, duration=duration)
+
     log = Log()
 
     # 1) 构建 Pinocchio 模型/数据（用于雅可比/动力学计算；重力由 load_pin_model 置零） /
@@ -177,15 +187,9 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0):
     pin_model = load_pin_model()
     pin_data = pin_model.createData()
 
-    # 注意：TaskSpaceController 当前实现的 __init__ 形参为 (robot_model, dt) /
-    # Note: TaskSpaceController __init__ currently expects (robot_model, dt)
-    # 这里传入 (pin_model, pin_data) 可能导致运行时不匹配，仅保留为示例；/
-    # Passing (pin_model, pin_data) may mismatch at runtime; example only
-    # 建议统一构造接口或在此处传入 dt。/
-    # Suggest unifying the constructor or pass dt here
-    #task_dynamics = TaskSpaceController(pin_model, pin_data)
-    # 这里改为传入 dt /
-    task_dynamics = TaskSpaceController(pin_model, dt)
+    # 任务空间控制器：阻抗参数由 ImpedanceConfig 提供（默认值与历史实现一致） /
+    # Task-space controller: impedance params from ImpedanceConfig (defaults match historical values)
+    task_dynamics = TaskSpaceController(pin_model, cfg.dt, ImpedanceConfig())
     # 计算初始位姿的逆运动学，得到初始关节位置 /
     # Compute IK for initial pose to get initial joint configuration
     init_pos = np.array([0.0, 0.5, 0.5])
@@ -201,10 +205,10 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0):
     # Use a good initial guess to help IK converge
     initial_guess = np.array([0.0, 0.5, 0.0, -1.0, 0.0, 1.5, 0.0])
     q_init, success = compute_ik(pin_model, pin_data, init_pose, initial_q=initial_guess, max_iters=5000)
-    
+
     if not success:
         print("Warning: IK did not converge perfectly, but continuing with best solution found.")
-    
+
     #步进 Pinocchio 以更新数据 /
     # Step Pinocchio to update data
     pin.forwardKinematics(pin_model, pin_data, q_init)
@@ -216,8 +220,9 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0):
     print(f"Initial end-effector position: {H_init.translation}")
     print(f"Initial joint positions: {q_init}", success)
 
-    # Set target position (relative motion)
-    target_pos = init_pos + np.array([0.00, -0.00, -0.18])
+    # Set target position (relative motion): 目标 = 初始位置 + 对接行程 /
+    # Target = initial position + docking stroke (from config)
+    target_pos = init_pos + np.array(cfg.stroke)
     print(f"Target position: {target_pos}")
 
     # Initialize robot simulation with parameters
@@ -227,14 +232,14 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0):
         model_path=str(MUJOCO_MODEL),
         render=render,
         record=record,
-        dt=dt,
+        dt=cfg.dt,
         target_pos=target_pos
     )
 
     # Create trajectory planner with specified duration
     # 3) 构建任务空间解耦五次轨迹规划器 /
     # 3) Build decoupled quintic task-space trajectory planner
-    trajector_planner = DecoupledQuinticTrajectory(init_pos, target_pos, traj_duration)
+    trajector_planner = DecoupledQuinticTrajectory(init_pos, target_pos, cfg.traj_duration)
 
     # Run simulation with specified duration
     run_simulation(
@@ -242,13 +247,14 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0):
         task_dynamics,
         trajector_planner,
         log,
-        duration=duration,
-        dt=dt,
+        cfg=cfg,
         q_init=q_init
     )
+
+    return log
 
 if __name__ == '__main__':
     main(render=False, record=True, dt=0.001, traj_duration=15.0, duration=18.0)
 
-    
+
 

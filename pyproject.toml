@@ -23,6 +23,9 @@ dev = [
     "ruff",
 ]
 
+[project.scripts]
+docking = "compliant_docking.cli:main"
+
 [tool.uv]
 package = true
 
@@ -39,3 +42,6 @@ ignore = ["E501"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+    "slow: long physics regression runs",
+]

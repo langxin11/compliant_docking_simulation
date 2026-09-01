@@ -1,5 +1,7 @@
 # KUKA iiwa14 柔顺对接仿真（MuJoCo × Pinocchio）
 
+[![CI](https://github.com/langxin11/compliant_docking_simulation/actions/workflows/ci.yml/badge.svg)](https://github.com/langxin11/compliant_docking_simulation/actions/workflows/ci.yml)
+
 基于 **MuJoCo 物理仿真** 与 **Pinocchio 刚体动力学** 联动搭建的七轴机械臂（KUKA iiwa14）柔顺对接仿真平台。两个引擎完全独立、互不共享参数：MuJoCo 作为"物理世界"提供非凸 SDF 接触、末端六维力/力矩传感与渲染；Pinocchio 作为控制器内置的动力学模型提供质量矩阵、雅可比与逆运动学。二者在 **1 kHz** 闭环中协同运行，与真实机器人上部署模型基（model-based）控制器的结构完全一致。
 
 ## 亮点
@@ -101,7 +103,15 @@ git clone https://github.com/langxin11/compliant_docking_simulation.git
 cd compliant_docking_simulation
 
 uv sync                     # 创建环境并锁定依赖（uv.lock）
-uv run python experiments/run_docking.py
+uv run docking --quick      # CLI 冒烟：2 s 仿真验证环境
+uv run python experiments/run_docking.py   # 完整 18 s 对接仿真
+```
+
+运行测试：
+
+```bash
+uv run pytest -m "not slow" -q   # 快速单元测试（CI 同款）
+uv run pytest -m slow -q         # 12 s 接触回归：锁定行为锚点（误差/接触力数值）
 ```
 
 没有 uv 时也可以直接用 pip 安装依赖：
@@ -123,6 +133,8 @@ export MUJOCO_GL=egl
 ```
 ├── src/compliant_docking/          # 核心 Python 包
 │   ├── models.py                   # 模型层入口：XML/URDF 路径与加载（重力置零统一管理）
+│   ├── config.py                   # ImpedanceConfig / DockingConfig：参数集中管理
+│   ├── cli.py                      # docking 命令行入口（uv run docking）
 │   ├── planning/
 │   │   ├── trajectory.py           # 三轴解耦五次多项式轨迹
 │   │   └── kinematics.py           # 阻尼最小二乘逆运动学
