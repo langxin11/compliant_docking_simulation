@@ -11,8 +11,8 @@ Features:
 - Multiple plot types for analyzing different aspects of control performance
 - Support for external force/torque measurement visualization
 
-Author: RQM
-Date: 2024
+Author: langxin11
+Date: 2025
 """
 
 import numpy as np

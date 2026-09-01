@@ -1,5 +1,5 @@
 """
-task_dynamics_mujoco_control.py - Robotic Task Space Control Simulation
+main_simulation.py - Robotic Task Space Control Simulation
 
 This module implements a simulation environment for task space control of a KUKA iiwa14 robot
 using MuJoCo for physics simulation and Pinocchio for dynamics calculations. It demonstrates
@@ -11,8 +11,8 @@ The simulation includes:
 - External force compensation
 - Visualization of robot motion and performance metrics
 
-Author: RQM
-Date: 2024
+Author: langxin11
+Date: 2025
 """
 import os
 if "DISPLAY" not in os.environ or not os.environ["DISPLAY"]:

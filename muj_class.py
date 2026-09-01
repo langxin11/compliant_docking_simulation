@@ -12,8 +12,8 @@ Key features:
 - Target position visualization
 - Integration with the MuJoCo viewer for real-time simulation display
 
-Author: RQM
-Date: 2024
+Author: langxin11
+Date: 2025
 """
 
 import mujoco

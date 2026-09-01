@@ -11,8 +11,8 @@ Key components:
 - TaskSpaceController: Operational space control with impedance and orientation control
 - RobotSimulator: Simple physics simulation of robot dynamics using Runge-Kutta integration
 
-Author: RQM
-Date: 2024
+Author: langxin11
+Date: 2025
 """
 
 import pinocchio as pin
