@@ -50,7 +50,7 @@ graph TB
         S3["dynamics1.py<br/>双引擎一致性验证"]
     end
     subgraph L0["模型层 — kuka_xml_urdf/"]
-        D1["iiwa14_dock.xml → MuJoCo"]
+        D1["iiwa14_dock_updated.xml → MuJoCo"]
         D2["iiwa14_dock.urdf → Pinocchio"]
     end
     M --> C1 & C2 & C3
@@ -68,7 +68,7 @@ graph TB
 | 控制层 | `Relate_class.TaskSpaceController` | 三组控制器实现（见下表） | 控制器间可切换对比 |
 | 规划层 | `DecoupledQuinticTrajectory` / `compute_ik` | 三轴解耦五次多项式轨迹（端点速度/加速度为零）、DLS 逆运动学 | 任意轨迹发生器 |
 | 仿真层 | `MujRobot` / `RobotSimulator` / `dynamics1.py` | MuJoCo 仿真封装、纯 Pinocchio RK4 仿真、双引擎验证 | 仿真器可互换 |
-| 模型层 | `kuka_xml_urdf/` | 同一套 mesh 的双描述：MuJoCo XML 与 Pinocchio URDF | 换机器人只换模型层 |
+| 模型层 | `kuka_xml_urdf/` | 同一套 mesh 的双描述：MuJoCo XML（主模型 `iiwa14_dock_updated.xml`）与 Pinocchio URDF | 换机器人只换模型层 |
 
 各层之间只通过标准量（`q, v, τ, SE(3), J`）交互，替换任何一层不影响其它层——例如把 MuJoCo 仿真器换成纯 Pinocchio 仿真器做无接触验证、或在多组控制器之间切换做对比实验，都只改动编排层一行装配代码。
 
@@ -78,7 +78,8 @@ graph TB
 
 - 操作空间阻抗控制 + 接触力前馈：接触后 Z 向按阻抗参数柔顺让位，无冲击尖峰；
 - 接触力（MuJoCo 力传感器实测）：稳态约 **2.5 N**，瞬态峰值约 **2.7 N**；
-- 非接触方向跟踪：X/Y 误差保持在 **±2 mm** 以内。
+- 非接触方向跟踪：X/Y 误差保持在 **±2 mm** 以内；
+- 主循环含力矩限幅与异常捕获，接触丰富的场景下长时仿真稳定。
 
 ![docking error](demo/tracking_error.png)
 [![Docking Demo](demo/docking_preview.gif)](demo/docking.mp4)
@@ -122,12 +123,20 @@ export MUJOCO_GL=egl
 ├── muj_class.py            # 仿真层：MuJoCo 封装（step / 传感器 / 渲染 / 录制）
 ├── log_class.py            # 记录层：数据记录与结果绘图
 ├── dynamics1.py            # 双引擎动力学一致性验证
+├── test_environment.py     # 仿真环境自检脚本
+├── docs/                   # 理论文档（见"延伸阅读"）
 ├── kuka_xml_urdf/          # 模型层：MuJoCo XML 与 Pinocchio URDF（同一套 mesh）
-│   ├── iiwa14_dock.xml     # 含 SDF 对接头/对接座与力传感器定义
-│   └── iiwa14_dock.urdf
+│   ├── iiwa14_dock_updated.xml      # 主仿真模型：SDF 对接头/对接座 + 力传感器
+│   ├── iiwa14_dock.xml / iiwa14_dock_sdf_tamed.xml  # 模型变体
+│   └── iiwa14_dock.urdf             # Pinocchio 动力学计算用
 ├── demo/                   # 演示视频与结果图
 └── figure/                 # 最近一次运行输出
 ```
+
+## 延伸阅读
+
+- [docs/main_simulation_theory_and_flow.md](docs/main_simulation_theory_and_flow.md) —— 控制理论基础与端到端数据流梳理，附关键代码锚点
+- [docs/机械臂阻抗控制.md](docs/机械臂阻抗控制.md) —— 关节空间阻抗控制推导（期望阻抗模型与控制律设计）
 
 ## License
 

@@ -21,11 +21,11 @@ import os
 
 class Log:
     def __init__(self):
-
+        # 关节数量（KUKA iiwa14 为 7 自由度）
         self.nq = 7
 
     def reset_logs(self):
-        """重置记录数据"""
+        """重置记录数据：在每次仿真开始时调用"""
 
         self.t_list = []
 
@@ -50,18 +50,20 @@ class Log:
     def store_data(self, t: float, q: np.ndarray, 
                    v: np.ndarray, pos_actual: np.ndarray, 
                    vel_actual: np.ndarray, error: float,
-                   pos_desired: np.ndarray,vel_desired: np.ndarray,
-                   acc_desired: np.ndarray,tau: np.ndarray,
-                   external_force: np.ndarray,external_torque: np.ndarray):
+                   pos_desired: np.ndarray, vel_desired: np.ndarray,
+                   acc_desired: np.ndarray, tau: np.ndarray,
+                   external_force: np.ndarray, external_torque: np.ndarray):
         """
-        存储数据
+        存储数据（单步）：时间、关节状态、末端状态、期望轨迹、力矩及外力
         Args:
-            t: 时间
-            q_d: 期望的位置
-            q: 实际的位置
-            dq: 实际的速度
-            tau: 实际的控制力矩
-            error: 跟踪误差
+            t: 时间戳（秒）
+            q: 当前关节角
+            v: 当前关节角速度
+            pos_actual/vel_actual: 当前末端位置/速度
+            error: 末端位置跟踪误差范数
+            pos_desired/vel_desired/acc_desired: 期望末端 pos/vel/acc
+            tau: 控制器计算的关节力矩
+            external_force/external_torque: 传感器外力/力矩（控制参考系）
         """
 
         self.t_list.append(t)
@@ -84,16 +86,14 @@ class Log:
 
 
 
-    def plot_results(self,save_path:str):
-        
-        """绘制仿真结果"""
+    def plot_results(self, save_path: str):
+        """绘制仿真结果：末端跟踪曲线、误差、外力/外力矩、各关节力矩"""
         pos_actual = np.array(self.pos_actual).reshape(-1, 3)
         pos_desired = np.array(self.pos_desired)
         joint_angles = np.array(self.joint_angles)
         joint_velocities = np.array(self.joint_velocities)
 
-        virtual_force_list = np.zeros_like(pos_actual)
-        # array(self.virtual_force_list)
+        virtual_force_list = np.zeros_like(pos_actual)  # 占位，兼容早期接口
 
 
         tau_hist = np.array(self.tau_hist)
@@ -105,7 +105,7 @@ class Log:
             external_torques = np.zeros_like(pos_actual)
             
         
-        # 创建三个子图
+        # 创建三个子图：末端跟踪、误差、外力/外力矩
         fig = plt.figure(figsize=(15, 12))
         gs = plt.GridSpec(3, 2)
         
