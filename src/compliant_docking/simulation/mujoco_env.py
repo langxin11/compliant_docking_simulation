@@ -53,10 +53,12 @@ class MujRobot:
                  render: bool = True,
                  record: bool = True,
                  dt: float = 0.001,
-                 target_pos=np.zeros(3)):
+                 target_pos: np.ndarray | None = None):
 
         # ---- 基本配置 ----
         # 保存构造参数到实例属性
+        if target_pos is None:
+            target_pos = np.zeros(3)
         self.model_path = model_path
         self.dt = dt
         self.target_pos = np.asarray(target_pos, dtype=float)
@@ -74,7 +76,7 @@ class MujRobot:
         # 这里通过环境变量 DISPLAY 的存在性做一个保守判断。
         self.headless = "DISPLAY" not in os.environ or not os.environ["DISPLAY"]
         if self.headless and render:
-            warnings.warn("Running in headless environment. Interactive rendering disabled.")
+            warnings.warn("Running in headless environment. Interactive rendering disabled.", stacklevel=2)
             self.render = False
 
         # ---- 尝试创建交互式 viewer ----
@@ -159,7 +161,7 @@ class MujRobot:
             except Exception as e:
                 # viewer 可能因多种原因创建失败（GLFW 初始化失败、驱动/权限问题、
                 # 无显示环境等），此时降级为不渲染以避免崩溃。
-                warnings.warn(f"Failed to create viewer: {e}. Rendering disabled.")
+                warnings.warn(f"Failed to create viewer: {e}. Rendering disabled.", stacklevel=2)
                 self.render = False
 
     def setup_renderer(self):
@@ -184,7 +186,7 @@ class MujRobot:
 
         return render_options
 
-    def step(self, tau: np.ndarray = np.zeros(7)):
+    def step(self, tau: np.ndarray | None = None):
         """推进一步仿真，并在需要时渲染/录帧。
 
         Parameters
@@ -197,6 +199,9 @@ class MujRobot:
         qpos, qvel, eef_pos : tuple
             当前关节位置、速度与末端执行器位置。
         """
+
+        if tau is None:
+            tau = np.zeros(7)
 
         # 写入控制（安全地裁剪到 7 维；具体维数应与模型一致）
         self.data.ctrl[:7] = tau
@@ -295,7 +300,7 @@ class MujRobot:
 
         # 若无帧可写则给出告警
         if not self.frames:
-            warnings.warn("No frames to save. Video not created.")
+            warnings.warn("No frames to save. Video not created.", stacklevel=2)
             return
 
         # 首选：写 MP4
@@ -331,7 +336,7 @@ def test_render():
     robot = MujRobot(model_path, render=True, record=False)
     init_qpos = np.array([0, -np.pi/2, 0, 0, 0, 0, 0])
     robot.init_simulators(init_qpos)
-    for i in range(2000):
+    for _i in range(2000):
         tau = np.zeros(7)
         qpos, qvel, eef_pos = robot.step(tau)
         print("qpos:", qpos)
@@ -346,7 +351,7 @@ def test_record():
     robot = MujRobot(model_path, render=False, record=True)
     init_qpos = np.array([0, -np.pi/2, 0, 0, 0, 0, 0])
     robot.init_simulators(init_qpos)
-    for i in range(10):
+    for _i in range(10):
         tau = np.zeros(7)
         qpos, qvel, eef_pos = robot.step(tau)
         print("qpos:", qpos)

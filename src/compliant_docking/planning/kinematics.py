@@ -14,8 +14,11 @@ Date: 2025
 import numpy as np
 import pinocchio as pin
 
+# compute_ik 的默认初始关节角（模块级单例，避免在参数默认值中调用函数）
+_DEFAULT_INITIAL_Q = np.ones(7) * 0.3
 
-def compute_ik(pin_model, pin_data, target_pose, initial_q=np.ones(7)*0.3, max_iters=3000, eps=1e-7):
+
+def compute_ik(pin_model, pin_data, target_pose, initial_q=_DEFAULT_INITIAL_Q, max_iters=3000, eps=1e-7):
     """
     使用 Pinocchio 进行逆运动学（阻尼最小二乘）：返回关节角与是否收敛 /
     Compute inverse kinematics (damped least squares) using Pinocchio

@@ -11,7 +11,6 @@ Author: langxin11
 Date: 2025
 """
 
-from typing import Tuple
 
 import numpy as np
 import pinocchio as pin
@@ -31,7 +30,7 @@ class RobotSimulator:
         a = pin.aba(self.model, self.data, q, v, tau)
         return a
 
-    def step(self, q: np.ndarray, v: np.ndarray, tau: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def step(self, q: np.ndarray, v: np.ndarray, tau: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         pin.forwardKinematics(self.model, self.data, q)
         pin.updateFramePlacements(self.model, self.data)
 

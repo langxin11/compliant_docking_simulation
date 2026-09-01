@@ -49,8 +49,8 @@ class Log:
 
 
 
-    def store_data(self, t: float, q: np.ndarray, 
-                   v: np.ndarray, pos_actual: np.ndarray, 
+    def store_data(self, t: float, q: np.ndarray,
+                   v: np.ndarray, pos_actual: np.ndarray,
                    vel_actual: np.ndarray, error: float,
                    pos_desired: np.ndarray, vel_desired: np.ndarray,
                    acc_desired: np.ndarray, tau: np.ndarray,
@@ -92,11 +92,6 @@ class Log:
         """绘制仿真结果：末端跟踪曲线、误差、外力/外力矩、各关节力矩"""
         pos_actual = np.array(self.pos_actual).reshape(-1, 3)
         pos_desired = np.array(self.pos_desired)
-        joint_angles = np.array(self.joint_angles)
-        joint_velocities = np.array(self.joint_velocities)
-
-        virtual_force_list = np.zeros_like(pos_actual)  # 占位，兼容早期接口
-
 
         tau_hist = np.array(self.tau_hist)
         external_forces = np.array(self.force_externals)
@@ -105,12 +100,12 @@ class Log:
         if len(self.force_externals) < 1:
             external_forces = np.zeros_like(pos_actual)
             external_torques = np.zeros_like(pos_actual)
-            
-        
+
+
         # 创建三个子图：末端跟踪、误差、外力/外力矩
         fig = plt.figure(figsize=(15, 12))
         gs = plt.GridSpec(3, 2)
-        
+
         # 1. 位置跟踪
         ax1 = fig.add_subplot(gs[0, :])
         labels = ['X', 'Y', 'Z']
@@ -123,7 +118,7 @@ class Log:
         ax1.legend()
         ax1.grid(True)
         ax1.set_title('End-effector Position Tracking')
-        
+
         # 2. 跟踪误差
         ax2 = fig.add_subplot(gs[1, :])
         for i in range(3):
@@ -134,7 +129,7 @@ class Log:
         ax2.legend()
         ax2.grid(True)
         ax2.set_title('Position Tracking Error')
-        
+
         # 3. 关节角度和速度
         ax3 = fig.add_subplot(gs[2, 0])
         for i in range(3):

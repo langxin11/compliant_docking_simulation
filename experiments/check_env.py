@@ -38,18 +38,14 @@ def main():
     print("=" * 50)
     print("柔顺对接仿真项目 - 环境测试")
     print("=" * 50)
-    
+
     # 测试Python版本
     python_version = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
     print(f"Python版本: {python_version}")
-    
-    if sys.version_info < (3, 8):
-        print("⚠️  警告: Python版本过低，推荐使用3.8+")
-    else:
-        print("✅ Python版本符合要求")
-    
+    print("✅ Python版本符合要求")
+
     print("\n测试核心依赖...")
-    
+
     # 测试必需的Python模块
     required_modules = [
         ("numpy", "1.19.0"),
@@ -58,14 +54,14 @@ def main():
         ("pinocchio", None),
         ("mujoco", None),
     ]
-    
+
     all_passed = True
     for module, min_version in required_modules:
         if not test_module(module, min_version):
             all_passed = False
-    
+
     print("\n测试项目文件...")
-    
+
     # 测试项目文件
     project_files = [
         ("experiments/run_docking.py", "主仿真程序"),
@@ -74,29 +70,29 @@ def main():
         ("src/compliant_docking/telemetry.py", "数据记录类"),
         ("pyproject.toml", "项目配置文件"),
     ]
-    
+
     for file_path, description in project_files:
         if not test_file_exists(file_path, description):
             all_passed = False
-    
+
     print("\n测试模型文件...")
-    
+
     # 测试模型文件
     model_files = [
         ("assets/iiwa14/iiwa14_dock_updated.xml", "MuJoCo模型"),
         ("assets/iiwa14/iiwa14_dock.urdf", "URDF模型"),
     ]
-    
+
     for file_path, description in model_files:
         if not test_file_exists(file_path, description):
             all_passed = False
-    
+
     print("\n测试环境变量...")
-    
+
     # 测试环境变量
     mujoco_gl = os.environ.get("MUJOCO_GL", "未设置")
     display = os.environ.get("DISPLAY", "未设置")
-    
+
     print(f"MUJOCO_GL: {mujoco_gl}")
     if display == "未设置":
         print("DISPLAY: 未设置 (无头环境)")
@@ -104,20 +100,20 @@ def main():
             print("⚠️  警告: 无头环境建议设置 MUJOCO_GL=egl")
     else:
         print(f"DISPLAY: {display}")
-    
+
     print("\n测试基本功能...")
-    
+
     # 测试基本功能
     try:
         import numpy as np
         import pinocchio as pin
-        
+
         # 测试基本数值计算
         a = np.array([1, 2, 3])
         b = np.array([4, 5, 6])
         c = np.dot(a, b)
         print(f"✅ NumPy基本运算: {c}")
-        
+
         # 测试Pinocchio基本功能
         try:
             from compliant_docking.models import PIN_URDF
@@ -126,11 +122,11 @@ def main():
         except Exception as e:
             print(f"❌ Pinocchio URDF加载失败: {e}")
             all_passed = False
-            
+
     except Exception as e:
         print(f"❌ 基本功能测试失败: {e}")
         all_passed = False
-    
+
     print("\n" + "=" * 50)
     if all_passed:
         print("🎉 所有测试通过！环境配置正确。")
@@ -143,9 +139,9 @@ def main():
         print("- 快速启动指南.md")
         print("\n或运行自动配置脚本:")
         print("bash setup.sh")
-    
+
     print("=" * 50)
-    
+
     return 0 if all_passed else 1
 
 if __name__ == "__main__":

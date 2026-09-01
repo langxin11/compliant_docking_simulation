@@ -11,7 +11,6 @@ Author: langxin11
 Date: 2025
 """
 
-from typing import Tuple
 
 import numpy as np
 
@@ -68,7 +67,7 @@ class DecoupledQuinticTrajectory:
 
         return np.linalg.solve(A, b)
 
-    def get_state(self, t: float) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def get_state(self, t: float) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
         获取时刻 t 的位置/速度/加速度；三轴独立计算 /
         Get position, velocity and acceleration at time t; axes computed independently

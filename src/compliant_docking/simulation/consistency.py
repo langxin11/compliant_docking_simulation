@@ -1,6 +1,5 @@
 """consistency.py - MuJoCo × Pinocchio 一致性控制器（关节空间 PD + 逆动力学）。"""
 import os
-from typing import Optional
 
 import matplotlib.pyplot as plt
 import mujoco
@@ -30,7 +29,7 @@ class RobotController:
             self.model = mujoco.MjModel.from_xml_path(model_path)
             self.data = mujoco.MjData(self.model)
         except Exception as e:
-            raise RuntimeError(f"Failed to load MuJoCo model: {str(e)}")
+            raise RuntimeError(f"Failed to load MuJoCo model: {str(e)}") from e
 
         # 创建Pinocchio模型（用于动力学/雅可比计算）；
         # 重力置零由 load_pin_model 统一处理（控制侧去重力，仿真环境可能仍生效）
@@ -38,12 +37,12 @@ class RobotController:
             self.pin_model = load_pin_model(urdf_path)
             self.pin_data = self.pin_model.createData()
         except Exception as e:
-            raise RuntimeError(f"Failed to load Pinocchio model: {str(e)}")
-        
+            raise RuntimeError(f"Failed to load Pinocchio model: {str(e)}") from e
+
         # 控制参数
         self.Kp = 100.0  # P增益
         self.Kd = 20.0   # D增益
-        
+
         # 机器人参数
         self.nq = self.pin_model.nq  # 关节数量
         self.joint_limits = {
@@ -52,7 +51,7 @@ class RobotController:
             'velocity': self.pin_model.velocityLimit,
             'torque': self.pin_model.effortLimit
         }
-        
+
         # 记录数据用于绘图（关节角/速度/力矩/误差）
         self.reset_logs()
 
@@ -64,7 +63,7 @@ class RobotController:
         self.dq_actual_log = []
         self.tau_log = []
         self.error_log = []
-        
+
     def forward_dynamics(self, q: np.ndarray, dq: np.ndarray, tau: np.ndarray) -> np.ndarray:
         """
         计算前向动力学（ABA）：返回关节加速度
@@ -72,40 +71,33 @@ class RobotController:
         pin.computeAllTerms(self.pin_model, self.pin_data, q, dq)
         ddq = pin.aba(self.pin_model, self.pin_data, q, dq, tau)
         return ddq
-        
+
     def inverse_dynamics(self, q: np.ndarray, dq: np.ndarray, ddq: np.ndarray) -> np.ndarray:
         """
         计算逆动力学（RNEA）：返回关节力矩
         """
         tau = pin.rnea(self.pin_model, self.pin_data, q, dq, ddq)
         return tau
-        
+
     def clamp_torque(self, tau: np.ndarray) -> np.ndarray:
         """限制力矩在允许范围内"""
         return np.clip(tau, -self.joint_limits['torque'], self.joint_limits['torque'])
-        
-    def compute_control(self, q_desired: np.ndarray, dq_desired: np.ndarray, 
-                       ddq_desired: np.ndarray, q_current: np.ndarray, 
+
+    def compute_control(self, q_desired: np.ndarray, dq_desired: np.ndarray,
+                       ddq_desired: np.ndarray, q_current: np.ndarray,
                        dq_current: np.ndarray) -> np.ndarray:
         """计算控制输出（关节空间 PD + 逆动力学前馈）"""
         # 检查输入维度
         if any(arr.shape != (self.nq,) for arr in [q_desired, dq_desired, ddq_desired, q_current, dq_current]):
             raise ValueError("Input arrays must match the number of joints")
-            
-        # 计算误差
-        q_error = q_desired - q_current
-        dq_error = dq_desired - dq_current
-        
-        # 计算期望加速度（PD控制）
-        ddq = ddq_desired + self.Kp * q_error + self.Kd * dq_error
-        
+
         # 计算所需关节力矩（推荐：使用当前状态与期望加速度）
         # tau = self.inverse_dynamics(q_current, dq_current, ddq)
         # 当前实现使用期望状态/加速度，偏差大时可能不一致；可按上行切换
         tau = self.inverse_dynamics(q_desired, dq_desired, ddq_desired)
         return tau
 
-    def generate_quintic_trajectory(self, t: float, t0: float, tf: float, 
+    def generate_quintic_trajectory(self, t: float, t0: float, tf: float,
                                   q0: np.ndarray, qf: np.ndarray,
                                   v0: np.ndarray = None, vf: np.ndarray = None,
                                   a0: np.ndarray = None, af: np.ndarray = None) -> tuple:
@@ -138,7 +130,7 @@ class RobotController:
         T = tf - t0
         if T <= 0:
             raise ValueError("Final time must be greater than initial time")
-        
+
         # 计算归一化当前时间
         s = (t - t0) / T
         if s < 0:
@@ -210,7 +202,7 @@ class RobotController:
             af = np.zeros(self.nq)  # 终止加速度
 
             return self.generate_quintic_trajectory(t, t0, tf, q0, qf, v0, vf, a0, af)
-            
+
         elif trajectory_type == 'sine':
             omega = 2 * np.pi  # 角频率
             q = np.array([
@@ -243,7 +235,7 @@ class RobotController:
                 -0.4 * omega**2 * np.sin(omega * t + np.pi)
             ])
             return q, dq, ddq
-        
+
         elif trajectory_type == 'circle':
             omega = 2 * np.pi  # 角频率
             q = np.array([
@@ -276,8 +268,8 @@ class RobotController:
                 -0.1 * omega**2 * np.cos(omega * t)
             ])
             return q, dq, ddq
-            
-    def run_simulation(self, trajectory_type: str = 'quintic', 
+
+    def run_simulation(self, trajectory_type: str = 'quintic',
                       duration: float = 5.0, dt: float = 0.001,
                       render: bool = False):
         """运行仿真"""
@@ -286,28 +278,28 @@ class RobotController:
 
         self.data.qpos[:7] = np.zeros(self.nq)
         self.data.qvel[:7] = np.zeros(self.nq)
-        
-        
+
+
         viewer = None
         if render:
             viewer = mujoco.viewer.launch_passive(self.model, self.data)
 
         for i in range(steps):
             t = i * dt
-            
+
             # 获取期望轨迹
             q_d, dq_d, ddq_d = self.generate_trajectory(t, trajectory_type)
-            
+
             # 获取当前状态
             q = self.data.qpos[:7]
             dq = self.data.qvel[:7]
-            
+
             # 计算控制输出
             tau = self.compute_control(q_d, dq_d, ddq_d, q, dq)
-            
+
             # 应用控制
             self.data.ctrl[:7] = tau
-            
+
             # 记录数据
             self.time_log.append(t)
             self.q_desired_log.append(q_d.copy())
@@ -315,15 +307,15 @@ class RobotController:
             self.dq_actual_log.append(dq.copy())
             self.tau_log.append(tau.copy())
             self.error_log.append(np.linalg.norm(q_d - q))
-            
+
             # 推进仿真
             mujoco.mj_step(self.model, self.data)
-            
+
             # 渲染（如果启用）
             if render and i % 10 == 0:  # 每10步渲染一次
                 viewer.sync()
 
-    def plot_results(self, save_path: Optional[str] = None):
+    def plot_results(self, save_path: str | None = None):
         """
         绘制结果对比图
         Args:
@@ -334,12 +326,12 @@ class RobotController:
         q_actual_array = np.array(self.q_actual_log)
         tau_array = np.array(self.tau_log)
         error_array = np.array(self.error_log)
-        
+
         # 创建子图
         set_plot_config()
         fig = plt.figure(figsize=(15, 10))
         gs = plt.GridSpec(3, 2)
-        
+
         # 角度轨迹图
         ax1 = fig.add_subplot(gs[0:2, 0])
         for i in range(self.nq):
@@ -349,7 +341,7 @@ class RobotController:
         ax1.set_ylabel('Joint Angles (rad)')
         ax1.grid(True)
         ax1.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
-        
+
         # 跟踪误差图
         ax2 = fig.add_subplot(gs[2, 0])
         ax2.plot(time_array, error_array, 'r-', label='Tracking Error')
@@ -365,7 +357,7 @@ class RobotController:
         ax3.set_ylabel('Control Torque (Nm)')
         ax3.grid(True)
         ax3.legend()
-        
+
         plt.tight_layout()
         if save_path:
             plt.savefig(save_path)
@@ -447,7 +439,7 @@ def main():
         model_path=str(ASSETS_DIR / "iiwa14.xml"),
         urdf_path=str(PIN_URDF)
     )
-    
+
     # 运行不同轨迹的仿真
     trajectories = ['sine']
     for traj in trajectories:

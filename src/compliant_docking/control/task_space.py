@@ -11,7 +11,6 @@ Author: langxin11
 Date: 2025
 """
 
-from typing import Tuple
 
 import numpy as np
 import pinocchio as pin
@@ -57,7 +56,7 @@ class TaskSpaceController:
             [0, -1,  0],
             [0,  0, -1]])
 
-    def get_task_space_state(self, q: np.ndarray, v: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    def get_task_space_state(self, q: np.ndarray, v: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
         """
         计算当前末端位置与线速度（世界系）/
         Compute current end-effector position and linear velocity (world frame)
@@ -76,7 +75,7 @@ class TaskSpaceController:
 
         return current_pos, current_vel, current_ori
 
-    def get_task_space_state_with_orientation(self, q: np.ndarray, v: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    def get_task_space_state_with_orientation(self, q: np.ndarray, v: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
         返回末端位置、线/角速度，以及相对于期望姿态的李代数姿态误差 /
         Return EE position, linear/angular velocity, and orientation error (log map)
@@ -184,27 +183,18 @@ class TaskSpaceController:
                        pos_des: np.ndarray, vel_des: np.ndarray,
                        acc_des: np.ndarray, current_pos: np.ndarray,
                        current_vel: np.ndarray,
-                       force_ext: np.ndarray, torque_ext: np.ndarray = np.zeros(3)) -> np.ndarray:
+                       force_ext: np.ndarray, torque_ext: np.ndarray | None = None) -> np.ndarray:
         pos_cur, vel_pos_cur, ori_err, vel_rot_cur = self.get_task_space_state_with_orientation(q, v)
 
-        pos_err = pos_des - pos_cur
-        vel_pos_err = vel_des - vel_pos_cur
         vel_rot_err = -vel_rot_cur
 
         end_effector_id = self.model.getFrameId("cylinder_link")
         J = pin.computeFrameJacobian(self.model, self.data, q, end_effector_id, pin.ReferenceFrame.WORLD)
-        J_pos = J[:3, :]
-        J_rot = J[3:, :]
 
         M = pin.crba(self.model, self.data, q)
-        M_inv = pinv(M)
-        W = np.eye(7)
 
         J_dot = pin.getFrameJacobianTimeVariation(
             self.model, self.data, self.end_effector_id, pin.ReferenceFrame.WORLD)
-
-        J_dot_pos = J_dot[:3, :]
-        J_dot_rot = J_dot[3:, :]
 
         pin.computeCoriolisMatrix(self.model, self.data, q, v)
         C = self.data.C
@@ -223,13 +213,7 @@ class TaskSpaceController:
 
         u = np.concatenate([u_pos, u_rot])
 
-        J_full = np.vstack([J_pos, J_rot])
         lambda_ = pinv(J)
-
-        D_null = 1. * np.eye(7)
-        v_null = v
-        N = (np.eye(7) - lambda_ @ J)
-        null_term2 = -N @ D_null @ v_null.reshape(7)
 
         tau = M @ (lambda_ @ (u - J_dot @ v)) + C
 
@@ -245,8 +229,6 @@ class TaskSpaceController:
         """
         pos_cur, vel_pos_cur, ori_err, vel_rot_cur = self.get_task_space_state_with_orientation(q, v)
 
-        pos_err = pos_des - pos_cur
-        vel_pos_err = vel_des - vel_pos_cur
         vel_rot_err = -vel_rot_cur
 
         end_effector_id = self.model.getFrameId("cylinder_link")
@@ -257,13 +239,8 @@ class TaskSpaceController:
         M = pin.crba(self.model, self.data, q)
         M_inv = pinv(M)
 
-        W = M_inv
-
         J_dot = pin.getFrameJacobianTimeVariation(
             self.model, self.data, self.end_effector_id, pin.ReferenceFrame.WORLD)
-
-        J_dot_pos = J_dot[:3, :]
-        J_dot_rot = J_dot[3:, :]
 
         pin.computeCoriolisMatrix(self.model, self.data, q, v)
         C = self.data.C
@@ -297,17 +274,12 @@ class TaskSpaceController:
         """
         pos_cur, vel_cur, _ = self.get_task_space_state(q, v)
 
-        pos_err = pos_des - pos_cur
-        vel_err = vel_des - vel_cur
-
         end_effector_id = self.model.getFrameId("cylinder_link")
         J = pin.computeFrameJacobian(self.model, self.data, q, end_effector_id, pin.ReferenceFrame.WORLD)
         J_pos = J[:3, :]
 
         M = pin.crba(self.model, self.data, q)
         M_inv = pinv(M)
-
-        W = M_inv
 
         lambda_ = M @ M_inv.T @ J_pos.T @ pinv(J_pos @ M_inv @ M @ M_inv.T @ J_pos.T)
 
@@ -323,18 +295,13 @@ class TaskSpaceController:
 
         u = acc_des + 20 * (vel_des - current_vel) + 100 * (pos_des - current_pos)
 
-        grad_m = self.manipulability_gradient(q)
-        k = 0.2
-
-        ddq_desired = k * grad_m
-
-        tau_null_desired = M @ ddq_desired
+        # 保留调用以维持对 self.data 的任何副作用（与原实现一致）
+        self.manipulability_gradient(q)
 
         D_null = 1.2 * np.eye(7)
         v_null = v
         N = (np.eye(7) - lambda_ @ J_pos @ M_inv)
         null_term2 = -N @ D_null @ v_null.reshape(7)
-        null_term = N @ tau_null_desired.reshape(7)
 
         tau = lambda_ @ (u - J_dot_full @ v + J_pos @ M_inv @ (C)) + null_term2
 
