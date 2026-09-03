@@ -1,0 +1,20 @@
+<mujoco model="male_plug_cone">
+  <!-- 锥形插头（公头，probe）：与 female_socket_cone（锥孔杯座）构成匹配锥面副
+       （半角 30°、径向间隙 0.4mm，网格由程序化生成：plug_cone.stl）。
+       工具片段约定：根 body 必须叫 dock、须含 sensor_site site。-->
+  <compiler angle="degree" meshdir="../iiwa14/assets"/>
+  <asset>
+    <mesh name="male_plug_cone_mesh" file="plug_cone.stl"/>
+    <material name="male_plug_cone_mat" rgba="0.85 0.5 0.2 1"/>
+  </asset>
+  <worldbody>
+    <body name="dock">
+      <site pos="0 0 0" name="sensor_site"/>
+      <body name="rev" euler="0 0 40">
+        <inertial mass="1" pos="0 0 0" diaginertia="0.1 0.1 0.1"/>
+        <geom name="dock_geom" type="sdf" mesh="male_plug_cone_mesh" material="male_plug_cone_mat"/>
+        <geom name="dock_visual" type="mesh" mesh="male_plug_cone_mesh" material="male_plug_cone_mat" contype="0" conaffinity="0" group="2"/>
+      </body>
+    </body>
+  </worldbody>
+</mujoco>

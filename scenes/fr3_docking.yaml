@@ -1,8 +1,9 @@
 # 对接场景：FR3 + 公头锥 + 母头锥。机械臂资产由 mujoco_menagerie franka_fr3
 # 派生（assets/fr3/fr3_arm.xml：力矩执行器变体，Pinocchio 经 MJCF 直读）。
-# 注意：阻抗增益（ImpedanceConfig）沿用 iiwa14 调参，FR3 关节 armature/
-# frictionloss 未补偿，跟踪滞后明显（接触靠阻抗自然建立，约 50N 量级）；
-# 若需精细对接行为，应针对 FR3 重新整定增益（后续工作）。
+# 接口：锥形插头（公）+ 锥孔杯座（母）程序化生成配对（半角 30°、径向
+# 间隙 0.4mm）；FR3 关节摩擦损耗已降至 0.03 N·m（见 fr3_arm.xml 注释），
+# 与 iiwa14 零摩擦口径对齐——上游真实减速器摩擦会让阻抗控制器产生
+# ~16cm 无法入扣的跟踪滞后。
 scene:
   name: fr3_docking
 
@@ -13,12 +14,12 @@ robot:
   ee_frame: attachment_site
 
 tool:
-  mjcf: assets/interfaces/male_cone.xml
+  mjcf: assets/interfaces/male_plug_cone.xml    # 锥形插头公头（程序化生成，与杯座配对）
   prefix: tool_
   pose: {pos: [0.0, 0.0, 0.015], quat: [1.0, 0.0, 0.0, 0.0]}
 
 target:
-  mjcf: assets/interfaces/female_socket.xml
+  mjcf: assets/interfaces/female_socket_cone.xml  # 锥孔杯座母头（程序化生成，与插头配对）
   prefix: target_
   pos: [0.0, 0.5, 0.35]
   quat: [1.0, 0.0, 0.0, 0.0]
@@ -35,4 +36,4 @@ task:
   init_pos: [0.0, 0.5, 0.5]
   init_ori: [[1, 0, 0], [0, -1, 0], [0, 0, -1]]
   ik_guess: [0.0, 0.0, 0.0, -1.57079, 0.0, 1.57079, -0.7853]  # FR3 home 位形
-  stroke: [0.0, 0.0, -0.18]
+  stroke: [0.0, 0.0, -0.06]   # 匹配新工具几何（加长杆+锥面座合），行程收短避免腕部碰撞

@@ -1,0 +1,18 @@
+<mujoco model="female_socket_cone">
+  <!-- 锥孔杯座（母头，drogue）：与 male_plug_cone（锥形插头）构成匹配锥面副
+       （半角 30°、径向间隙 0.4mm，网格由程序化生成：socket_cone.stl）。-->
+  <compiler angle="degree" meshdir="../iiwa14/assets"/>
+  <asset>
+    <mesh name="female_socket_cone_mesh" file="socket_cone.stl"/>
+    <material name="female_socket_cone_mat" rgba="0.55 0.62 0.72 1"/>
+  </asset>
+  <worldbody>
+    <body name="dock">
+      <body name="rev">
+        <inertial mass="1" pos="0 0 0" diaginertia="0.1 0.1 0.1"/>
+        <geom name="dock_geom" type="sdf" mesh="female_socket_cone_mesh" material="female_socket_cone_mat"/>
+        <geom name="dock_visual" type="mesh" mesh="female_socket_cone_mesh" material="female_socket_cone_mat" contype="0" conaffinity="0" group="2"/>
+      </body>
+    </body>
+  </worldbody>
+</mujoco>
