@@ -24,6 +24,9 @@ import yaml
 # 仓库根目录（与 models.py 的 ASSETS_DIR 同口径：src/<pkg>/scene.py 上溯 3 级）
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
+# 默认场景：历史行为（iiwa14 对接）收编为配置文件
+DEFAULT_SCENE_PATH = REPO_ROOT / "scenes" / "iiwa14_docking.yaml"
+
 # physics.integrator / physics.cone 的 YAML 字符串 → MuJoCo 枚举 int 映射
 _INTEGRATORS = {
     "euler": int(mujoco.mjtIntegrator.mjINT_EULER),

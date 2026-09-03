@@ -1,11 +1,14 @@
-"""模型加载入口：MuJoCo XML 与 Pinocchio URDF 双描述统一管理。"""
+"""模型加载入口：MuJoCo XML 与 Pinocchio URDF 双描述统一管理。
+
+实验路径一律由 compliant_docking.scene 的场景 YAML 驱动；本模块的 PIN_URDF
+仅为向后兼容的默认值。
+"""
 from pathlib import Path
 
 import numpy as np
 import pinocchio as pin
 
 ASSETS_DIR = Path(__file__).resolve().parents[2] / "assets" / "iiwa14"
-MUJOCO_MODEL = ASSETS_DIR / "iiwa14_dock_updated.xml"
 PIN_URDF = ASSETS_DIR / "iiwa14_dock.urdf"
 
 

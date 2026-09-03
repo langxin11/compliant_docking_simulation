@@ -22,6 +22,5 @@ class DockingConfig:
     dt: float = 0.001
     traj_duration: float = 15.0
     duration: float = 18.0
-    stroke: tuple = (0.0, 0.0, -0.18)  # 相对初始位置的对接行程
     max_torque: float = 10.0  # 关节力矩限幅 [N·m]
     impedance: ImpedanceConfig = field(default_factory=ImpedanceConfig)

@@ -16,6 +16,7 @@ Date: 2025
 """
 import os
 from dataclasses import replace
+from pathlib import Path
 
 # 在无显示环境（如服务器/CI）下，指定 MuJoCo 使用 EGL 离屏渲染后端 /
 # In headless environments (e.g., server/CI), set MuJoCo to use EGL offscreen backend
@@ -30,9 +31,10 @@ import pinocchio as pin
 
 from compliant_docking.config import DockingConfig, ImpedanceConfig
 from compliant_docking.control.task_space import TaskSpaceController
-from compliant_docking.models import MUJOCO_MODEL, load_pin_model
+from compliant_docking.models import load_pin_model
 from compliant_docking.planning.kinematics import compute_ik
 from compliant_docking.planning.trajectory import DecoupledQuinticTrajectory
+from compliant_docking.scene import DEFAULT_SCENE_PATH, Scene, load_scene
 from compliant_docking.simulation.mujoco_env import MujRobot
 from compliant_docking.telemetry import Log
 
@@ -42,7 +44,8 @@ def run_simulation(muj_robot:MujRobot,
                    trajector_planner:DecoupledQuinticTrajectory,
                    log:Log,
                    cfg:DockingConfig,
-                   q_init:np.ndarray):
+                   q_init:np.ndarray,
+                   scene:Scene | None = None):
     """
     执行主仿真循环：读取轨迹 → 计算任务空间阻抗控制力矩 → MuJoCo 步进 → 记录/绘图 /
     Run the main simulation loop: sample trajectory → compute task-space impedance torque → MuJoCo step → log/plot
@@ -54,6 +57,8 @@ def run_simulation(muj_robot:MujRobot,
     - log: 日志记录与绘图类 / Logger for data capture and plotting
     - cfg: 任务/仿真参数（时长、步长、力矩限幅等） / Task & simulation config (duration, dt, torque clamp, ...)
     - q_init: 初始关节位置（由 IK 求得） / Initial joint configuration (from IK)
+    - scene: 场景配置（仅用于视频文件名取 scene.name；未传时回落为历史名 docking_update） /
+      Scene config (only used for the video filename via scene.name; falls back to "docking_update" if omitted)
 
     返回 / Returns:
     - log: 记录了完整时序数据的日志对象 / The populated Log object
@@ -156,13 +161,15 @@ def run_simulation(muj_robot:MujRobot,
             except Exception as e:
                 print(f"Error creating video directory: {e}")
 
-        video_path = os.path.join(video_dir, "docking_update.mp4")
+        video_name = scene.name if scene is not None else "docking_update"
+        video_path = os.path.join(video_dir, f"{video_name}.mp4")
         print(f"Saving video to absolute path: {video_path}")
         muj_robot.to_mp4(video_path)
 
 
 
-def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0):
+def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
+         scene_path: str | Path = DEFAULT_SCENE_PATH):
     """
     Main function that sets up and runs the robot control simulation.
 
@@ -172,10 +179,16 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0):
         dt (float): Simulation time step in seconds
         traj_duration (float): Duration of the trajectory execution in seconds
         duration (float): Total simulation duration in seconds
+        scene_path (str | Path): 场景 YAML 路径（默认 DEFAULT_SCENE_PATH，即 iiwa14 对接场景） /
+            Scene YAML path (default: the built-in iiwa14 docking scene)
 
     Returns:
         Log: 记录了完整仿真时序数据的日志对象 / populated telemetry log
     """
+    # 加载场景：机械臂/工具/目标/物理参数与任务初始条件全部来自场景 YAML /
+    # Load scene: robot/tool/target/physics and task init conditions all come from the scene YAML
+    scene = load_scene(scene_path)
+
     # 参数集中管理：函数入参覆盖 DockingConfig 默认值 /
     # Centralized params: function args override DockingConfig defaults
     cfg = replace(DockingConfig(), dt=dt, traj_duration=traj_duration, duration=duration)
@@ -184,27 +197,26 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0):
 
     # 1) 构建 Pinocchio 模型/数据（用于雅可比/动力学计算；重力由 load_pin_model 置零） /
     # 1) Build Pinocchio model/data (for Jacobians and dynamics; gravity zeroed by load_pin_model)
-    pin_model = load_pin_model()
+    pin_model = load_pin_model(scene.robot.urdf)
     pin_data = pin_model.createData()
 
-    # 任务空间控制器：阻抗参数由 ImpedanceConfig 提供（默认值与历史实现一致） /
-    # Task-space controller: impedance params from ImpedanceConfig (defaults match historical values)
-    task_dynamics = TaskSpaceController(pin_model, cfg.dt, ImpedanceConfig())
+    # 任务空间控制器：阻抗参数由 ImpedanceConfig 提供（默认值与历史实现一致），
+    # 末端 frame 由场景给出 /
+    # Task-space controller: impedance params from ImpedanceConfig (defaults match
+    # historical values); ee_frame comes from the scene
+    task_dynamics = TaskSpaceController(pin_model, cfg.dt, ImpedanceConfig(), ee_frame=scene.robot.ee_frame)
     # 计算初始位姿的逆运动学，得到初始关节位置 /
     # Compute IK for initial pose to get initial joint configuration
-    init_pos = np.array([0.0, 0.5, 0.5])
-    init_ori = np.array([
-        [1,  0,  0],
-        [0, -1,  0],
-        [0,  0, -1]
-    ])
+    init_pos = scene.task.init_pos
+    init_ori = scene.task.init_ori
 
     init_pose = pin.SE3(init_ori, init_pos)
 
     # 使用合适的初始猜测值以帮助IK收敛 /
     # Use a good initial guess to help IK converge
-    initial_guess = np.array([0.0, 0.5, 0.0, -1.0, 0.0, 1.5, 0.0])
-    q_init, success = compute_ik(pin_model, pin_data, init_pose, initial_q=initial_guess, max_iters=5000)
+    initial_guess = scene.task.ik_guess
+    q_init, success = compute_ik(pin_model, pin_data, init_pose, initial_q=initial_guess, max_iters=5000,
+                                 ee_frame=scene.robot.ee_frame)
 
     if not success:
         print("Warning: IK did not converge perfectly, but continuing with best solution found.")
@@ -216,24 +228,26 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0):
     # Update frame placements
     pin.updateFramePlacements(pin_model, pin_data)
     #获取末端在世界坐标系的SE(3)位姿
-    H_init = pin_data.oMf[pin_model.getFrameId("cylinder_link")]
+    H_init = pin_data.oMf[pin_model.getFrameId(scene.robot.ee_frame)]
     print(f"Initial end-effector position: {H_init.translation}")
     print(f"Initial joint positions: {q_init}", success)
 
     # Set target position (relative motion): 目标 = 初始位置 + 对接行程 /
-    # Target = initial position + docking stroke (from config)
-    target_pos = init_pos + np.array(cfg.stroke)
+    # Target = initial position + docking stroke (from scene)
+    target_pos = init_pos + scene.task.stroke
     print(f"Target position: {target_pos}")
 
     # Initialize robot simulation with parameters
     # 2) 初始化 MuJoCo 机器人（写 tau、推进仿真、渲染/录帧） /
     # 2) Initialize MuJoCo robot (apply tau, step sim, render/record)
     muj_robot = MujRobot(
-        model_path=str(MUJOCO_MODEL),
+        model=scene.build_mjmodel(),
         render=render,
         record=record,
         dt=cfg.dt,
-        target_pos=target_pos
+        target_pos=target_pos,
+        eef_body=scene.eef_body,
+        camera=scene.camera,
     )
 
     # Create trajectory planner with specified duration
@@ -248,7 +262,8 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0):
         trajector_planner,
         log,
         cfg=cfg,
-        q_init=q_init
+        q_init=q_init,
+        scene=scene,
     )
 
     return log

@@ -1,11 +1,14 @@
 """模型资产与加载入口测试：文件存在性、DoF 数、默认零重力。"""
 import numpy as np
 
-from compliant_docking.models import MUJOCO_MODEL, PIN_URDF, load_pin_model
+from compliant_docking.models import PIN_URDF, load_pin_model
+from compliant_docking.scene import DEFAULT_SCENE_PATH, load_scene
 
 
 def test_model_files_exist():
-    assert MUJOCO_MODEL.is_file(), f"MuJoCo 模型缺失: {MUJOCO_MODEL}"
+    _SCENE = load_scene(DEFAULT_SCENE_PATH)
+    assert _SCENE.robot.mjcf.is_file(), f"MuJoCo 模型缺失: {_SCENE.robot.mjcf}"
+    assert _SCENE.robot.urdf.is_file(), f"Pinocchio URDF 缺失: {_SCENE.robot.urdf}"
     assert PIN_URDF.is_file(), f"Pinocchio URDF 缺失: {PIN_URDF}"
 
 

@@ -18,7 +18,8 @@ import pinocchio as pin
 _DEFAULT_INITIAL_Q = np.ones(7) * 0.3
 
 
-def compute_ik(pin_model, pin_data, target_pose, initial_q=_DEFAULT_INITIAL_Q, max_iters=3000, eps=1e-7):
+def compute_ik(pin_model, pin_data, target_pose, initial_q=_DEFAULT_INITIAL_Q, max_iters=3000, eps=1e-7,
+               *, ee_frame: str = "cylinder_link"):
     """
     使用 Pinocchio 进行逆运动学（阻尼最小二乘）：返回关节角与是否收敛 /
     Compute inverse kinematics (damped least squares) using Pinocchio
@@ -30,6 +31,10 @@ def compute_ik(pin_model, pin_data, target_pose, initial_q=_DEFAULT_INITIAL_Q, m
         initial_q: 初始关节角，None 则取 neutral / initial joint config
         max_iters: 最大迭代步数 / maximum iterations
         eps: 收敛阈值 / convergence threshold
+        ee_frame: 末端 frame 名（由模型/场景决定；默认值为组合 URDF 的
+            ``cylinder_link``，即 iiwa14 + 公头圆柱场景的历史名称） /
+            end-effector frame name (decided by model/scene; default is the
+            historical name of the iiwa14 combined URDF)
 
     返回 / Returns:
         q: 关节角解 / joint configuration
@@ -41,8 +46,8 @@ def compute_ik(pin_model, pin_data, target_pose, initial_q=_DEFAULT_INITIAL_Q, m
     else:
         q = initial_q.copy()
 
-    # Get end effector frame ID
-    ee_frame_id = pin_model.getFrameId("cylinder_link")
+    # Get end effector frame ID（frame 名由 ee_frame 参数决定，默认为历史名称）
+    ee_frame_id = pin_model.getFrameId(ee_frame)
 
     # Damping factor for numerical stability
     damp = 1e-8  # 阻尼因子，提高最小二乘求解的数值稳定性

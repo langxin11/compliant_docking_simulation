@@ -12,28 +12,28 @@ import pytest
 
 from compliant_docking.config import ImpedanceConfig
 from compliant_docking.control.task_space import TaskSpaceController
-from compliant_docking.models import MUJOCO_MODEL, load_pin_model
+from compliant_docking.models import load_pin_model
 from compliant_docking.planning.kinematics import compute_ik
 from compliant_docking.planning.trajectory import DecoupledQuinticTrajectory
+from compliant_docking.scene import DEFAULT_SCENE_PATH, load_scene
 from compliant_docking.simulation.mujoco_env import MujRobot
 
-INIT_POS = np.array([0.0, 0.5, 0.5])
-INIT_ORI = np.array([
-    [1,  0,  0],
-    [0, -1,  0],
-    [0,  0, -1],
-])
-IK_GUESS = np.array([0.0, 0.5, 0.0, -1.0, 0.0, 1.5, 0.0])
-STROKE = np.array([0.0, 0.0, -0.18])
+# 场景驱动：初始条件与模型资产来自默认场景（数值与重构前硬编码值完全一致）
+_SCENE = load_scene(DEFAULT_SCENE_PATH)
+INIT_POS = _SCENE.task.init_pos
+INIT_ORI = _SCENE.task.init_ori
+IK_GUESS = _SCENE.task.ik_guess
+STROKE = _SCENE.task.stroke
 
 
 @pytest.fixture(scope="module")
 def q_init():
     """标准初始位姿的 IK 解（模块内共享，避免重复求解）。"""
-    pin_model = load_pin_model()
+    pin_model = load_pin_model(_SCENE.robot.urdf)
     pin_data = pin_model.createData()
     init_pose = pin.SE3(INIT_ORI, INIT_POS)
-    q, success = compute_ik(pin_model, pin_data, init_pose, initial_q=IK_GUESS, max_iters=5000)
+    q, success = compute_ik(pin_model, pin_data, init_pose, initial_q=IK_GUESS, max_iters=5000,
+                            ee_frame=_SCENE.robot.ee_frame)
     assert success, "标准初始位姿的 IK 应收敛"
     return q
 
@@ -46,14 +46,14 @@ def run_docking_loop(duration: float, q_init: np.ndarray, dt: float = 0.001,
     → MujRobot → 循环：采样轨迹 → 阻抗控制 → ±max_torque 限幅 → step → 更新状态
     → f_ext = cur_ori @ (-sensor('force_sensor').data)
     """
-    pin_model = load_pin_model()
-    controller = TaskSpaceController(pin_model, dt, ImpedanceConfig())
+    pin_model = load_pin_model(_SCENE.robot.urdf)
+    controller = TaskSpaceController(pin_model, dt, ImpedanceConfig(), ee_frame=_SCENE.robot.ee_frame)
 
     target_pos = INIT_POS + STROKE
     traj = DecoupledQuinticTrajectory(INIT_POS, target_pos, traj_duration)
 
-    muj_robot = MujRobot(str(MUJOCO_MODEL), render=False, record=False,
-                         dt=dt, target_pos=target_pos)
+    muj_robot = MujRobot(model=_SCENE.build_mjmodel(), render=False, record=False,
+                         dt=dt, target_pos=target_pos, eef_body=_SCENE.eef_body)
     muj_robot.init_simulators(q_init)
 
     q = q_init

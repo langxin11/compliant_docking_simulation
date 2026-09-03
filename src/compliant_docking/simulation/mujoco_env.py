@@ -37,8 +37,8 @@ class MujRobot:
 
     Attributes
     ----------
-    model_path : str
-        模型 XML 路径（MuJoCo 将从该文件加载模型）。
+    model : mujoco.MjModel | str | os.PathLike
+        仿真模型：可直接传已组装的 MjModel，或传模型 XML 路径（按原逻辑加载）。
     dt : float
         仿真步长（会写入 model.opt.timestep）。
     render : bool
@@ -47,21 +47,35 @@ class MujRobot:
         是否通过 MuJoCo 的离屏渲染器采样帧（稍后可写成 MP4）。
     target_pos : array-like (3,)
         目标点的世界系坐标（写入一个 site 以可视化目标）。
+    eef_body / eef_marker_site / target_site / camera : str
+        末端 body、末端可视化 site、目标 site 与录帧相机的名称（默认值即
+        历史硬编码名称；场景驱动时应从场景解析结果传入）。
     """
 
-    def __init__(self, model_path: str,
+    def __init__(self, model: mujoco.MjModel | str | os.PathLike,
                  render: bool = True,
                  record: bool = True,
                  dt: float = 0.001,
-                 target_pos: np.ndarray | None = None):
+                 target_pos: np.ndarray | None = None,
+                 *,
+                 eef_body: str = "dock1",
+                 eef_marker_site: str = "eef_marker",
+                 target_site: str = "vis",
+                 camera: str = "track_cam"):
 
         # ---- 基本配置 ----
         # 保存构造参数到实例属性
         if target_pos is None:
             target_pos = np.zeros(3)
-        self.model_path = model_path
+        self.model_source = model
         self.dt = dt
         self.target_pos = np.asarray(target_pos, dtype=float)
+
+        # 名称参数（默认值 = 历史硬编码名称，保证旧调用行为不变）
+        self.eef_body_name = eef_body
+        self.eef_marker_site_name = eef_marker_site
+        self.target_site_name = target_site
+        self.camera_name = camera
 
         # ---- MuJoCo 结构初始化 ----
         # 加载模型与数据结构；若路径错误会抛异常
@@ -95,11 +109,15 @@ class MujRobot:
         这里会：
         1) 设置求解容差、步长等默认项；
         2) 解析后续会用到的一些元素 ID（末端执行器、可视化 site、摄像机等）。
-           名称 'dock1'、'eef_marker'、'vis'、'track_cam' 需要与 XML 中保持一致。
+           名称由构造参数 eef_body / eef_marker_site / target_site / camera 决定
+           （默认 'dock1'、'eef_marker'、'vis'、'track_cam'，需与模型中保持一致）。
         """
 
-        # 从 XML 文件加载模型（可能抛异常）
-        self.model = mujoco.MjModel.from_xml_path(self.model_path)
+        # 模型来源：直接用已组装的 MjModel；否则按 XML 路径加载（可能抛异常）
+        if isinstance(self.model_source, mujoco.MjModel):
+            self.model = self.model_source
+        else:
+            self.model = mujoco.MjModel.from_xml_path(str(self.model_source))
 
         # 设置一些求解器容差参数（较小的容差有助于控制稳定）
         self.model.opt.tolerance = 0.001
@@ -107,18 +125,18 @@ class MujRobot:
         # 为该模型创建运行时数据结构
         self.data = mujoco.MjData(self.model)
 
-        # 设置仿真步长（必要时覆盖 XML 内的值）
+        # 设置仿真步长（必要时覆盖模型内的值）
         self.model.opt.timestep = self.dt
 
         # 通过名称解析常用 ID。若名称在模型中不存在，会返回 -1（或在不同版本中抛异常）。
         # - eef_id: 末端执行器所在的 BODY 的 id
         # - eef_marker_id / vis_id: 用于可视化 ee/目标点的 SITE id
-        self.eef_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, "dock1")
-        self.eef_marker_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SITE, "eef_marker")
-        self.vis_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SITE, "vis")
+        self.eef_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_BODY, self.eef_body_name)
+        self.eef_marker_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SITE, self.eef_marker_site_name)
+        self.vis_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SITE, self.target_site_name)
 
-        # 录帧时所用摄像机的 id（必须在 XML 中定义）
-        self.camera_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_CAMERA, 'track_cam')
+        # 录帧时所用摄像机的 id（必须在模型中定义）
+        self.camera_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_CAMERA, self.camera_name)
 
     def init_simulators(self, init_qpos: np.ndarray):
         """重置仿真并设置初始姿态。
@@ -192,7 +210,7 @@ class MujRobot:
         Parameters
         ----------
         tau : ndarray, optional
-            机器人驱动力/力矩输入（此处假设前 7 维）。
+            机器人驱动力/力矩输入（维数由 model.nu 决定）。
 
         Returns
         -------
@@ -201,17 +219,17 @@ class MujRobot:
         """
 
         if tau is None:
-            tau = np.zeros(7)
+            tau = np.zeros(self.model.nv)
 
-        # 写入控制（安全地裁剪到 7 维；具体维数应与模型一致）
-        self.data.ctrl[:7] = tau
+        # 写入控制（裁剪到模型执行器维数 nu；nq==nv 时力矩执行器一一对应）
+        self.data.ctrl[:self.model.nu] = tau
 
         # 物理步进
         mujoco.mj_step(self.model, self.data)
 
         # 输出常用状态
-        qpos = self.data.qpos[:7]
-        qvel = self.data.qvel[:7]
+        qpos = self.data.qpos[:self.model.nq]
+        qvel = self.data.qvel[:self.model.nq]
 
         # 末端执行器位置（基于 body/site 的数据，依模型而定）
         eef_pos = self.data.xpos[self.eef_id]
@@ -234,8 +252,8 @@ class MujRobot:
                     )
                     print(f"Frames collected so far: {len(self.frames)}")
                 try:
-                    # 更新渲染场景；指定摄像机名与可视化选项
-                    self.renderer.update_scene(self.data, camera='track_cam', scene_option=self.renderer_options)
+                    # 更新渲染场景；指定摄像机与可视化选项
+                    self.renderer.update_scene(self.data, camera=self.camera_name, scene_option=self.renderer_options)
                     frame = self.renderer.render()
                     # 渲染返回 float32 [0..1]；某些场景可能需要后续转 uint8
                     self.frames.append(frame)
@@ -264,10 +282,10 @@ class MujRobot:
         return ee_pos, ee_vel
 
     def get_joint_state(self):
-        """便捷地返回前 7 个关节的位置与速度。"""
+        """便捷地返回全部关节的位置与速度（维数由 model.nq 决定）。"""
 
-        qpos = self.data.qpos[:7]
-        qvel = self.data.qvel[:7]
+        qpos = self.data.qpos[:self.model.nq]
+        qvel = self.data.qvel[:self.model.nq]
         return qpos, qvel
 
     def to_mp4(self, filepath: str):

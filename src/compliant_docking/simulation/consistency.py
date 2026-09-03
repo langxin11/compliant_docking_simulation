@@ -276,8 +276,8 @@ class RobotController:
         steps = int(duration / dt)
         self.reset_logs()
 
-        self.data.qpos[:7] = np.zeros(self.nq)
-        self.data.qvel[:7] = np.zeros(self.nq)
+        self.data.qpos[:self.nq] = np.zeros(self.nq)
+        self.data.qvel[:self.nq] = np.zeros(self.nq)
 
 
         viewer = None
@@ -291,14 +291,14 @@ class RobotController:
             q_d, dq_d, ddq_d = self.generate_trajectory(t, trajectory_type)
 
             # 获取当前状态
-            q = self.data.qpos[:7]
-            dq = self.data.qvel[:7]
+            q = self.data.qpos[:self.nq]
+            dq = self.data.qvel[:self.nq]
 
             # 计算控制输出
             tau = self.compute_control(q_d, dq_d, ddq_d, q, dq)
 
             # 应用控制
-            self.data.ctrl[:7] = tau
+            self.data.ctrl[:self.nq] = tau
 
             # 记录数据
             self.time_log.append(t)

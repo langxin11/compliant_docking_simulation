@@ -5,12 +5,15 @@
 
 用法示例 / Examples:
     docking --quick                 # 2 秒快速冒烟（无渲染、无录帧）
+    docking --scene scenes/iiwa14_docking.yaml --quick
     docking --duration 18 --render  # 完整时长 + 交互式渲染
 """
 import argparse
 import os
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
+
+from compliant_docking.scene import DEFAULT_SCENE_PATH
 
 
 def _load_run_docking():
@@ -33,6 +36,8 @@ def build_parser() -> argparse.ArgumentParser:
                         help="仿真步长（秒），默认 0.001")
     parser.add_argument("--traj-duration", type=float, default=15.0,
                         help="对接轨迹时长（秒），默认 15.0")
+    parser.add_argument("--scene", default=str(DEFAULT_SCENE_PATH),
+                        help="场景 YAML 路径（默认 iiwa14 对接场景）")
     parser.add_argument("--render", action=argparse.BooleanOptionalAction, default=False,
                         help="是否交互式渲染（默认 --no-render）")
     parser.add_argument("--record", action=argparse.BooleanOptionalAction, default=False,
@@ -59,6 +64,7 @@ def main(argv: list[str] | None = None) -> int:
         dt=args.dt,
         traj_duration=args.traj_duration,
         duration=args.duration,
+        scene_path=args.scene,
     )
 
     total_steps = len(log.t_list)

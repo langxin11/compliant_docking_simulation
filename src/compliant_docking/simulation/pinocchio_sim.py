@@ -17,13 +17,15 @@ import pinocchio as pin
 
 
 class RobotSimulator:
-    def __init__(self, robot_model: pin.Model, dt: float):
+    def __init__(self, robot_model: pin.Model, dt: float,
+                 ee_frame: str = "cylinder_link"):
         # 重力置零由 compliant_docking.models.load_pin_model 负责（加载时统一处理）/
         # Gravity zeroing is owned by compliant_docking.models.load_pin_model
         self.model = robot_model
         self.data = self.model.createData()
         self.dt = dt
-        self.end_effector_id = self.model.getFrameId("cylinder_link")
+        # 末端 frame 名由模型/场景决定；默认值为组合 URDF 的历史名称
+        self.end_effector_id = self.model.getFrameId(ee_frame)
 
     def compute_acceleration(self, q: np.ndarray, v: np.ndarray, tau: np.ndarray) -> np.ndarray:
         pin.computeAllTerms(self.model, self.data, q, v)

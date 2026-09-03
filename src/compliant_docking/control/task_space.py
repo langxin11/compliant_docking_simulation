@@ -24,7 +24,9 @@ class TaskSpaceController:
     任务空间动力学控制器（平动+姿态阻抗，动力学一致映射，零空间阻尼）/
     Task-space dynamics controller (translation + rotation impedance; dynamics-consistent mapping; null damping)
     """
-    def __init__(self, robot_model: pin.Model, dt: float, impedance: ImpedanceConfig | None = None):
+    def __init__(self, robot_model: pin.Model, dt: float,
+                 impedance: ImpedanceConfig | None = None,
+                 ee_frame: str = "cylinder_link"):
         """
         初始化控制器：设定 Pinocchio 模型、步长与阻抗参数 /
         Initialize controller: set Pinocchio model, time step and impedance params
@@ -33,9 +35,16 @@ class TaskSpaceController:
             robot_model: Pinocchio 模型 / Pinocchio model
             dt: 控制步长 [s] / control time step
             impedance: 阻抗参数（None 时取 ImpedanceConfig 默认值） / impedance params
+            ee_frame: 末端 frame 名（由模型/场景决定；默认值为组合 URDF 的
+                ``cylinder_link``，即 iiwa14 + 公头圆柱场景的历史名称） /
+                end-effector frame name (decided by model/scene; default is the
+                historical name of the iiwa14 combined URDF)
 
         注意：重力置零由 compliant_docking.models.load_pin_model 负责（加载时统一处理）/
         Note: gravity zeroing is owned by compliant_docking.models.load_pin_model
+
+        注意：末端 frame 由 ee_frame 决定，方法内所有矩阵/向量维数均按
+        ``model.nq`` 泛化（iiwa14 nq=7 时与历史实现数值逐位一致）。
         """
         self.model = robot_model
         self.data = self.model.createData()
@@ -45,10 +54,13 @@ class TaskSpaceController:
         self.Kp = np.diag([0.] * 3)
         self.Kd = np.diag([0.] * 3)
 
+        # 末端 frame id（由 ee_frame 参数决定，方法内统一复用）
+        self.end_effector_id = self.model.getFrameId(ee_frame)
+
+        # 以下限位/速度上限数组为 iiwa14 专用经验值（仅 _apply_limits 使用，主回路不调用）
         self.q_min = np.array([-2.96706, -2.0944, -2.96706, -2.0944, -2.96706, -2.0944, -3.05433])
         self.q_max = np.array([2.96706, 2.0944, 2.96706, 2.0944, 2.96706, 2.0944, 3.05433])
         self.v_max = np.array([1.4835, 1.4835, 1.7453, 1.3090, 2.2689, 2.3562, 2.3562])
-        self.end_effector_id = self.model.getFrameId("cylinder_link")
 
         # 期望初始姿态（固定朝向），用于 log3 误差
         self.initial_orientation = np.array([
@@ -118,15 +130,14 @@ class TaskSpaceController:
         vel_rot_err = -vel_rot_cur
 
         # 2) 计算末端雅可比（世界系），拆分为平动与旋转部分
-        end_effector_id = self.model.getFrameId("cylinder_link")
-        J = pin.computeFrameJacobian(self.model, self.data, q, end_effector_id, pin.ReferenceFrame.WORLD)
+        J = pin.computeFrameJacobian(self.model, self.data, q, self.end_effector_id, pin.ReferenceFrame.WORLD)
         J_pos = J[:3, :]
         J_rot = J[3:, :]
 
         # 3) 机器人动力学项：广义质量矩阵 M 及其伪逆，权重矩阵 W（此处取单位阵）
         M = pin.crba(self.model, self.data, q)  # 质量矩阵
         M_inv = pinv(M)
-        W = np.eye(7)
+        W = np.eye(self.model.nq)
 
         # 4) 雅可比的时间变化项 J_dot（用于前馈/补偿项）
         J_dot = pin.getFrameJacobianTimeVariation(
@@ -135,8 +146,8 @@ class TaskSpaceController:
         # 5) 科氏/离心项：C(q, v)·v（转为一维向量表示广义力）
         pin.computeCoriolisMatrix(self.model, self.data, q, v)
         C = self.data.C
-        C = C @ v.reshape(7, 1)  # 广义科氏/离心项乘以速度，得到广义力形式
-        C = C.reshape(7)
+        C = C @ v.reshape(-1, 1)  # 广义科氏/离心项乘以速度，得到广义力形式
+        C = C.reshape(self.model.nq)
 
         # 6) 平动阻抗参数与外力（参数由 ImpedanceConfig 集中管理） /
         # 6) Translational impedance params and external force (owned by ImpedanceConfig)
@@ -169,10 +180,10 @@ class TaskSpaceController:
 
         # 11) 零空间阻尼：抑制未约束自由度的速度振荡（阻尼由 ImpedanceConfig 提供） /
         # 11) Null-space damping (coefficient from ImpedanceConfig)
-        D_null = imp.null_damping * np.eye(7)
+        D_null = imp.null_damping * np.eye(self.model.nq)
         v_null = v
-        N = (np.eye(7) - lambda_ @ J_full @ M_inv)
-        null_term2 = -N @ D_null @ v_null.reshape(7)
+        N = (np.eye(self.model.nq) - lambda_ @ J_full @ M_inv)
+        null_term2 = -N @ D_null @ v_null.reshape(self.model.nq)
 
         # 12) 合成关节力矩：主任务项（含前馈与科氏/离心补偿）+ 零空间阻尼
         tau = lambda_ @ (u - J_dot @ v + J_full @ M_inv @ (C)) + null_term2
@@ -188,8 +199,7 @@ class TaskSpaceController:
 
         vel_rot_err = -vel_rot_cur
 
-        end_effector_id = self.model.getFrameId("cylinder_link")
-        J = pin.computeFrameJacobian(self.model, self.data, q, end_effector_id, pin.ReferenceFrame.WORLD)
+        J = pin.computeFrameJacobian(self.model, self.data, q, self.end_effector_id, pin.ReferenceFrame.WORLD)
 
         M = pin.crba(self.model, self.data, q)
 
@@ -198,8 +208,8 @@ class TaskSpaceController:
 
         pin.computeCoriolisMatrix(self.model, self.data, q, v)
         C = self.data.C
-        C = C @ v.reshape(7, 1)
-        C = C.reshape(7)
+        C = C @ v.reshape(-1, 1)
+        C = C.reshape(self.model.nq)
 
         force_ext = np.array(force_ext).reshape(3)
         m = 10
@@ -231,8 +241,7 @@ class TaskSpaceController:
 
         vel_rot_err = -vel_rot_cur
 
-        end_effector_id = self.model.getFrameId("cylinder_link")
-        J = pin.computeFrameJacobian(self.model, self.data, q, end_effector_id, pin.ReferenceFrame.WORLD)
+        J = pin.computeFrameJacobian(self.model, self.data, q, self.end_effector_id, pin.ReferenceFrame.WORLD)
         J_pos = J[:3, :]
         J_rot = J[3:, :]
 
@@ -244,8 +253,8 @@ class TaskSpaceController:
 
         pin.computeCoriolisMatrix(self.model, self.data, q, v)
         C = self.data.C
-        C = C @ v.reshape(7, 1)
-        C = C.reshape(7)
+        C = C @ v.reshape(-1, 1)
+        C = C.reshape(self.model.nq)
 
         u_pos = acc_des + 20 * (vel_des - current_vel) + 100 * (pos_des - current_pos)
         u_rot = 20 * (vel_rot_err) + 100 * (ori_err)
@@ -255,10 +264,10 @@ class TaskSpaceController:
         J_full = np.vstack([J_pos, J_rot])
         lambda_ = M @ M_inv.T @ J_full.T @ pinv(J_full @ M_inv @ M @ M_inv.T @ J_full.T)
 
-        D_null = 1.2 * np.eye(7)
+        D_null = 1.2 * np.eye(self.model.nq)
         v_null = v
-        N = (np.eye(7) - lambda_ @ J_full @ M_inv)
-        null_term2 = -N @ D_null @ v_null.reshape(7)
+        N = (np.eye(self.model.nq) - lambda_ @ J_full @ M_inv)
+        null_term2 = -N @ D_null @ v_null.reshape(self.model.nq)
 
         tau = lambda_ @ (u - J_dot @ v + J_full @ M_inv @ (C)) + null_term2
 
@@ -274,8 +283,7 @@ class TaskSpaceController:
         """
         pos_cur, vel_cur, _ = self.get_task_space_state(q, v)
 
-        end_effector_id = self.model.getFrameId("cylinder_link")
-        J = pin.computeFrameJacobian(self.model, self.data, q, end_effector_id, pin.ReferenceFrame.WORLD)
+        J = pin.computeFrameJacobian(self.model, self.data, q, self.end_effector_id, pin.ReferenceFrame.WORLD)
         J_pos = J[:3, :]
 
         M = pin.crba(self.model, self.data, q)
@@ -290,18 +298,18 @@ class TaskSpaceController:
 
         pin.computeCoriolisMatrix(self.model, self.data, q, v)
         C = self.data.C
-        C = C @ v.reshape(7, 1)
-        C = C.reshape(7)
+        C = C @ v.reshape(-1, 1)
+        C = C.reshape(self.model.nq)
 
         u = acc_des + 20 * (vel_des - current_vel) + 100 * (pos_des - current_pos)
 
         # 保留调用以维持对 self.data 的任何副作用（与原实现一致）
         self.manipulability_gradient(q)
 
-        D_null = 1.2 * np.eye(7)
+        D_null = 1.2 * np.eye(self.model.nq)
         v_null = v
-        N = (np.eye(7) - lambda_ @ J_pos @ M_inv)
-        null_term2 = -N @ D_null @ v_null.reshape(7)
+        N = (np.eye(self.model.nq) - lambda_ @ J_pos @ M_inv)
+        null_term2 = -N @ D_null @ v_null.reshape(self.model.nq)
 
         tau = lambda_ @ (u - J_dot_full @ v + J_pos @ M_inv @ (C)) + null_term2
 

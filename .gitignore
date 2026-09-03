@@ -23,3 +23,6 @@ runs/
 .ruff_cache/
 .pytest_cache/
 .mypy_cache/
+
+# --- MuJoCo 运行副产物 ---
+MUJOCO_LOG.TXT
