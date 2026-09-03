@@ -151,6 +151,10 @@ uv run docking --scene scenes/fr3_docking.yaml --quick      # FR3 对接
 
 新增场景：复制一份现有 YAML，替换 `robot` 段的资产路径与 `task` 段的初始条件（`ik_guess` 换成新机械臂的 home 位形）即可；公头/母头片段可直接复用 `assets/interfaces/` 下的 `male_cone.xml` / `female_socket.xml`。
 
+## 绘图风格
+
+项目绘图统一走 [SciencePlots](https://github.com/garrettj403/SciencePlots) 的 `["science", "ieee", "no-latex"]` 风格（IEEE 单栏、不依赖 LaTeX），并叠加 Noto CJK 中文字体回退与 `axes.unicode_minus=False`（规避中文字体缺 U+2212 负号的问题）。入口：`compliant_docking.plotting.apply_style()` 与 `plot_docking_log(log, out_dir, scene_name=...)`，每张图同时输出 PNG + PDF。运行 `docking --scene ...` 完成后图件落在 `figure/`，文件名带场景前缀。
+
 ## 仓库结构
 
 ```
