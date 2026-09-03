@@ -1,0 +1,17 @@
+<mujoco model="male_cone">
+  <compiler angle="degree" meshdir="../iiwa14/assets"/>
+  <asset>
+    <mesh name="male_cone_mesh" file="dock_1_17_new.STL"/>
+    <material name="male_cone_mat" rgba="0.7 0.7 0.7 1"/>
+  </asset>
+  <worldbody>
+    <body name="dock">
+      <site pos="0 0 0" name="sensor_site"/>
+      <body name="rev" euler="0 0 40">
+        <inertial mass="1" pos="0 0 0" diaginertia="0.1 0.1 0.1"/>
+        <geom name="dock_geom" type="sdf" mesh="male_cone_mesh" material="male_cone_mat"/>
+        <geom name="dock_visual" type="mesh" mesh="male_cone_mesh" material="male_cone_mat" contype="0" conaffinity="0" group="2"/>
+      </body>
+    </body>
+  </worldbody>
+</mujoco>

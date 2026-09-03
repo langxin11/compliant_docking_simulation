@@ -1,0 +1,16 @@
+<mujoco model="female_socket">
+  <compiler angle="degree" meshdir="../iiwa14/assets"/>
+  <asset>
+    <mesh name="female_socket_mesh" file="dock_1_17_new.STL"/>
+    <material name="female_socket_mat" rgba="0.7 0.7 0.7 1"/>
+  </asset>
+  <worldbody>
+    <body name="dock">
+      <body name="rev">
+        <inertial mass="1" pos="0 0 0" diaginertia="0.1 0.1 0.1"/>
+        <geom name="dock_geom" type="sdf" mesh="female_socket_mesh" material="female_socket_mat"/>
+        <geom name="dock_visual" type="mesh" mesh="female_socket_mesh" material="female_socket_mat" contype="0" conaffinity="0" group="2"/>
+      </body>
+    </body>
+  </worldbody>
+</mujoco>

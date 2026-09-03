@@ -15,6 +15,7 @@ dependencies = [
     "matplotlib",
     "imageio",
     "imageio-ffmpeg",
+    "pyyaml>=6.0.3",
 ]
 
 [dependency-groups]

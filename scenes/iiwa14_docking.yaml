@@ -1,0 +1,35 @@
+# 对接场景：iiwa14 + 公头锥 + 母头锥（几何取自历史 dock 模型，组装结果与原
+# iiwa14_dock_updated.xml 物理逐位等价，tests/test_scene.py 有等价性测试）。
+scene:
+  name: iiwa14_docking
+
+robot:
+  mjcf: assets/iiwa14/iiwa14_arm.xml      # 纯机械臂（不含工具/目标）
+  urdf: assets/iiwa14/urdf/iiwa14_dock.urdf  # Pinocchio 用：臂+公头圆柱的组合 URDF
+  ee_site: attachment_site                # MJCF 挂载锚点（法兰 site）
+  ee_frame: cylinder_link                 # Pinocchio 末端 frame 名
+
+tool:                                     # 公头：挂载到 robot.ee_site
+  mjcf: assets/interfaces/male_cone.xml
+  prefix: tool_                           # attach 后所有名称加此前缀
+  pose: {pos: [0.0, 0.0, 0.015], quat: [1.0, 0.0, 0.0, 0.0]}  # 相对 ee_site
+
+target:                                   # 母头：世界系固定
+  mjcf: assets/interfaces/female_socket.xml
+  prefix: target_
+  pos: [0.0, 0.5, 0.35]
+  quat: [1.0, 0.0, 0.0, 0.0]
+
+physics:                                  # 与历史 XML option 一致
+  timestep: 0.001
+  gravity: [0.0, 0.0, 0.0]
+  integrator: implicitfast
+  cone: elliptic
+  sdf_iterations: 10
+  sdf_initpoints: 40
+
+task:                                     # 对接任务初始条件（历史硬编码值收编）
+  init_pos: [0.0, 0.5, 0.5]
+  init_ori: [[1, 0, 0], [0, -1, 0], [0, 0, -1]]
+  ik_guess: [0.0, 0.5, 0.0, -1.0, 0.0, 1.5, 0.0]
+  stroke: [0.0, 0.0, -0.18]
