@@ -8,7 +8,7 @@ from compliant_docking.scene import DEFAULT_SCENE_PATH, load_scene
 def test_model_files_exist():
     _SCENE = load_scene(DEFAULT_SCENE_PATH)
     assert _SCENE.robot.mjcf.is_file(), f"MuJoCo 模型缺失: {_SCENE.robot.mjcf}"
-    assert _SCENE.robot.urdf.is_file(), f"Pinocchio URDF 缺失: {_SCENE.robot.urdf}"
+    assert _SCENE.robot.pin_model.is_file(), f"Pinocchio 模型缺失: {_SCENE.robot.pin_model}"
     assert PIN_URDF.is_file(), f"Pinocchio URDF 缺失: {PIN_URDF}"
 
 

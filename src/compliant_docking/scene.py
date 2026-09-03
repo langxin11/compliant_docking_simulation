@@ -51,10 +51,14 @@ def _enum_value(table: dict[str, int], kind: str, value: str) -> int:
 
 @dataclass(frozen=True)
 class RobotSpec:
-    """机械臂描述：MJCF（组装基底）+ URDF（Pinocchio）+ 末端锚点/frame 名。"""
+    """机械臂描述：MJCF（组装基底）+ Pinocchio 模型 + 末端锚点/frame 名。
+
+    pin_model 是 Pinocchio 侧的模型路径，可以是 ``.urdf``（URDF 解析）或
+    ``.xml``（MJCF，经 buildModelFromMJCF 直读），load_pin_model 按后缀分发。
+    """
 
     mjcf: Path
-    urdf: Path
+    pin_model: Path
     ee_site: str
     ee_frame: str
 
@@ -246,7 +250,7 @@ def load_scene(path: str | Path) -> Scene:
         name=str(scene["name"]),
         robot=RobotSpec(
             mjcf=asset(robot["mjcf"]),
-            urdf=asset(robot["urdf"]),
+            pin_model=asset(robot["pin_model"]),
             ee_site=str(robot["ee_site"]),
             ee_frame=str(robot["ee_frame"]),
         ),

@@ -197,7 +197,7 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
 
     # 1) 构建 Pinocchio 模型/数据（用于雅可比/动力学计算；重力由 load_pin_model 置零） /
     # 1) Build Pinocchio model/data (for Jacobians and dynamics; gravity zeroed by load_pin_model)
-    pin_model = load_pin_model(scene.robot.urdf)
+    pin_model = load_pin_model(scene.robot.pin_model)
     pin_data = pin_model.createData()
 
     # 任务空间控制器：阻抗参数由 ImpedanceConfig 提供（默认值与历史实现一致），

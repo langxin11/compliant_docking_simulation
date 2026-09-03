@@ -29,7 +29,7 @@ STROKE = _SCENE.task.stroke
 @pytest.fixture(scope="module")
 def q_init():
     """标准初始位姿的 IK 解（模块内共享，避免重复求解）。"""
-    pin_model = load_pin_model(_SCENE.robot.urdf)
+    pin_model = load_pin_model(_SCENE.robot.pin_model)
     pin_data = pin_model.createData()
     init_pose = pin.SE3(INIT_ORI, INIT_POS)
     q, success = compute_ik(pin_model, pin_data, init_pose, initial_q=IK_GUESS, max_iters=5000,
@@ -46,7 +46,7 @@ def run_docking_loop(duration: float, q_init: np.ndarray, dt: float = 0.001,
     → MujRobot → 循环：采样轨迹 → 阻抗控制 → ±max_torque 限幅 → step → 更新状态
     → f_ext = cur_ori @ (-sensor('force_sensor').data)
     """
-    pin_model = load_pin_model(_SCENE.robot.urdf)
+    pin_model = load_pin_model(_SCENE.robot.pin_model)
     controller = TaskSpaceController(pin_model, dt, ImpedanceConfig(), ee_frame=_SCENE.robot.ee_frame)
 
     target_pos = INIT_POS + STROKE

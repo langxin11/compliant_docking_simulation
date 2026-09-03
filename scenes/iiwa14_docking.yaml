@@ -5,7 +5,7 @@ scene:
 
 robot:
   mjcf: assets/iiwa14/iiwa14_arm.xml      # 纯机械臂（不含工具/目标）
-  urdf: assets/iiwa14/iiwa14_dock.urdf  # Pinocchio 用：臂+公头圆柱的组合 URDF（与 models.PIN_URDF 同一文件）
+  pin_model: assets/iiwa14/iiwa14_dock.urdf  # Pinocchio 用：臂+公头圆柱的组合 URDF（与 models.PIN_URDF 同一文件）
   ee_site: attachment_site                # MJCF 挂载锚点（法兰 site）
   ee_frame: cylinder_link                 # Pinocchio 末端 frame 名
 
