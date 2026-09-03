@@ -13,11 +13,15 @@ import mujoco
 import numpy as np
 import pytest
 
-from compliant_docking.models import ASSETS_DIR
+from compliant_docking.models import ASSETS_DIR, load_pin_model
 from compliant_docking.scene import REPO_ROOT, load_scene
 
 SCENE_YAML = REPO_ROOT / "scenes" / "iiwa14_docking.yaml"
 LEGACY_XML = ASSETS_DIR / "iiwa14_dock_updated.xml"
+FR3_SCENE_YAML = REPO_ROOT / "scenes" / "fr3_docking.yaml"
+
+# FR3 home 位形（fr3_docking.yaml 的 ik_guess，IK 初猜锚点）
+FR3_HOME = np.array([0.0, 0.0, 0.0, -1.57079, 0.0, 1.57079, -0.7853])
 
 # legacy XML 的 home 关键帧 qpos（等价性检查的初始状态）
 HOME_QPOS = np.array(
@@ -160,3 +164,41 @@ def test_rollout_120_steps_equivalent(pair):
             legacy_data.qpos, assembled_data.qpos, atol=1e-12, rtol=0,
             err_msg=f"rollout 第 {step} 步 qpos 与 legacy 不一致",
         )
+
+
+# ---- FR3 场景（Menagerie MJCF 变体，Pinocchio 直读 MJCF） ----
+
+@pytest.fixture(scope="module")
+def fr3_scene():
+    """FR3 对接场景（模块内共享）。"""
+    return load_scene(FR3_SCENE_YAML)
+
+
+def test_load_fr3_scene(fr3_scene):
+    """FR3 场景 YAML 加载：pin_model 为 MJCF、末端锚点与 home 初猜正确。"""
+    assert fr3_scene.name == "fr3_docking"
+    assert fr3_scene.robot.pin_model.suffix == ".xml"
+    assert fr3_scene.robot.ee_site == "attachment_site"
+    assert fr3_scene.robot.ee_frame == "attachment_site"
+    np.testing.assert_array_equal(fr3_scene.task.ik_guess, FR3_HOME)
+
+
+def test_build_fr3_mjmodel(fr3_scene):
+    """FR3 组装结构：7 自由度、公/母头对象存在、总质量 ≈ 20.315 kg。"""
+    m = fr3_scene.build_mjmodel()
+    assert m.nq == 7 and m.nv == 7 and m.nu == 7
+    assert m.body_mass.sum() == pytest.approx(20.315485, abs=1e-3)
+    for kind, name in [
+        (mujoco.mjtObj.mjOBJ_BODY, "tool_dock"),
+        (mujoco.mjtObj.mjOBJ_SITE, "tool_sensor_site"),
+        (mujoco.mjtObj.mjOBJ_BODY, "target_dock"),
+    ]:
+        assert mujoco.mj_name2id(m, kind, name) >= 0, f"缺少对象: {name}"
+
+
+def test_fr3_pin_model_from_mjcf(fr3_scene):
+    """Pinocchio 经 MJCF 直读 FR3：7 自由度、零重力、末端 frame 有效。"""
+    model = load_pin_model(fr3_scene.robot.pin_model)
+    assert model.nq == 7
+    np.testing.assert_array_equal(model.gravity.linear, np.zeros(3))
+    assert model.getFrameId("attachment_site") < model.nframes

@@ -1,0 +1,38 @@
+# 对接场景：FR3 + 公头锥 + 母头锥。机械臂资产由 mujoco_menagerie franka_fr3
+# 派生（assets/fr3/fr3_arm.xml：力矩执行器变体，Pinocchio 经 MJCF 直读）。
+# 注意：阻抗增益（ImpedanceConfig）沿用 iiwa14 调参，FR3 关节 armature/
+# frictionloss 未补偿，跟踪滞后明显（接触靠阻抗自然建立，约 50N 量级）；
+# 若需精细对接行为，应针对 FR3 重新整定增益（后续工作）。
+scene:
+  name: fr3_docking
+
+robot:
+  mjcf: assets/fr3/fr3_arm.xml
+  pin_model: assets/fr3/fr3_arm.xml      # MJCF 直读（load_pin_model 按后缀分发）
+  ee_site: attachment_site
+  ee_frame: attachment_site
+
+tool:
+  mjcf: assets/interfaces/male_cone.xml
+  prefix: tool_
+  pose: {pos: [0.0, 0.0, 0.015], quat: [1.0, 0.0, 0.0, 0.0]}
+
+target:
+  mjcf: assets/interfaces/female_socket.xml
+  prefix: target_
+  pos: [0.0, 0.5, 0.35]
+  quat: [1.0, 0.0, 0.0, 0.0]
+
+physics:
+  timestep: 0.001
+  gravity: [0.0, 0.0, 0.0]
+  integrator: implicitfast
+  cone: elliptic
+  sdf_iterations: 10
+  sdf_initpoints: 40
+
+task:
+  init_pos: [0.0, 0.5, 0.5]
+  init_ori: [[1, 0, 0], [0, -1, 0], [0, 0, -1]]
+  ik_guess: [0.0, 0.0, 0.0, -1.57079, 0.0, 1.57079, -0.7853]  # FR3 home 位形
+  stroke: [0.0, 0.0, -0.18]

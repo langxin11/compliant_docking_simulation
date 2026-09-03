@@ -128,6 +128,24 @@ sudo apt update && sudo apt install libegl1 libegl-dev
 export MUJOCO_GL=egl
 ```
 
+## 场景配置
+
+`scenes/*.yaml` 用一份 YAML 描述完整对接场景：机械臂 + 公头工具 + 母头目标 + 物理参数 + 任务初始条件。三段 MJCF 片段在运行时经 MuJoCo **MjSpec attach** 组装为单一模型（`compliant_docking.scene.load_scene` → `Scene.build_mjmodel`），无需手工拼接 XML。
+
+通过 CLI 的 `--scene` 参数选择场景：
+
+```bash
+uv run docking --scene scenes/iiwa14_docking.yaml --quick   # iiwa14 对接（默认场景）
+uv run docking --scene scenes/fr3_docking.yaml --quick      # FR3 对接
+```
+
+可选机械臂：
+
+- **KUKA iiwa14**（URDF）：MuJoCo 用 `assets/iiwa14/iiwa14_arm.xml`，Pinocchio 读 URDF `iiwa14_dock.urdf`；
+- **Franka FR3**（mujoco_menagerie 派生的力矩执行器 MJCF 变体）：MuJoCo 与 Pinocchio 均直读 `assets/fr3/fr3_arm.xml`——`load_pin_model` 按文件后缀分发解析器（`.urdf` 走 URDF，`.xml` 走 `buildModelFromMJCF`）。
+
+新增场景：复制一份现有 YAML，替换 `robot` 段的资产路径与 `task` 段的初始条件（`ik_guess` 换成新机械臂的 home 位形）即可；公头/母头片段可直接复用 `assets/interfaces/` 下的 `male_cone.xml` / `female_socket.xml`。
+
 ## 仓库结构
 
 ```
