@@ -16,6 +16,7 @@ dependencies = [
     "imageio",
     "imageio-ffmpeg",
     "pyyaml>=6.0.3",
+    "proxsuite>=0.7.3",
 ]
 
 [dependency-groups]

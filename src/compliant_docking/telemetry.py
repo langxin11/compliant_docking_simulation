@@ -47,6 +47,10 @@ class Log:
         self.force_externals = []
         self.torque_externals = []
 
+        # 末端姿态误差向量（世界系，log(R_d R^T)）；仅在调用方提供时记录，
+        # 列表长度可能短于其他列表（metrics 侧按非空判断）
+        self.orientation_errors = []
+
 
 
     def store_data(self, t: float, q: np.ndarray,
@@ -54,7 +58,8 @@ class Log:
                    vel_actual: np.ndarray, error: float,
                    pos_desired: np.ndarray, vel_desired: np.ndarray,
                    acc_desired: np.ndarray, tau: np.ndarray,
-                   external_force: np.ndarray, external_torque: np.ndarray):
+                   external_force: np.ndarray, external_torque: np.ndarray,
+                   *, orientation_error: np.ndarray | None = None):
         """
         存储数据（单步）：时间、关节状态、末端状态、期望轨迹、力矩及外力
         Args:
@@ -66,6 +71,7 @@ class Log:
             pos_desired/vel_desired/acc_desired: 期望末端 pos/vel/acc
             tau: 控制器计算的关节力矩
             external_force/external_torque: 传感器外力/力矩（控制参考系）
+            orientation_error: 末端姿态误差向量（世界系，可选；None 时不记录）
         """
 
         self.t_list.append(t)
@@ -85,6 +91,9 @@ class Log:
         self.tau_hist.append(tau)
         self.force_externals.append(external_force)
         self.torque_externals.append(external_torque)
+
+        if orientation_error is not None:
+            self.orientation_errors.append(orientation_error)
 
 
 

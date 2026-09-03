@@ -31,6 +31,7 @@ import pinocchio as pin
 
 from compliant_docking.config import DockingConfig, ImpedanceConfig
 from compliant_docking.control.task_space import TaskSpaceController
+from compliant_docking.metrics import compute_metrics, format_metrics
 from compliant_docking.models import load_pin_model
 from compliant_docking.planning.kinematics import compute_ik
 from compliant_docking.planning.trajectory import DecoupledQuinticTrajectory
@@ -45,7 +46,8 @@ def run_simulation(muj_robot:MujRobot,
                    log:Log,
                    cfg:DockingConfig,
                    q_init:np.ndarray,
-                   scene:Scene | None = None):
+                   scene:Scene | None = None,
+                   r_des:np.ndarray | None = None):
     """
     执行主仿真循环：读取轨迹 → 计算任务空间阻抗控制力矩 → MuJoCo 步进 → 记录/绘图 /
     Run the main simulation loop: sample trajectory → compute task-space impedance torque → MuJoCo step → log/plot
@@ -59,6 +61,11 @@ def run_simulation(muj_robot:MujRobot,
     - q_init: 初始关节位置（由 IK 求得） / Initial joint configuration (from IK)
     - scene: 场景配置（仅用于视频文件名取 scene.name；未传时回落为历史名 docking_update） /
       Scene config (only used for the video filename via scene.name; falls back to "docking_update" if omitted)
+    - r_des: 期望末端姿态旋转矩阵（世界系，通常为 scene.task.init_ori；可选）。提供时
+      每步记录世界系姿态误差向量 log(R_d R^T) 供 metrics 姿态指标使用 /
+      Desired EE orientation (world frame, typically scene.task.init_ori; optional).
+      When given, the per-step world-frame orientation error log(R_d R^T) is logged
+      for the orientation metrics.
 
     返回 / Returns:
     - log: 记录了完整时序数据的日志对象 / The populated Log object
@@ -140,11 +147,15 @@ def run_simulation(muj_robot:MujRobot,
 
         # 7) 记录关节/末端/控制量/外力等数据，便于后续绘图分析 /
         # 7) Log joint/EE/control/external data for plotting/analysis
+        #    提供期望姿态 r_des 时同步记录世界系姿态误差 log(R_d R^T)（供 metrics 使用）/
+        #    When r_des is given, also log the world-frame orientation error log(R_d R^T)
+        ori_err_vec = pin.log3(r_des @ current_ori.T) if r_des is not None else None
         log.store_data(
             t, q, v, current_pos, current_vel,
             np.linalg.norm(current_pos - pos_des),
             pos_des, vel_des, acc_des, tau,
-            force_external, torque_external)
+            force_external, torque_external,
+            orientation_error=ori_err_vec)
 
 
     log.plot_results(save_path="figure/")
@@ -264,7 +275,17 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
         cfg=cfg,
         q_init=q_init,
         scene=scene,
+        r_des=init_ori,
     )
+
+    # 4) 对接性能指标（Ren & Shan 2026, Acta Astronautica, Table 10 三层指标）：
+    #    复用前已构建的 pin_model（不重复加载）；对接轴 = 轨迹推进方向（stroke）归一化。
+    #    本阶段指标仅打印到 stdout（不落盘），打印必须发生在 CLI 汇总行之前 /
+    #    Compute and print docking performance metrics; stdout only (no persistence).
+    #    Must print before the CLI summary line.
+    axis = scene.task.stroke / np.linalg.norm(scene.task.stroke)
+    metrics = compute_metrics(log, pin_model, axis=axis, ee_frame=scene.robot.ee_frame)
+    print(format_metrics(metrics))
 
     return log
 
