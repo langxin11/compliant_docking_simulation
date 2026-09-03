@@ -96,6 +96,11 @@ graph TB
 | `compute_control_task_space_with_orientation` | 纯操作空间 PD（无阻抗、无力前馈），作为对照 |
 | `compute_control_task_space` | 位置子空间控制 + 可操作度（manipulability）梯度零空间优化，作为对照 |
 
+此外提供独立的 `HQPAdaptiveController`（`control/hqp_ac.py`，与主控制器同签名可互换）：
+HQP-AC 约束自适应控制——把关节位置/速度/力矩极限作为 QP 硬约束（ZOH 短时域预测），
+刚度按接触力自适应，零空间做奇异性规避与关节位姿阻抗；CLI 以
+`docking --controller hqp` 启用。出处：Ren & Shan 2026, Acta Astronautica, §3.2。
+
 ## 快速开始
 
 ```bash

@@ -7,6 +7,7 @@
     docking --quick                 # 2 秒快速冒烟（无渲染、无录帧）
     docking --scene scenes/iiwa14_docking.yaml --quick
     docking --duration 18 --render  # 完整时长 + 交互式渲染
+    docking --controller hqp        # HQP-AC 约束自适应控制器（默认 impedance）
 """
 import argparse
 import os
@@ -44,6 +45,9 @@ def build_parser() -> argparse.ArgumentParser:
                         help="是否离屏录帧并导出 MP4（默认 --no-record）")
     parser.add_argument("--quick", action="store_true",
                         help="快速冒烟测试：等价于 --duration 2.0")
+    parser.add_argument("--controller", choices=["impedance", "hqp"], default="impedance",
+                        help="控制器：impedance=固定增益任务空间阻抗（默认）；"
+                             "hqp=HQP-AC 约束自适应控制（Ren & Shan 2026 §3.2）")
     return parser
 
 
@@ -65,6 +69,7 @@ def main(argv: list[str] | None = None) -> int:
         traj_duration=args.traj_duration,
         duration=args.duration,
         scene_path=args.scene,
+        controller=args.controller,
     )
 
     total_steps = len(log.t_list)

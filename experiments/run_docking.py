@@ -29,7 +29,8 @@ if "DISPLAY" not in os.environ or not os.environ["DISPLAY"]:
 import numpy as np
 import pinocchio as pin
 
-from compliant_docking.config import DockingConfig, ImpedanceConfig
+from compliant_docking.config import DockingConfig, HQPConfig, ImpedanceConfig
+from compliant_docking.control.hqp_ac import HQPAdaptiveController
 from compliant_docking.control.task_space import TaskSpaceController
 from compliant_docking.metrics import compute_metrics, format_metrics
 from compliant_docking.models import load_pin_model
@@ -44,7 +45,7 @@ from compliant_docking.telemetry import Log
 
 
 def run_simulation(muj_robot:MujRobot,
-                   task_dynamics:TaskSpaceController,
+                   task_dynamics:TaskSpaceController | HQPAdaptiveController,
                    trajector_planner:DecoupledQuinticTrajectory,
                    log:Log,
                    cfg:DockingConfig,
@@ -183,7 +184,7 @@ def run_simulation(muj_robot:MujRobot,
 
 
 def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
-         scene_path: str | Path = DEFAULT_SCENE_PATH):
+         scene_path: str | Path = DEFAULT_SCENE_PATH, controller: str = "impedance"):
     """
     Main function that sets up and runs the robot control simulation.
 
@@ -195,6 +196,9 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
         duration (float): Total simulation duration in seconds
         scene_path (str | Path): 场景 YAML 路径（默认 DEFAULT_SCENE_PATH，即 iiwa14 对接场景） /
             Scene YAML path (default: the built-in iiwa14 docking scene)
+        controller (str): 控制器选择："impedance"（默认，固定增益任务空间阻抗 +
+            软限幅）或 "hqp"（HQP-AC 约束自适应控制，Ren & Shan 2026 §3.2，
+            关节位置/速度/力矩极限为 QP 硬约束，刚度按接触力自适应）
 
     Returns:
         Log: 记录了完整仿真时序数据的日志对象 / populated telemetry log
@@ -214,16 +218,30 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
     pin_model = load_pin_model(scene.robot.pin_model)
     pin_data = pin_model.createData()
 
-    # 任务空间控制器：阻抗参数由 ImpedanceConfig 提供（默认值与历史实现一致），
-    # 末端 frame 由场景给出 /
-    # Task-space controller: impedance params from ImpedanceConfig (defaults match
-    # historical values); ee_frame comes from the scene
-    task_dynamics = TaskSpaceController(pin_model, cfg.dt, ImpedanceConfig(), ee_frame=scene.robot.ee_frame)
-    # 计算初始位姿的逆运动学，得到初始关节位置 /
-    # Compute IK for initial pose to get initial joint configuration
+    # 任务初始条件（先于控制器构建提取，供 IK 与 HQP 期望姿态使用） /
+    # Task init conditions (extracted before controller construction, for IK and HQP r_des)
     init_pos = scene.task.init_pos
     init_ori = scene.task.init_ori
 
+    # 控制器装配：impedance = 固定增益任务空间阻抗（历史主路径，行为不变）；
+    # hqp = HQP-AC（同签名鸭子类型替换，力矩硬约束取 ±cfg.max_torque，
+    # 与 impedance 路径 run 循环里的 clip 限幅同幅值，两条路径公平对比） /
+    # Controller assembly: "impedance" keeps the legacy fixed-gain task-space
+    # impedance path unchanged; "hqp" swaps in the HQP-AC controller via the
+    # same-signature duck-typed interface
+    if controller == "impedance":
+        task_dynamics = TaskSpaceController(pin_model, cfg.dt, ImpedanceConfig(), ee_frame=scene.robot.ee_frame)
+    elif controller == "hqp":
+        task_dynamics = HQPAdaptiveController(
+            pin_model, cfg.dt, HQPConfig(torque_limit=cfg.max_torque),
+            ee_frame=scene.robot.ee_frame, r_des=init_ori)
+        print(f"控制器: HQP-AC（Ren & Shan 2026 §3.2，关节位置/速度/力矩 QP 硬约束 + "
+              f"接触力自适应刚度；力矩约束 ±{cfg.max_torque} N·m）")
+    else:
+        raise ValueError(f"未知控制器: {controller!r}（可选 'impedance' 或 'hqp'）")
+
+    # 计算初始位姿的逆运动学，得到初始关节位置 /
+    # Compute IK for initial pose to get initial joint configuration
     init_pose = pin.SE3(init_ori, init_pos)
 
     # 使用合适的初始猜测值以帮助IK收敛 /
