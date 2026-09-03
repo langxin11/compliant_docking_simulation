@@ -8,6 +8,10 @@
 
   <option integrator="implicitfast"/>
 
+  <visual>
+    <global offwidth="1920" offheight="1080"/>
+  </visual>
+
   <default>
     <default class="fr3">
       <!-- Overwritten in joints 5, 6, and 7. -->
