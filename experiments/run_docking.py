@@ -162,7 +162,8 @@ def run_simulation(muj_robot:MujRobot,
             orientation_error=ori_err_vec)
 
 
-    log.plot_results(save_path="figure/")
+    log.plot_results(save_path="figure/",
+                     scene_name=scene.name if scene is not None else None)
 
     if muj_robot.record:
         # 创建绝对路径以确保视频保存在正确位置（仓库根目录 video/，与迁移前一致）/

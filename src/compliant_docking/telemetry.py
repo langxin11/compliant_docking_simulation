@@ -1,23 +1,22 @@
 """
-telemetry.py - Simulation Data Logging and Visualization Library
+telemetry.py - 数据记录 + SciencePlots IEEE 中文绘图（绘图实现见 plotting.py）/
+telemetry.py - Simulation data logging + SciencePlots IEEE plotting (see plotting.py)
 
-This module provides a comprehensive logging system for robot control simulations.
+This module provides a logging system for robot control simulations.
 It captures time-series data for joint angles, velocities, end-effector positions,
 control torques, and external forces/torques during simulation runs.
 
 Features:
 - Data collection for robot state variables during simulation
-- Visualization of tracking performance and control inputs
-- Multiple plot types for analyzing different aspects of control performance
-- Support for external force/torque measurement visualization
+- 委托 compliant_docking.plotting 完成 SciencePlots IEEE 中文风格绘图 /
+  Delegates plotting to compliant_docking.plotting (SciencePlots IEEE style)
 
 Author: langxin11
 Date: 2025
 """
 
-import os
+from pathlib import Path
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -97,81 +96,12 @@ class Log:
 
 
 
-    def plot_results(self, save_path: str):
-        """绘制仿真结果：末端跟踪曲线、误差、外力/外力矩、各关节力矩"""
-        pos_actual = np.array(self.pos_actual).reshape(-1, 3)
-        pos_desired = np.array(self.pos_desired)
+    def plot_results(self, save_path: str = "figure/",
+                     *, scene_name: str | None = None) -> list[Path]:
+        """绘制仿真结果（SciencePlots IEEE 中文风格，委托 plotting 模块）/
+        Plot simulation results (SciencePlots IEEE CJK style; delegates to plotting)."""
+        # 惰性导入：telemetry 在无 scienceplots 的环境下仍可独立 import，不连累 CLI /
+        # Lazy import: telemetry stays importable without scienceplots installed
+        from compliant_docking.plotting import plot_docking_log
 
-        tau_hist = np.array(self.tau_hist)
-        external_forces = np.array(self.force_externals)
-        external_torques = np.array(self.torque_externals)
-
-        if len(self.force_externals) < 1:
-            external_forces = np.zeros_like(pos_actual)
-            external_torques = np.zeros_like(pos_actual)
-
-
-        # 创建三个子图：末端跟踪、误差、外力/外力矩
-        fig = plt.figure(figsize=(15, 12))
-        gs = plt.GridSpec(3, 2)
-
-        # 1. 位置跟踪
-        ax1 = fig.add_subplot(gs[0, :])
-        labels = ['X', 'Y', 'Z']
-        color = ['r', 'g', 'b']
-        for i in range(3):
-            ax1.plot(self.t_list, pos_actual[:, i], '-', label=f'Actual {labels[i]}', color=color[i])
-            ax1.plot(self.t_list, pos_desired[:, i], '--', label=f'Desired {labels[i]}', color=color[i])
-        ax1.set_xlabel('Time [s]')
-        ax1.set_ylabel('Position [m]')
-        ax1.legend()
-        ax1.grid(True)
-        ax1.set_title('End-effector Position Tracking')
-
-        # 2. 跟踪误差
-        ax2 = fig.add_subplot(gs[1, :])
-        for i in range(3):
-            error = pos_desired[:, i] - pos_actual[:, i]
-            ax2.plot(self.t_list, error, label=f'{labels[i]} Error')
-        ax2.set_xlabel('Time [s]')
-        ax2.set_ylabel('Error [m]')
-        ax2.legend()
-        ax2.grid(True)
-        ax2.set_title('Position Tracking Error')
-
-        # 3. 关节角度和速度
-        ax3 = fig.add_subplot(gs[2, 0])
-        for i in range(3):
-            ax3.plot(self.t_list[:], external_forces[:, i], label=f'axis {i+1}')
-            ax3.set_xlabel('Time [s]')
-            ax3.set_ylabel('Virtual Force [N]')
-            ax3.legend()
-            ax3.grid(True)
-            ax3.set_title('Impedance Force')
-
-        ax4 = fig.add_subplot(gs[2, 1])
-        for i in range(3):
-            ax4.plot(self.t_list[:], external_torques[:, i], label=f'axis {i+1}')
-            ax4.set_xlabel('Time [s]')
-            ax4.set_ylabel('Virtual Force [N]')
-            ax4.legend()
-            ax4.grid(True)
-            ax4.set_title('Impedance Torque')
-
-        os.makedirs(save_path, exist_ok=True)
-
-        fig.savefig(save_path + "tracking_error.png",dpi=1200)
-
-        fig = plt.figure(figsize=(15, 12))
-        gs = plt.GridSpec(7, 1)
-
-        for i in range(7):
-            ax1 = fig.add_subplot(gs[i, 0])
-            ax1.plot(self.t_list, tau_hist[:, i], label=f'Joint {i+1}')
-            ax1.set_xlabel('Time [s]')
-            ax1.set_ylabel('Torque [Nm]')
-            ax1.legend()
-            ax1.grid(True)
-            ax1.set_title('Joint Torques')
-
-        fig.savefig(save_path + "torque.png",dpi=1200)
+        return plot_docking_log(self, save_path, scene_name=scene_name)
