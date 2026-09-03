@@ -1,0 +1,45 @@
+# 两段式对接场景：iiwa14 + 公头锥 + 母头锥。
+# 与默认场景 iiwa14_docking.yaml 唯一区别是多了 trajectory 段：论文式两段接近
+# （Ren & Shan 2026，Acta Astronautica）的简化 rest-to-rest 版——接近段宽松限速 +
+# 对接段严格限速（0.02 m/s 量级），途经预对接点瞬时停顿。峰值接触力主要由接触前
+# 速度决定，低对接限速是降峰值力的关键。
+scene:
+  name: iiwa14_docking_twophase
+
+robot:
+  mjcf: assets/iiwa14/iiwa14_arm.xml      # 纯机械臂（不含工具/目标）
+  pin_model: assets/iiwa14/iiwa14_dock.urdf  # Pinocchio 用：臂+公头圆柱的组合 URDF（与 models.PIN_URDF 同一文件）
+  ee_site: attachment_site                # MJCF 挂载锚点（法兰 site）
+  ee_frame: cylinder_link                 # Pinocchio 末端 frame 名
+
+tool:                                     # 公头：挂载到 robot.ee_site
+  mjcf: assets/interfaces/male_cone.xml
+  prefix: tool_                           # attach 后所有名称加此前缀
+  pose: {pos: [0.0, 0.0, 0.015], quat: [1.0, 0.0, 0.0, 0.0]}  # 相对 ee_site
+
+target:                                   # 母头：世界系固定
+  mjcf: assets/interfaces/female_socket.xml
+  prefix: target_
+  pos: [0.0, 0.5, 0.35]
+  quat: [1.0, 0.0, 0.0, 0.0]
+
+physics:                                  # 与历史 XML option 一致
+  timestep: 0.001
+  gravity: [0.0, 0.0, 0.0]
+  integrator: implicitfast
+  cone: elliptic
+  sdf_iterations: 10
+  sdf_initpoints: 40
+
+task:                                     # 对接任务初始条件（历史硬编码值收编）
+  init_pos: [0.0, 0.5, 0.5]
+  init_ori: [[1, 0, 0], [0, -1, 0], [0, 0, -1]]
+  ik_guess: [0.0, 0.5, 0.0, -1.0, 0.0, 1.5, 0.0]
+  stroke: [0.0, 0.0, -0.18]
+
+trajectory:                               # 两段式轨迹（扁平结构；缺省时走单段五次）
+  standoff: 0.10        # 预对接点后撤距离 [m]；实测接触界面在 EE z≈0.4055，须大于 0.0855 才能保证接近段无接触
+  v_max_approach: 0.10  # 接近段线速度上限 [m/s]
+  a_max_approach: 0.20  # 接近段线加速度上限 [m/s^2]
+  v_max_docking: 0.02   # 对接段线速度上限 [m/s]
+  a_max_docking: 0.05   # 对接段线加速度上限 [m/s^2]

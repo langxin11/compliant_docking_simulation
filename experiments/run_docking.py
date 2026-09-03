@@ -34,7 +34,10 @@ from compliant_docking.control.task_space import TaskSpaceController
 from compliant_docking.metrics import compute_metrics, format_metrics
 from compliant_docking.models import load_pin_model
 from compliant_docking.planning.kinematics import compute_ik
-from compliant_docking.planning.trajectory import DecoupledQuinticTrajectory
+from compliant_docking.planning.trajectory import (
+    DecoupledQuinticTrajectory,
+    TwoPhaseDockingTrajectory,
+)
 from compliant_docking.scene import DEFAULT_SCENE_PATH, Scene, load_scene
 from compliant_docking.simulation.mujoco_env import MujRobot
 from compliant_docking.telemetry import Log
@@ -261,10 +264,30 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
         camera=scene.camera,
     )
 
-    # Create trajectory planner with specified duration
-    # 3) 构建任务空间解耦五次轨迹规划器 /
-    # 3) Build decoupled quintic task-space trajectory planner
-    trajector_planner = DecoupledQuinticTrajectory(init_pos, target_pos, cfg.traj_duration)
+    # Create trajectory planner
+    # 3) 构建任务空间轨迹规划器：场景提供 trajectory 段时用两段式对接轨迹
+    #    （接近段宽松限速 + 对接段严格限速，Ren & Shan 2026 任务结构的简化版），
+    #    此时 cfg.traj_duration 被忽略；否则维持历史单段解耦五次轨迹 /
+    # 3) Build task-space trajectory planner: two-phase docking trajectory when the
+    #    scene provides a trajectory section (approach loose limits + docking strict
+    #    limits; cfg.traj_duration ignored), else the legacy single-phase quintic
+    if scene.trajectory is not None:
+        traj_spec = scene.trajectory
+        trajector_planner = TwoPhaseDockingTrajectory(
+            init_pos, target_pos,
+            standoff=traj_spec.standoff,
+            v_max_approach=traj_spec.v_max_approach,
+            a_max_approach=traj_spec.a_max_approach,
+            v_max_docking=traj_spec.v_max_docking,
+            a_max_docking=traj_spec.a_max_docking,
+        )
+        t1, t2 = trajector_planner.durations
+        print(f"轨迹: 两段式对接（接近段 {t1:.3f}s + 对接段 {t2:.3f}s，总时长 "
+              f"{trajector_planner.total_duration:.3f}s）")
+        print(f"提示: 场景提供 trajectory 段，cfg.traj_duration={cfg.traj_duration}s 被忽略")
+    else:
+        trajector_planner = DecoupledQuinticTrajectory(init_pos, target_pos, cfg.traj_duration)
+        print(f"轨迹: 单段解耦五次多项式（时长 {cfg.traj_duration}s）")
 
     # Run simulation with specified duration
     run_simulation(

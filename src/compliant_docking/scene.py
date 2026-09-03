@@ -106,6 +106,29 @@ class TaskSpec:
 
 
 @dataclass(frozen=True)
+class TrajectorySpec:
+    """两段式对接轨迹参数（接近段宽松限速 + 对接段严格限速，可选）。
+
+    对应场景 YAML 的可选 ``trajectory`` 扁平段（缺省时走历史单段五次轨迹）：
+
+    .. code-block:: yaml
+
+        trajectory:
+          standoff: 0.06        # 预对接点沿接近轴的后撤距离 [m]
+          v_max_approach: 0.10  # 接近段线速度上限 [m/s]
+          a_max_approach: 0.20  # 接近段线加速度上限 [m/s^2]
+          v_max_docking: 0.02   # 对接段线速度上限 [m/s]
+          a_max_docking: 0.05   # 对接段线加速度上限 [m/s^2]
+    """
+
+    standoff: float
+    v_max_approach: float
+    a_max_approach: float
+    v_max_docking: float
+    a_max_docking: float
+
+
+@dataclass(frozen=True)
 class Scene:
     """完整对接场景：机械臂 + 公头 + 母头 + 物理 + 任务初始条件。"""
 
@@ -116,6 +139,7 @@ class Scene:
     physics: PhysicsSpec
     task: TaskSpec
     path: Path  # 场景 YAML 的绝对路径
+    trajectory: TrajectorySpec | None = None  # 可选两段式轨迹参数（缺省走单段五次）
 
     # ---- 解析后的名称属性（下阶段接线时使用） ----
 
@@ -245,6 +269,7 @@ def load_scene(path: str | Path) -> Scene:
     target = raw["target"]
     physics = raw["physics"]
     task = raw["task"]
+    trajectory = TrajectorySpec(**raw["trajectory"]) if "trajectory" in raw else None
 
     return Scene(
         name=str(scene["name"]),
@@ -281,4 +306,5 @@ def load_scene(path: str | Path) -> Scene:
             stroke=np.asarray(task["stroke"], dtype=float),
         ),
         path=scene_path,
+        trajectory=trajectory,
     )

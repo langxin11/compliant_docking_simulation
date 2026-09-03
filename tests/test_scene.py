@@ -19,6 +19,7 @@ from compliant_docking.scene import REPO_ROOT, load_scene
 SCENE_YAML = REPO_ROOT / "scenes" / "iiwa14_docking.yaml"
 LEGACY_XML = ASSETS_DIR / "iiwa14_dock_updated.xml"
 FR3_SCENE_YAML = REPO_ROOT / "scenes" / "fr3_docking.yaml"
+TWO_PHASE_SCENE_YAML = REPO_ROOT / "scenes" / "iiwa14_docking_twophase.yaml"
 
 # FR3 home 位形（fr3_docking.yaml 的 ik_guess，IK 初猜锚点）
 FR3_HOME = np.array([0.0, 0.0, 0.0, -1.57079, 0.0, 1.57079, -0.7853])
@@ -164,6 +165,25 @@ def test_rollout_120_steps_equivalent(pair):
             legacy_data.qpos, assembled_data.qpos, atol=1e-12, rtol=0,
             err_msg=f"rollout 第 {step} 步 qpos 与 legacy 不一致",
         )
+
+
+# ---- 两段式对接场景（可选 trajectory 段） ----
+
+def test_load_twophase_scene():
+    """两段式场景：trajectory 段解析为 TrajectorySpec；默认场景无 trajectory。"""
+    loaded = load_scene(TWO_PHASE_SCENE_YAML)
+
+    assert loaded.name == "iiwa14_docking_twophase"
+    assert loaded.trajectory is not None
+    assert loaded.trajectory.standoff == 0.10
+    assert loaded.trajectory.v_max_approach == 0.10
+    assert loaded.trajectory.a_max_approach == 0.20
+    assert loaded.trajectory.v_max_docking == 0.02
+    assert loaded.trajectory.a_max_docking == 0.05
+
+    # 默认场景不含 trajectory 段 → 走历史单段轨迹路径
+    default = load_scene(SCENE_YAML)
+    assert default.trajectory is None
 
 
 # ---- FR3 场景（Menagerie MJCF 变体，Pinocchio 直读 MJCF） ----

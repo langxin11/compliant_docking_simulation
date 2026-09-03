@@ -6,6 +6,8 @@ It provides a class for quintic polynomial trajectory planning in task space.
 
 Key components:
 - DecoupledQuinticTrajectory: Generates smooth trajectories with zero velocity/acceleration at endpoints
+- TwoPhaseDockingTrajectory: Two-phase docking trajectory (loose approach + strict docking phase)
+  with a stand-off waypoint, in the style of Ren & Shan 2026 (Acta Astronautica)
 
 Author: langxin11
 Date: 2025
@@ -13,6 +15,34 @@ Date: 2025
 
 
 import numpy as np
+
+# rest-to-rest 五次标量曲线的解析峰值系数：
+#   峰值速度 = QUINTIC_VEL_PEAK * L / T（= 30τ²(1-τ)² 在 τ=0.5 处的最大值 30/16）
+#   峰值加速度 = QUINTIC_ACC_PEAK * L / T²（= |60τ(1-τ)(1-2τ)| 的最大值 10/√3）
+QUINTIC_VEL_PEAK = 1.875
+QUINTIC_ACC_PEAK = 5.7735  # ≈ 10/√3
+
+
+def quintic_rest_to_rest_duration(length: float, v_max: float, a_max: float) -> float:
+    """
+    由速度/加速度上限反推 rest-to-rest 五次标量曲线的时长 / Derive the duration of a
+    rest-to-rest quintic scalar profile from velocity and acceleration limits
+
+    对位移长度 L 的 rest-to-rest 五次曲线，解析峰值为
+    v_peak = 1.875·L/T、a_peak = 5.7735·L/T²，故同时满足两约束的最短时长为
+    T = max(1.875·L/v_max, sqrt(5.7735·L/a_max))。
+
+    参数 / Parameters:
+        length: 该段位移的 3D 范数 / 3D norm of the segment displacement
+        v_max: 线速度上限 / linear velocity limit
+        a_max: 线加速度上限 / linear acceleration limit
+
+    返回 / Returns:
+        该段最短时长（秒）/ shortest feasible duration (s)
+    """
+    assert length > 0, "Segment length must be positive"
+    assert v_max > 0 and a_max > 0, "Velocity/acceleration limits must be positive"
+    return max(QUINTIC_VEL_PEAK * length / v_max, np.sqrt(QUINTIC_ACC_PEAK * length / a_max))
 
 
 class DecoupledQuinticTrajectory:
@@ -119,3 +149,109 @@ class DecoupledQuinticTrajectory:
         ]
 
         return all(conditions)
+
+
+class TwoPhaseDockingTrajectory:
+    """
+    两段式对接轨迹：接近段（approach，宽松限速）+ 对接段（docking，严格限速）
+    Two-phase docking trajectory: approach phase (loose limits) + docking phase (strict limits)
+
+    任务结构取自 Ren & Shan 2026 (Acta Astronautica) 的两段式对接：末端先以宽松限速
+    从 start_pos 接近到预对接点（pre-dock，= final_pos 沿接近轴后撤 standoff），再以
+    严格限速（0.02 m/s 量级）完成最后一段进给。峰值接触力主要由接触前速度决定，
+    因此对接段的低限速是压低峰值力的关键。
+
+    与论文 SE(3)-TOPP 的关系与简化点 / Relation to the paper's SE(3)-TOPP and simplifications:
+    - 论文对整条 SE(3) 路径做时间最优参数化（TOPP），全程不停顿、速度沿路径连续变化；
+    - 本实现是其保守简化版：两段各自独立做 rest-to-rest 五次多项式，途经预对接点处
+      瞬时停顿（速度/加速度归零）后再进入对接段——时间上不是最优，更保守；
+    - 每段时长由限速解析反推（quintic_rest_to_rest_duration）：三轴同步使用同一段
+      时长 T，并用该段位移的 3D 标量长度 L 保守估计合成速度/加速度峰值
+      （v_peak = 1.875·L/T、a_peak = 5.7735·L/T²）。对直线段而言三轴共享同一无量纲
+      时间形状，该估计恰为精确值。
+
+    位置/速度/加速度全程 C2 连续：接合点（预对接点）两侧均为 rest-to-rest，自然衔接。
+    """
+
+    def __init__(self,
+                 start_pos: np.ndarray,
+                 final_pos: np.ndarray,
+                 standoff: float,
+                 v_max_approach: float,
+                 a_max_approach: float,
+                 v_max_docking: float,
+                 a_max_docking: float):
+        """
+        Initialize the two-phase docking trajectory
+
+        参数 / Parameters:
+        - start_pos: 初始位置 (3D) / Initial position
+        - final_pos: 最终对接目标位置 (3D) / Final docking target position
+        - standoff: 预对接点沿接近轴的后撤距离 [m] / stand-off retreat distance [m]
+        - v_max_approach / a_max_approach: 接近段线速度/加速度上限 / approach phase limits
+        - v_max_docking / a_max_docking: 对接段线速度/加速度上限 / docking phase limits
+        """
+        assert start_pos.shape == (3,), "Start position must be 3D vector"
+        assert final_pos.shape == (3,), "Final position must be 3D vector"
+        assert standoff > 0, "Stand-off must be positive"
+        assert v_max_approach > 0 and a_max_approach > 0, "Approach limits must be positive"
+        assert v_max_docking > 0 and a_max_docking > 0, "Docking limits must be positive"
+
+        self.p0 = start_pos
+        self.pf = final_pos
+        self.standoff = standoff
+
+        # 接近轴 = 推进方向（start→final）的反向，即从目标指向"上方"
+        stroke = final_pos - start_pos
+        self.axis = -stroke / np.linalg.norm(stroke)
+
+        # 预对接点 = 最终目标沿接近轴后撤 standoff
+        self._pre_dock = final_pos + standoff * self.axis
+
+        # 两段时长分别由各自限速反推（L 用该段位移的 3D 范数）
+        length_approach = float(np.linalg.norm(self._pre_dock - start_pos))
+        length_docking = float(np.linalg.norm(final_pos - self._pre_dock))
+        self._t1 = quintic_rest_to_rest_duration(length_approach, v_max_approach, a_max_approach)
+        self._t2 = quintic_rest_to_rest_duration(length_docking, v_max_docking, a_max_docking)
+
+        # 复用解耦五次规划器：两段各自 rest-to-rest，接合点自然 C2
+        self._approach = DecoupledQuinticTrajectory(start_pos, self._pre_dock, self._t1)
+        self._docking = DecoupledQuinticTrajectory(self._pre_dock, final_pos, self._t2)
+
+    @property
+    def durations(self) -> tuple[float, float]:
+        """(接近段时长 t1, 对接段时长 t2)，单位秒 / (approach, docking) durations in s"""
+        return (self._t1, self._t2)
+
+    @property
+    def pre_dock_pos(self) -> np.ndarray:
+        """预对接点位置（副本）/ Pre-dock waypoint position (copy)"""
+        return self._pre_dock.copy()
+
+    @property
+    def total_duration(self) -> float:
+        """轨迹总时长 t1 + t2（秒）/ Total trajectory duration t1 + t2 (s)"""
+        return self._t1 + self._t2
+
+    def get_state(self, t: float) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """
+        获取时刻 t 的位置/速度/加速度 / Get position, velocity and acceleration at time t
+
+        时间分段：
+        - t < 0：按 t = 0 处理（停在起点）；
+        - t ∈ [0, t1)：接近段（段内局部时间采样）；
+        - t ∈ [t1, t1+t2)：对接段（段内局部时间采样）；
+        - t ≥ t1+t2：停在 final_pos，速度/加速度为 0。
+
+        参数 / Parameters:
+            t: 当前时间（秒） / Current time (s)
+
+        返回 / Returns:
+            (pos, vel, acc) 三个 3D 向量 / 3D numpy arrays
+        """
+        if t < 0.0:
+            return self._approach.get_state(0.0)
+        if t < self._t1:
+            return self._approach.get_state(t)
+        # t ≥ t1：第二段按局部时间采样；超过 t2 时内部 clip 停在 final（vel/acc = 0）
+        return self._docking.get_state(t - self._t1)
