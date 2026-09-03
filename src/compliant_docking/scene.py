@@ -106,6 +106,20 @@ class TaskSpec:
 
 
 @dataclass(frozen=True)
+class ImpedanceOverride:
+    """可选的任务空间阻抗增益覆盖（覆盖 ImpedanceConfig 对应字段）。
+
+    典型用途：带关节摩擦的机械臂（如 FR3 上游真实摩擦）需要更高刚度
+    压小静摩擦死区（死区 ≈ 摩擦阈值/k）。缺省段则完全沿用 ImpedanceConfig。
+    """
+
+    k: float | None = None      # 平动刚度 [N/m]
+    d: float | None = None      # 平动阻尼 [N·s/m]
+    k_rot: float | None = None  # 姿态刚度 [N·m/rad]
+    d_rot: float | None = None  # 姿态阻尼 [N·m·s/rad]
+
+
+@dataclass(frozen=True)
 class TrajectorySpec:
     """两段式对接轨迹参数（接近段宽松限速 + 对接段严格限速，可选）。
 
@@ -140,6 +154,7 @@ class Scene:
     task: TaskSpec
     path: Path  # 场景 YAML 的绝对路径
     trajectory: TrajectorySpec | None = None  # 可选两段式轨迹参数（缺省走单段五次）
+    impedance: ImpedanceOverride | None = None  # 可选阻抗增益覆盖（缺省走 ImpedanceConfig）
 
     # ---- 解析后的名称属性（下阶段接线时使用） ----
 
@@ -270,6 +285,7 @@ def load_scene(path: str | Path) -> Scene:
     physics = raw["physics"]
     task = raw["task"]
     trajectory = TrajectorySpec(**raw["trajectory"]) if "trajectory" in raw else None
+    impedance = ImpedanceOverride(**raw["impedance"]) if "impedance" in raw else None
 
     return Scene(
         name=str(scene["name"]),
@@ -307,4 +323,5 @@ def load_scene(path: str | Path) -> Scene:
         ),
         path=scene_path,
         trajectory=trajectory,
+        impedance=impedance,
     )

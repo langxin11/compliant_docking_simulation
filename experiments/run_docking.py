@@ -223,22 +223,43 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
     init_pos = scene.task.init_pos
     init_ori = scene.task.init_ori
 
+    # 组装 MuJoCo 模型（控制器摩擦前馈与仿真环境同源，提前到控制器构建之前）/
+    # Assemble the MuJoCo model up front: its dof_frictionloss feeds the
+    # controllers' friction feedforward so compensation matches simulation
+    mj_model = scene.build_mjmodel()
+    frictionloss = mj_model.dof_frictionloss.copy()
+
     # 控制器装配：impedance = 固定增益任务空间阻抗（历史主路径，行为不变）；
     # hqp = HQP-AC（同签名鸭子类型替换，力矩硬约束取 ±cfg.max_torque，
-    # 与 impedance 路径 run 循环里的 clip 限幅同幅值，两条路径公平对比） /
+    # 与 impedance 路径 run 循环里的 clip 限幅同幅值，两条路径公平对比）。
+    # frictionloss 为零（如 iiwa14）时前馈项恒为零，行为不变 /
     # Controller assembly: "impedance" keeps the legacy fixed-gain task-space
     # impedance path unchanged; "hqp" swaps in the HQP-AC controller via the
-    # same-signature duck-typed interface
+    # same-signature duck-typed interface. Zero frictionloss (e.g. iiwa14)
+    # makes the friction feedforward a no-op
+    imp_cfg = ImpedanceConfig()
+    if scene.impedance is not None:
+        ov = scene.impedance
+        imp_cfg = ImpedanceConfig(
+            k=ov.k if ov.k is not None else imp_cfg.k,
+            d=ov.d if ov.d is not None else imp_cfg.d,
+            k_rot=ov.k_rot if ov.k_rot is not None else imp_cfg.k_rot,
+            d_rot=ov.d_rot if ov.d_rot is not None else imp_cfg.d_rot)
+        print(f"阻抗覆盖: k={imp_cfg.k} d={imp_cfg.d} k_rot={imp_cfg.k_rot} d_rot={imp_cfg.d_rot}")
     if controller == "impedance":
-        task_dynamics = TaskSpaceController(pin_model, cfg.dt, ImpedanceConfig(), ee_frame=scene.robot.ee_frame)
+        task_dynamics = TaskSpaceController(pin_model, cfg.dt, imp_cfg, ee_frame=scene.robot.ee_frame,
+                                            frictionloss=frictionloss)
     elif controller == "hqp":
         task_dynamics = HQPAdaptiveController(
             pin_model, cfg.dt, HQPConfig(torque_limit=cfg.max_torque),
-            ee_frame=scene.robot.ee_frame, r_des=init_ori)
+            ee_frame=scene.robot.ee_frame, r_des=init_ori, frictionloss=frictionloss,
+            impedance=imp_cfg)
         print(f"控制器: HQP-AC（Ren & Shan 2026 §3.2，关节位置/速度/力矩 QP 硬约束 + "
               f"接触力自适应刚度；力矩约束 ±{cfg.max_torque} N·m）")
     else:
         raise ValueError(f"未知控制器: {controller!r}（可选 'impedance' 或 'hqp'）")
+    if np.any(frictionloss > 0):
+        print(f"摩擦前馈: frictionloss={np.round(frictionloss, 3)} N·m（取自组装模型 dof_frictionloss）")
 
     # 计算初始位姿的逆运动学，得到初始关节位置 /
     # Compute IK for initial pose to get initial joint configuration
@@ -273,7 +294,7 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
     # 2) 初始化 MuJoCo 机器人（写 tau、推进仿真、渲染/录帧） /
     # 2) Initialize MuJoCo robot (apply tau, step sim, render/record)
     muj_robot = MujRobot(
-        model=scene.build_mjmodel(),
+        model=mj_model,
         render=render,
         record=record,
         dt=cfg.dt,

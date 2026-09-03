@@ -26,7 +26,7 @@ import numpy as np
 import pinocchio as pin
 import proxsuite
 
-from ..config import HQPConfig
+from ..config import HQPConfig, ImpedanceConfig
 
 # ProxQP 稠密 QP 与求解状态枚举（proxsuite 0.7.x 需经属性访问导入）
 _DenseQP = proxsuite.proxqp.dense.QP
@@ -47,7 +47,9 @@ class HQPAdaptiveController:
     def __init__(self, robot_model: pin.Model, dt: float,
                  config: HQPConfig | None = None,
                  ee_frame: str = "cylinder_link",
-                 r_des: np.ndarray | None = None):
+                 r_des: np.ndarray | None = None,
+                 frictionloss: np.ndarray | None = None,
+                 impedance: ImpedanceConfig | None = None):
         """初始化控制器：预解析限位并预建两个 ProxQP 实例（主任务/零空间）。
 
         参数 / Args:
@@ -58,6 +60,10 @@ class HQPAdaptiveController:
             r_des: 期望姿态（世界系 3×3）；None 时取
                 ``[[1,0,0],[0,-1,0],[0,0,-1]]``（与 TaskSpaceController
                 的 initial_orientation 同口径）
+            frictionloss: 关节摩擦损耗幅值 [N·m]（nv 维；None 时取零向量）。
+                Pinocchio 导入器不保留 MJCF frictionloss，需由调用方从组装
+                MjModel 的 dof_frictionloss 传入；以前馈 τ_ff = frictionloss·
+                tanh(q̇/v₀) 并入 ĥ（同时进入力矩硬约束与输出力矩）
 
         QP 实例复用策略：proxsuite 支持 ``qp.update(...)`` 原地更新 H/g/C/u，
         两个实例在 __init__ 各建一次，之后每个控制步只 update+solve，
@@ -67,10 +73,26 @@ class HQPAdaptiveController:
         self.data = self.model.createData()
         self.dt = dt
         self.config = config or HQPConfig()
+        if impedance is not None:
+            # 场景阻抗覆盖（ImpedanceOverride 的 k/d/k_rot/d_rot 可选字段 → K0）
+            from dataclasses import replace
+
+            cfg = self.config
+            K0 = cfg.K0.copy()
+            for i, val in enumerate((impedance.k, impedance.k, impedance.k,
+                                     impedance.k_rot, impedance.k_rot, impedance.k_rot)):
+                if val is not None:
+                    K0[i] = float(val)
+            self.config = replace(cfg, K0=K0)
         cfg = self.config
 
         self.frame_id = self.model.getFrameId(ee_frame)
         self.n = self.model.nv
+
+        # 摩擦前馈幅值（零向量 = 无补偿，行为与历史实现一致）
+        self.frictionloss = (np.zeros(self.n) if frictionloss is None
+                             else np.asarray(frictionloss, dtype=float).reshape(self.n))
+        self._friction_v0 = 0.01  # tanh 平滑化速度阈值 [rad/s]
 
         # 期望姿态（世界系 3×3）
         if r_des is None:
@@ -269,6 +291,9 @@ class HQPAdaptiveController:
         M = np.triu(M) + np.triu(M, 1).T  # crba 只保证上三角，显式对称化
         pin.computeCoriolisMatrix(self.model, self.data, q, v)
         h = np.array(self.data.C) @ v
+        # 关节摩擦前馈（Pinocchio 模型不含 frictionloss，仿真侧有）：
+        # 并入 ĥ 使力矩硬约束与输出力矩自动一致
+        h = h + self.frictionloss * np.tanh(v / self._friction_v0)
 
         # 任务空间惯性 Λ 及其逆（Λ⁻¹ = J M⁻¹ Jᵀ，pinv 稳健化后对称化）
         M_inv = np.linalg.pinv(M)

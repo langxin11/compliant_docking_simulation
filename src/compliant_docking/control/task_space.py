@@ -26,7 +26,9 @@ class TaskSpaceController:
     """
     def __init__(self, robot_model: pin.Model, dt: float,
                  impedance: ImpedanceConfig | None = None,
-                 ee_frame: str = "cylinder_link"):
+                 ee_frame: str = "cylinder_link",
+                 frictionloss: np.ndarray | None = None,
+                 friction_integral_gain: float | None = None):
         """
         初始化控制器：设定 Pinocchio 模型、步长与阻抗参数 /
         Initialize controller: set Pinocchio model, time step and impedance params
@@ -38,7 +40,15 @@ class TaskSpaceController:
             ee_frame: 末端 frame 名（由模型/场景决定；默认值为组合 URDF 的
                 ``cylinder_link``，即 iiwa14 + 公头圆柱场景的历史名称） /
                 end-effector frame name (decided by model/scene; default is the
-                historical name of the iiwa14 combined URDF)
+                historical name of the iiwa combined URDF)
+            frictionloss: 关节摩擦损耗幅值 [N·m]（nq 维；None 时取零向量）。
+                Pinocchio 的 MJCF/URDF 导入不保留 frictionloss，需由调用方
+                从组装 MjModel 的 dof_frictionloss 传入；控制器以前馈
+                τ_ff = frictionloss·tanh(q̇/v₀) 补偿（v₀=0.01 rad/s 平滑化） /
+                joint friction-loss magnitudes for feedforward compensation
+            friction_integral_gain: 任务空间积分增益 [N/(m·s)]，用于克服
+                静摩擦死区（前馈在零速时消失）。None 时自动：摩擦非零取
+                150.0，否则 0（iiwa14 零摩擦路径行为不变）
 
         注意：重力置零由 compliant_docking.models.load_pin_model 负责（加载时统一处理）/
         Note: gravity zeroing is owned by compliant_docking.models.load_pin_model
@@ -53,6 +63,20 @@ class TaskSpaceController:
 
         self.Kp = np.diag([0.] * 3)
         self.Kd = np.diag([0.] * 3)
+
+        # 摩擦前馈幅值（零向量 = 无补偿，行为与历史实现一致）
+        self.frictionloss = (np.zeros(self.model.nq) if frictionloss is None
+                             else np.asarray(frictionloss, dtype=float).reshape(self.model.nq))
+        self._friction_v0 = 0.01  # tanh 平滑化速度阈值 [rad/s]
+
+        # 静摩擦死区的积分补偿（速度前馈在零速时消失，I 项负责稳态残差；
+        # 摩擦为零时增益恒 0，历史行为不变）。积分力限幅 ±10N 防饱和。
+        if friction_integral_gain is None:
+            self._ki = 150.0 if np.any(self.frictionloss) else 0.0
+        else:
+            self._ki = float(friction_integral_gain)
+        self._i_clamp_force = 10.0  # [N]
+        self._i_err = np.zeros(3)
 
         # 末端 frame id（由 ee_frame 参数决定，方法内统一复用）
         self.end_effector_id = self.model.getFrameId(ee_frame)
@@ -159,7 +183,19 @@ class TaskSpaceController:
 
         # 7) 平动阻抗：Md (xdd - xdd_des) + Dd (xd - xd_des) + Kd (x - x_des) = F_ext - F_des
         #    整理得到期望操作空间加速度/力输入 u_pos
-        u_pos = (acc_des + (force_ext - force_desired - imp.d * (current_vel - vel_des)
+        if self._ki > 0.0:
+            # 积分补偿（摩擦非零时启用）：积累位置误差产生额外恢复力，
+            # 上限 ±_i_clamp_force N 防积分饱和。接触后（|f_ext|>1N）冻结
+            # 积累，避免 I 项在对接预紧上持续加力
+            if np.linalg.norm(force_ext) < 1.0:
+                self._i_err = np.clip(self._i_err + (pos_des - current_pos) * self.dt,
+                                      -self._i_clamp_force / self._ki,
+                                      self._i_clamp_force / self._ki)
+            force_integral = self._ki * self._i_err
+        else:
+            force_integral = np.zeros(3)
+        u_pos = (acc_des + (force_ext + force_integral - force_desired
+                            - imp.d * (current_vel - vel_des)
                             - imp.k * (current_pos - pos_des)) / imp.m)
 
         # 8) 姿态阻抗：类似 PD，在角速度误差与姿态误差上施加控制 /
@@ -187,6 +223,10 @@ class TaskSpaceController:
 
         # 12) 合成关节力矩：主任务项（含前馈与科氏/离心补偿）+ 零空间阻尼
         tau = lambda_ @ (u - J_dot @ v + J_full @ M_inv @ (C)) + null_term2
+
+        # 13) 关节摩擦前馈补偿（Pinocchio 模型不含 frictionloss，仿真侧有：
+        #     smooth tanh 逼近库仑摩擦，零摩擦时该项恒为零）
+        tau = tau + self.frictionloss * np.tanh(v / self._friction_v0)
 
         return tau
 
