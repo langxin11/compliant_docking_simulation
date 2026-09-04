@@ -18,6 +18,8 @@ tool:
   mjcf: assets/interfaces/male_cone.xml         # 花冠公头（与 iiwa14 场景同款接口片段）
   prefix: tool_
   pose: {pos: [0.0, 0.0, 0.015], quat: [1.0, 0.0, 0.0, 0.0]}
+  # Pinocchio 的 FR3 基模型不含运行时 attach 的工具；数值与 male_cone.xml 完全一致。
+  pin_inertia: {mass: 1.0, com: [0.0, 0.0, 0.0], diaginertia: [0.1, 0.1, 0.1]}
 
 target:
   mjcf: assets/interfaces/female_socket.xml     # 花冠母头（与 iiwa14 场景同款接口片段）

@@ -69,6 +69,15 @@ class RobotSpec:
 
 
 @dataclass(frozen=True)
+class ToolInertiaSpec:
+    """需追加入 Pinocchio 的固定工具惯量（MuJoCo 工具片段已有同一惯量）。"""
+
+    mass: float
+    com: np.ndarray
+    diaginertia: np.ndarray
+
+
+@dataclass(frozen=True)
 class ToolSpec:
     """公头工具片段：根 body 必须叫 ``dock``，须含 ``sensor_site`` site。"""
 
@@ -76,6 +85,7 @@ class ToolSpec:
     prefix: str
     pose_pos: np.ndarray  # 相对 robot.ee_site 的平移
     pose_quat: np.ndarray  # 相对 robot.ee_site 的旋转（wxyz）
+    pin_inertia: ToolInertiaSpec | None = None
 
 
 @dataclass(frozen=True)
@@ -357,6 +367,11 @@ def load_scene(path: str | Path) -> Scene:
             prefix=str(tool["prefix"]),
             pose_pos=np.asarray(tool["pose"]["pos"], dtype=float),
             pose_quat=np.asarray(tool["pose"]["quat"], dtype=float),
+            pin_inertia=ToolInertiaSpec(
+                mass=float(tool["pin_inertia"]["mass"]),
+                com=np.asarray(tool["pin_inertia"]["com"], dtype=float),
+                diaginertia=np.asarray(tool["pin_inertia"]["diaginertia"], dtype=float),
+            ) if "pin_inertia" in tool else None,
         ),
         target=TargetSpec(
             mjcf=asset(target["mjcf"]),

@@ -234,7 +234,18 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
 
     # 1) 构建 Pinocchio 模型/数据（用于雅可比/动力学计算；重力由 load_pin_model 置零） /
     # 1) Build Pinocchio model/data (for Jacobians and dynamics; gravity zeroed by load_pin_model)
-    pin_model = load_pin_model(scene.robot.pin_model)
+    pin_kwargs = {}
+    if scene.tool.pin_inertia is not None:
+        inertia = scene.tool.pin_inertia
+        pin_kwargs = {
+            "tool_frame": scene.robot.ee_frame,
+            "tool_mount_pos": scene.tool.pose_pos,
+            "tool_mount_quat": scene.tool.pose_quat,
+            "tool_mass": inertia.mass,
+            "tool_com": inertia.com,
+            "tool_diaginertia": inertia.diaginertia,
+        }
+    pin_model = load_pin_model(scene.robot.pin_model, **pin_kwargs)
     pin_data = pin_model.createData()
 
     # 任务初始条件（先于控制器构建提取，供 IK 与 HQP 期望姿态使用） /
@@ -247,6 +258,7 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
     # controllers' friction feedforward so compensation matches simulation
     mj_model = scene.build_mjmodel()
     frictionloss = mj_model.dof_frictionloss.copy()
+    damping = mj_model.dof_damping.copy()
 
     # 控制器装配：impedance = 固定增益任务空间阻抗（历史主路径，行为不变）；
     # hqp = HQP-AC（同签名鸭子类型替换，力矩硬约束取 ±cfg.max_torque，
@@ -267,18 +279,20 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
         print(f"阻抗覆盖: k={imp_cfg.k} d={imp_cfg.d} k_rot={imp_cfg.k_rot} d_rot={imp_cfg.d_rot}")
     if controller == "impedance":
         task_dynamics = TaskSpaceController(pin_model, cfg.dt, imp_cfg, ee_frame=scene.robot.ee_frame,
-                                            frictionloss=frictionloss)
+                                            frictionloss=frictionloss, damping=damping)
     elif controller == "hqp":
         task_dynamics = HQPAdaptiveController(
             pin_model, cfg.dt, HQPConfig(torque_limit=cfg.max_torque),
             ee_frame=scene.robot.ee_frame, r_des=init_ori, frictionloss=frictionloss,
-            impedance=imp_cfg)
+            damping=damping, impedance=imp_cfg)
         print(f"控制器: HQP-AC（Ren & Shan 2026 §3.2，关节位置/速度/力矩 QP 硬约束 + "
               f"接触力自适应刚度；力矩约束 ±{cfg.max_torque} N·m）")
     else:
         raise ValueError(f"未知控制器: {controller!r}（可选 'impedance' 或 'hqp'）")
     if np.any(frictionloss > 0):
         print(f"摩擦前馈: frictionloss={np.round(frictionloss, 3)} N·m（取自组装模型 dof_frictionloss）")
+    if np.any(damping > 0):
+        print(f"阻尼前馈: dof_damping={np.round(damping, 3)} N·m·s/rad（取自组装模型）")
 
     # 计算初始位姿的逆运动学，得到初始关节位置 /
     # Compute IK for initial pose to get initial joint configuration

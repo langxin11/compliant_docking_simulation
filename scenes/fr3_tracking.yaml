@@ -15,6 +15,8 @@ tool:
   mjcf: assets/interfaces/male_cone.xml         # 花冠公头（与 iiwa14 场景同款接口片段）
   prefix: tool_
   pose: {pos: [0.0, 0.0, 0.015], quat: [1.0, 0.0, 0.0, 0.0]}
+  # Pinocchio 的 FR3 基模型不含运行时 attach 的工具；数值与 male_cone.xml 完全一致。
+  pin_inertia: {mass: 1.0, com: [0.0, 0.0, 0.0], diaginertia: [0.1, 0.1, 0.1]}
 
 physics:
   timestep: 0.001
@@ -25,8 +27,10 @@ physics:
   sdf_initpoints: 40
 
 impedance:                                # FR3 真实摩擦下的刚度覆盖（静摩擦死区 ∝ 1/k）
-  k: 300.0
-  d: 100.0
+  k: 500.0
+  d: 140.0
+  k_rot: 100.0
+  d_rot: 20.0
 
 task:
   init_pos: [0.0, 0.5, 0.5]
@@ -36,3 +40,12 @@ task:
 
 trajectory:                               # 圆+8字跟踪测试（其余参数走 TrajectorySpec 默认值）
   type: tracking
+
+# 自由空间跟踪门禁（单位：m、rad；max_contacts 为 MuJoCo 接触对数）。
+tracking_thresholds:
+  circle_position_rms_m: 0.005
+  figure8_position_rms_m: 0.005
+  position_peak_m: 0.015
+  orientation_rms_rad: 0.008726646259971648  # 0.5 deg
+  torque_saturation_ratio: 0.01
+  max_contacts: 0

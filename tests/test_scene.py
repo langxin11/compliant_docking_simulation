@@ -11,6 +11,7 @@
 """
 import mujoco
 import numpy as np
+import pinocchio as pin
 import pytest
 
 from compliant_docking.models import ASSETS_DIR, load_pin_model
@@ -224,6 +225,46 @@ def test_fr3_pin_model_from_mjcf(fr3_scene):
     assert model.getFrameId("attachment_site") < model.nframes
 
 
+def test_fr3_pin_tool_inertia_matches_assembled_mujoco_mass_matrix(fr3_scene):
+    """FR3 的运行时工具载荷须在多个位形下与 MuJoCo 质量矩阵一致。"""
+    inertia = fr3_scene.tool.pin_inertia
+    assert inertia is not None
+    pin_model = load_pin_model(
+        fr3_scene.robot.pin_model,
+        tool_frame=fr3_scene.robot.ee_frame,
+        tool_mount_pos=fr3_scene.tool.pose_pos,
+        tool_mount_quat=fr3_scene.tool.pose_quat,
+        tool_mass=inertia.mass,
+        tool_com=inertia.com,
+        tool_diaginertia=inertia.diaginertia,
+    )
+    mj_model = fr3_scene.build_mjmodel()
+    mj_data = mujoco.MjData(mj_model)
+    pin_data = pin_model.createData()
+    rng = np.random.default_rng(2026)
+    q_samples = [fr3_scene.task.ik_guess.copy()]
+    q_samples.extend(
+        np.clip(
+            fr3_scene.task.ik_guess + rng.uniform(-0.4, 0.4, pin_model.nq),
+            pin_model.lowerPositionLimit + 0.05,
+            pin_model.upperPositionLimit - 0.05,
+        )
+        for _ in range(8)
+    )
+
+    for q in q_samples:
+        pin_mass = np.array(pin.crba(pin_model, pin_data, q))
+        pin_mass = np.triu(pin_mass) + np.triu(pin_mass, 1).T
+
+        mj_data.qpos[:] = q
+        mujoco.mj_forward(mj_model, mj_data)
+        mj_mass = np.zeros((mj_model.nv, mj_model.nv))
+        mujoco.mj_fullM(mj_model, mj_data, mj_mass)
+
+        relative_error = np.linalg.norm(pin_mass - mj_mass) / np.linalg.norm(mj_mass)
+        assert relative_error < 1e-10
+
+
 # ---- 跟踪测试场景（无母头，圆+8字轨迹） ----
 
 TRACKING_SCENE_YAMLS = [
@@ -240,6 +281,9 @@ def test_tracking_scenes_load_and_build(scene_yaml):
     assert scene.target is None
     assert scene.trajectory is not None
     assert scene.trajectory.type == "tracking"
+    assert scene.tracking_thresholds is not None
+    assert scene.tracking_thresholds.circle_position_rms_m == pytest.approx(0.005)
+    assert scene.tracking_thresholds.max_contacts == 0
 
     model = scene.build_mjmodel()
     assert model.nq == 7
@@ -261,3 +305,20 @@ def test_trajectory_spec_type_validation(tmp_path):
     message = str(exc_info.value)
     assert "lissajous" in message  # 含非法值
     assert "twophase" in message and "tracking" in message  # 含合法取值
+
+
+def test_tracking_scene_rejects_target(tmp_path):
+    """自由空间门禁不得误挂母头，否则跟踪指标会混入接触动力学。"""
+    base = (REPO_ROOT / "scenes" / "iiwa14_tracking.yaml").read_text(encoding="utf-8")
+    bad_path = tmp_path / "tracking_with_target.yaml"
+    bad_path.write_text(
+        base
+        + "\ntarget:\n"
+        + "  mjcf: assets/interfaces/female_socket.xml\n"
+        + "  prefix: target_\n"
+        + "  pose: {pos: [0.0, 0.5, 0.3], quat: [1.0, 0.0, 0.0, 0.0]}\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="tracking 场景不得配置 target"):
+        load_scene(bad_path)
