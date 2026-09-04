@@ -113,4 +113,7 @@ class Log:
         # Lazy import: telemetry stays importable without scienceplots installed
         from compliant_docking.plotting import plot_docking_log
 
-        return plot_docking_log(self, save_path, scene_name=scene_name)
+        # 每个场景一个子目录，避免多场景图件在 figure/ 根下混放 /
+        # One subdirectory per scene keeps multi-scene figures out of figure/ root
+        out_dir = Path(save_path) / scene_name if scene_name is not None else Path(save_path)
+        return plot_docking_log(self, out_dir, scene_name=scene_name)
