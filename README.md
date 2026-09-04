@@ -175,6 +175,15 @@ uv run docking --scene scenes/fr3_docking.yaml --quick      # FR3 对接
 
 新增场景：复制一份现有 YAML，替换 `robot` 段的资产路径与 `task` 段的初始条件（`ik_guess` 换成新机械臂的 home 位形）即可；公头/母头片段可直接复用 `assets/interfaces/` 下的 `male_cone.xml` / `female_socket.xml`。
 
+### 摩擦前馈模式
+
+带真实减速器摩擦的机械臂（FR3）可用场景级开关 `friction_comp:` 选择摩擦前馈模式（缺省 `velocity`）：
+
+- **`velocity`**：`τ_ff = f·tanh(q̇/0.01)`——运动中补偿精确，但零速时补偿消失，低速任务（如对接接近段）易发"粘-弹"振荡；
+- **`torque`**：`τ_ff = f·tanh(τ_pre/(f/2))`——用补偿前力矩方向决定摩擦方向，力矩一出即被抬过静摩擦阈值，治零速死区。
+
+实测（FR3 对接场景）：torque 模式把接触前最大横向偏差从 5.2 mm 压到 2.1 mm，速度比振荡从 0.10–3.91 收敛到 0.35–1.20，接触峰值轴向力 37.4→27.2 N。快速自由空间跟踪（速度前馈已饱和）保持 `velocity` 模式即可，跟踪门禁基线在该模式下校准。
+
 ## 绘图风格
 
 项目绘图统一走 [SciencePlots](https://github.com/garrettj403/SciencePlots) 的 `["science", "ieee", "no-latex"]` 风格（IEEE 单栏、不依赖 LaTeX），并叠加 Noto CJK 中文字体回退与 `axes.unicode_minus=False`（规避中文字体缺 U+2212 负号的问题）。入口：`compliant_docking.plotting.apply_style()` 与 `plot_docking_log(log, out_dir, scene_name=...)`，每张图同时输出 PNG + PDF。运行 `docking --scene ...` 完成后图件按场景归档在 `figure/<场景名>/`（如 `figure/iiwa14_docking/`），文件名带场景前缀。
