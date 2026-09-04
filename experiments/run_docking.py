@@ -32,7 +32,14 @@ import pinocchio as pin
 from compliant_docking.config import DockingConfig, HQPConfig, ImpedanceConfig
 from compliant_docking.control.hqp_ac import HQPAdaptiveController
 from compliant_docking.control.task_space import TaskSpaceController
-from compliant_docking.metrics import compute_metrics, format_metrics, tracking_summary
+from compliant_docking.metrics import (
+    TrackingThresholds,
+    compute_metrics,
+    compute_tracking_metrics,
+    evaluate_tracking_gate,
+    format_metrics,
+    format_tracking_gate,
+)
 from compliant_docking.models import load_pin_model
 from compliant_docking.planning.kinematics import compute_ik
 from compliant_docking.planning.trajectory import (
@@ -47,7 +54,9 @@ from compliant_docking.telemetry import Log
 
 def run_simulation(muj_robot:MujRobot,
                    task_dynamics:TaskSpaceController | HQPAdaptiveController,
-                   trajector_planner:DecoupledQuinticTrajectory,
+                   trajector_planner: DecoupledQuinticTrajectory
+                   | TwoPhaseDockingTrajectory
+                   | CircleFigure8Trajectory,
                    log:Log,
                    cfg:DockingConfig,
                    q_init:np.ndarray,
@@ -83,12 +92,13 @@ def run_simulation(muj_robot:MujRobot,
 
 
     q = q_init
-    v = np.zeros(7)
+    v = np.zeros(task_dynamics.model.nv)
 
     current_pos, current_vel, _ = task_dynamics.get_task_space_state(q, v)
 
     force_external = np.zeros(3)
     torque_external = np.zeros(3)
+    is_tracking = scene is not None and scene.trajectory is not None and scene.trajectory.type == "tracking"
 
 
     while muj_robot.data.time < cfg.duration:
@@ -101,12 +111,13 @@ def run_simulation(muj_robot:MujRobot,
 
         # 2) 任务空间控制（含平动/姿态阻抗与外力补偿）→ 得到关节力矩 tau /
         # 2) Task-space control (translation/rotation impedance + external force) → joint torques tau
-        tau = task_dynamics.compute_control_task_space_with_orientation_and_imp(
+        tau_unclipped = task_dynamics.compute_control_task_space_with_orientation_and_imp(
             q, v, pos_des, vel_des, acc_des, current_pos, current_vel, force_external, torque_external)
 
         # 力矩限幅以防止过大的控制输入导致碰撞检测失败 /
         # Clamp torques to prevent excessive control inputs that cause collision detection failure
-        tau = np.clip(tau, -cfg.max_torque, cfg.max_torque)
+        torque_saturated = bool(np.any(np.abs(tau_unclipped) > cfg.max_torque))
+        tau = np.clip(tau_unclipped, -cfg.max_torque, cfg.max_torque)
 
         # 3) 将 tau 写入 MuJoCo，并推进一步物理仿真 /
         # 3) Apply tau to MuJoCo and advance one simulation step
@@ -116,8 +127,7 @@ def run_simulation(muj_robot:MujRobot,
             print(f"\nSimulation error at t={t:.3f}s: {e}")
             print(f"Torques: {tau}")
             print(f"Joint positions: {q}")
-            print("Breaking simulation loop...")
-            break
+            raise RuntimeError(f"仿真在 t={t:.3f}s 异常终止") from e
         #print(f"Current time: {t}, End-effector position: {q},tau: {v}",)
 
         # 4) 使用 Pinocchio 更新当前末端状态（位置/速度/姿态） /
@@ -138,11 +148,16 @@ def run_simulation(muj_robot:MujRobot,
         # 6) Rotate sensor data with current EE rotation to controller’s reference frame
         # 注意：变换方向取决于 `current_ori` 的参考系定义，需与传感器坐标系一致 /
         # Note: direction depends on `current_ori` definition and sensor frame
-        force_external = current_ori @ force_sensor
-
-        torque_external = current_ori @ torque_sensor
-
-        print(f"current_time:{t},force_external:{force_external}")
+        measured_force = current_ori @ force_sensor
+        measured_torque = current_ori @ torque_sensor
+        # 自由空间跟踪是柔顺接触前置门禁：保留传感器遥测，但绝不把 F/T
+        # 反馈回控制器，避免偶发噪声或虚假接触污染基础跟踪性能。
+        if is_tracking:
+            force_external = np.zeros(3)
+            torque_external = np.zeros(3)
+        else:
+            force_external = measured_force
+            torque_external = measured_torque
 
         #print('current:',current_pos,"current_ori:",current_ori)
 
@@ -159,8 +174,10 @@ def run_simulation(muj_robot:MujRobot,
             t, q, v, current_pos, current_vel,
             np.linalg.norm(current_pos - pos_des),
             pos_des, vel_des, acc_des, tau,
-            force_external, torque_external,
-            orientation_error=ori_err_vec)
+            measured_force, measured_torque,
+            orientation_error=ori_err_vec,
+            torque_saturated=torque_saturated,
+            contact_count=muj_robot.data.ncon)
 
 
     log.plot_results(save_path="figure/",
@@ -371,14 +388,26 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
 
     # 4) 性能指标输出：
     #    - 跟踪测试模式：跳过对接指标（无接触/无对接轴），改为按轨迹段打印
-    #      位置跟踪统计（tracking_summary）；
+    #      位置/姿态误差、力矩限幅与接触数，并执行结构化 PASS/FAIL 门禁；
     #    - 对接模式：对接性能指标（Ren & Shan 2026, Acta Astronautica,
     #      Table 10 三层指标），复用前已构建的 pin_model（不重复加载）；
     #      对接轴 = 轨迹推进方向（stroke）归一化。
     #    本阶段指标仅打印到 stdout（不落盘），打印必须发生在 CLI 汇总行之前 /
     #    Print metrics to stdout only (no persistence), before the CLI summary line
     if is_tracking:
-        print(tracking_summary(log, trajector_planner.segments))
+        tracking_metrics = compute_tracking_metrics(log, trajector_planner.segments)
+        last_sample_time = log.t_list[-1] if log.t_list else float("-inf")
+        tracking_gate = evaluate_tracking_gate(
+            tracking_metrics,
+            scene.tracking_thresholds or TrackingThresholds(),
+            # 日志记录的是步进前时刻，因此容许一个控制周期；按实际日志覆盖范围
+            # 判定，不能只相信请求的 duration（仿真若提前退出不得误报完整）。
+            complete=last_sample_time + cfg.dt >= trajector_planner.total_duration,
+        )
+        # 附加在既有 Log 返回值上，保持 main() 的历史调用接口不变。
+        log.tracking_metrics = tracking_metrics
+        log.tracking_gate = tracking_gate
+        print(format_tracking_gate(tracking_gate))
     else:
         axis = scene.task.stroke / np.linalg.norm(scene.task.stroke)
         metrics = compute_metrics(log, pin_model, axis=axis, ee_frame=scene.robot.ee_frame)
@@ -388,6 +417,3 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
 
 if __name__ == '__main__':
     main(render=False, record=True, dt=0.001, traj_duration=15.0, duration=18.0)
-
-
-

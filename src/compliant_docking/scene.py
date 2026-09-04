@@ -21,6 +21,8 @@ import mujoco
 import numpy as np
 import yaml
 
+from .metrics import TrackingThresholds
+
 # 仓库根目录（与 models.py 的 ASSETS_DIR 同口径：src/<pkg>/scene.py 上溯 3 级）
 REPO_ROOT = Path(__file__).resolve().parents[2]
 
@@ -186,6 +188,7 @@ class Scene:
     path: Path  # 场景 YAML 的绝对路径
     target: TargetSpec | None = None  # 可选：跟踪测试场景不挂母头
     trajectory: TrajectorySpec | None = None  # 可选轨迹段（两段式对接 / 圆+8字跟踪；缺省走单段五次）
+    tracking_thresholds: TrackingThresholds | None = None  # 跟踪门禁阈值（只在 type=tracking 时使用）
     impedance: ImpedanceOverride | None = None  # 可选阻抗增益覆盖（缺省走 ImpedanceConfig）
 
     # ---- 解析后的名称属性（下阶段接线时使用） ----
@@ -324,6 +327,7 @@ def load_scene(path: str | Path) -> Scene:
     # trajectory 段解析后校验 type 合法取值，再构造 TrajectorySpec /
     # Validate trajectory.type against the legal values before constructing the spec
     trajectory = None
+    tracking_thresholds = None
     if "trajectory" in raw:
         traj_type = str(raw["trajectory"].get("type", "twophase"))
         if traj_type not in _TRAJECTORY_TYPES:
@@ -331,6 +335,14 @@ def load_scene(path: str | Path) -> Scene:
             raise ValueError(
                 f"scene 配置 trajectory.type 不支持 {traj_type!r}，可选值: {options}")
         trajectory = TrajectorySpec(**raw["trajectory"])
+        if traj_type == "tracking":
+            if target is not None:
+                raise ValueError(
+                    "tracking 场景不得配置 target；自由空间跟踪必须与对接接触隔离")
+            # 允许顶层 tracking_thresholds；缺省严格采用对接前门禁默认阈值。
+            # 显式拒绝未知键，避免 YAML 拼写错误悄悄放宽验收。
+            threshold_raw = raw.get("tracking_thresholds", {})
+            tracking_thresholds = TrackingThresholds(**threshold_raw)
 
     return Scene(
         name=str(scene["name"]),
@@ -368,5 +380,6 @@ def load_scene(path: str | Path) -> Scene:
         ),
         path=scene_path,
         trajectory=trajectory,
+        tracking_thresholds=tracking_thresholds,
         impedance=impedance,
     )

@@ -75,6 +75,11 @@ def main(argv: list[str] | None = None) -> int:
     total_steps = len(log.t_list)
     final_err = log.error[-1] if log.error else float("nan")
     print(f"[docking] steps={total_steps} final_tracking_error={final_err:.6e} m")
+    # 跟踪场景是柔顺对接的前置门禁：完整运行且门禁失败时以非零退出。
+    # --quick 的短时运行会由实验层标为 INCOMPLETE，不视为失败。
+    tracking_gate = getattr(log, "tracking_gate", None)
+    if tracking_gate is not None and tracking_gate.status == "FAIL":
+        return 2
     return 0
 
 

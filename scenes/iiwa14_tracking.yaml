@@ -32,3 +32,12 @@ task:                                     # 任务初始条件（与对接场景
 
 trajectory:                               # 圆+8字跟踪测试（其余参数走 TrajectorySpec 默认值）
   type: tracking
+
+# 自由空间跟踪通过后才进入柔顺力控对接。单位：m、rad；max_contacts 为 MuJoCo 接触对数。
+tracking_thresholds:
+  circle_position_rms_m: 0.005
+  figure8_position_rms_m: 0.005
+  position_peak_m: 0.015
+  orientation_rms_rad: 0.008726646259971648  # 0.5 deg
+  torque_saturation_ratio: 0.01
+  max_contacts: 0

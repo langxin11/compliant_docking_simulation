@@ -43,6 +43,10 @@ class Log:
         self.acc_desired = []
 
         self.tau_hist = []
+        # 每步控制输入是否触及软件力矩限幅、MuJoCo 当前接触对数量。
+        # 保留为独立时序，便于自由空间跟踪作为对接前门禁时审计。
+        self.torque_saturated = []
+        self.contact_counts = []
         self.force_externals = []
         self.torque_externals = []
 
@@ -58,7 +62,8 @@ class Log:
                    pos_desired: np.ndarray, vel_desired: np.ndarray,
                    acc_desired: np.ndarray, tau: np.ndarray,
                    external_force: np.ndarray, external_torque: np.ndarray,
-                   *, orientation_error: np.ndarray | None = None):
+                   *, orientation_error: np.ndarray | None = None,
+                   torque_saturated: bool = False, contact_count: int = 0):
         """
         存储数据（单步）：时间、关节状态、末端状态、期望轨迹、力矩及外力
         Args:
@@ -71,6 +76,8 @@ class Log:
             tau: 控制器计算的关节力矩
             external_force/external_torque: 传感器外力/力矩（控制参考系）
             orientation_error: 末端姿态误差向量（世界系，可选；None 时不记录）
+            torque_saturated: 本步控制量是否触及软件力矩限幅（可选，默认 False）
+            contact_count: 本步 MuJoCo 接触对数量（可选，默认 0）
         """
 
         self.t_list.append(t)
@@ -88,6 +95,8 @@ class Log:
         self.acc_desired.append(acc_desired)
 
         self.tau_hist.append(tau)
+        self.torque_saturated.append(bool(torque_saturated))
+        self.contact_counts.append(int(contact_count))
         self.force_externals.append(external_force)
         self.torque_externals.append(external_torque)
 

@@ -4,13 +4,23 @@
 无渲染/无录帧/无逐行打印），并以 log3(R_d R^T) 逐 step 记录世界系姿态误差，
 供姿态指标断言。运行方式：pytest -m "not slow"（默认套件）。
 """
+from dataclasses import replace
+
 import numpy as np
 import pinocchio as pin
 import pytest
 
 from compliant_docking.config import ImpedanceConfig
 from compliant_docking.control.task_space import TaskSpaceController
-from compliant_docking.metrics import compute_metrics, format_metrics, tracking_summary
+from compliant_docking.metrics import (
+    TrackingThresholds,
+    compute_metrics,
+    compute_tracking_metrics,
+    evaluate_tracking_gate,
+    format_metrics,
+    format_tracking_gate,
+    tracking_summary,
+)
 from compliant_docking.models import load_pin_model
 from compliant_docking.planning.kinematics import compute_ik
 from compliant_docking.planning.trajectory import DecoupledQuinticTrajectory
@@ -190,3 +200,112 @@ def test_tracking_summary_synthetic():
     assert "全时程" in text
     # 全时程：10×1mm + 10×2mm → RMS = sqrt(2.5) ≈ 1.5811 mm，峰值 2.0000 mm
     assert "1.5811" in text
+
+
+def test_tracking_gate_metrics_pass_fail_and_incomplete():
+    """门禁含分段/全程姿态统计、接触/限幅遥测，并明确区分 INCOMPLETE。"""
+    log = Log()
+    log.reset_logs()
+    segments = [("圆周", 0.0, 1.0), ("8字", 1.0, 2.0)]
+    for k in range(20):
+        t = k * 0.1
+        log.store_data(
+            t, np.zeros(7), np.zeros(7), np.zeros(3), np.zeros(3), 0.001,
+            np.zeros(3), np.zeros(3), np.zeros(3), np.full(7, 2.0),
+            np.zeros(3), np.zeros(3), orientation_error=np.array([0.001, 0.0, 0.0]),
+            torque_saturated=False, contact_count=0,
+        )
+
+    metrics = compute_tracking_metrics(log, segments)
+    assert metrics.segment("圆周").position_rms_m == pytest.approx(0.001)
+    assert metrics.overall.orientation_peak_rad == pytest.approx(0.001)
+    assert metrics.peak_joint_torque_Nm == pytest.approx(2.0)
+    assert metrics.torque_saturation_ratio == pytest.approx(0.0)
+    assert metrics.max_contacts == 0
+
+    passed = evaluate_tracking_gate(metrics, TrackingThresholds(), complete=True)
+    assert passed.status == "PASS"
+    assert "PASS" in format_tracking_gate(passed)
+
+    incomplete = evaluate_tracking_gate(metrics, TrackingThresholds(), complete=False)
+    assert incomplete.status == "INCOMPLETE"
+    assert "未作为门禁失败" in format_tracking_gate(incomplete)
+
+    bad_log = Log()
+    bad_log.reset_logs()
+    bad_log.store_data(
+        0.0, np.zeros(7), np.zeros(7), np.zeros(3), np.zeros(3), 0.020,
+        np.zeros(3), np.zeros(3), np.zeros(3), np.zeros(7), np.zeros(3), np.zeros(3),
+        orientation_error=np.array([0.02, 0.0, 0.0]), torque_saturated=True, contact_count=1,
+    )
+    bad = evaluate_tracking_gate(compute_tracking_metrics(bad_log, [("圆周", 0.0, 1.0), ("8字", 0.0, 1.0)]),
+                                TrackingThresholds(), complete=True)
+    assert bad.status == "FAIL"
+    assert bad.failures
+
+
+@pytest.mark.parametrize("nonfinite", [float("nan"), float("inf")])
+def test_tracking_gate_fails_closed_for_nonfinite_metrics_and_thresholds(nonfinite):
+    """NaN/inf 不能通过数值比较的空洞绕过完整跟踪门禁。"""
+    log = Log()
+    log.reset_logs()
+    segments = [("圆周", 0.0, 1.0), ("8字", 1.0, 2.0)]
+    for k in range(20):
+        log.store_data(
+            k * 0.1, np.zeros(7), np.zeros(7), np.zeros(3), np.zeros(3), 0.001,
+            np.zeros(3), np.zeros(3), np.zeros(3), np.ones(7),
+            np.zeros(3), np.zeros(3), orientation_error=np.zeros(3),
+            torque_saturated=False, contact_count=0,
+        )
+    metrics = compute_tracking_metrics(log, segments)
+
+    invalid_metric = replace(metrics, peak_joint_torque_Nm=nonfinite)
+    metric_result = evaluate_tracking_gate(invalid_metric, TrackingThresholds(), complete=True)
+    assert metric_result.status == "FAIL"
+    assert any("峰值关节力矩" in failure and "非有限" in failure
+               for failure in metric_result.failures)
+
+    invalid_threshold = replace(TrackingThresholds(), circle_position_rms_m=nonfinite)
+    threshold_result = evaluate_tracking_gate(metrics, invalid_threshold, complete=True)
+    assert threshold_result.status == "FAIL"
+    assert any("圆周位置 RMS" in failure and "阈值" in failure
+               for failure in threshold_result.failures)
+
+
+def test_tracking_metrics_exclude_post_trajectory_hold_window():
+    """轨迹结束后的低误差保持段不得稀释窗口内误差、限幅或接触指标。"""
+    segments = [("圆周", 0.0, 1.0), ("8字", 1.0, 2.0)]
+
+    def add_sample(log: Log, t: float, error: float, torque: float,
+                   saturated: bool, contacts: int) -> None:
+        log.store_data(
+            t, np.zeros(7), np.zeros(7), np.zeros(3), np.zeros(3), error,
+            np.zeros(3), np.zeros(3), np.zeros(3), np.full(7, torque),
+            np.zeros(3), np.zeros(3), orientation_error=np.zeros(3),
+            torque_saturated=saturated, contact_count=contacts,
+        )
+
+    in_window = Log()
+    in_window.reset_logs()
+    for k in range(20):
+        # 单个测试窗内异常，后续大量零误差样本不应改变其统计结果。
+        add_sample(in_window, k * 0.1, 0.020 if k == 0 else 0.001,
+                   10.0 if k == 0 else 2.0, k == 0, 3 if k == 0 else 0)
+    reference = compute_tracking_metrics(in_window, segments)
+
+    with_hold = Log()
+    with_hold.reset_logs()
+    for k in range(20):
+        add_sample(with_hold, k * 0.1, 0.020 if k == 0 else 0.001,
+                   10.0 if k == 0 else 2.0, k == 0, 3 if k == 0 else 0)
+    for k in range(1000):
+        add_sample(with_hold, 2.0 + k * 0.1, 0.0, 0.0, False, 0)
+    held = compute_tracking_metrics(with_hold, segments)
+
+    expected_rms = np.sqrt((0.020 ** 2 + 19 * 0.001 ** 2) / 20)
+    assert reference.overall.position_rms_m == pytest.approx(expected_rms)
+    assert reference.overall.position_peak_m == pytest.approx(0.020)
+    assert reference.peak_joint_torque_Nm == pytest.approx(10.0)
+    assert reference.torque_saturation_ratio == pytest.approx(1.0 / 20.0)
+    assert reference.max_contacts == 3
+    assert held == reference

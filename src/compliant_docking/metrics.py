@@ -62,6 +62,57 @@ class DockingMetrics:
     max_joint_vel_joint: int | None = None
 
 
+@dataclass(frozen=True)
+class TrackingErrorMetrics:
+    """一个跟踪时间窗的位置和姿态误差统计（None 表示没有可用样本）。"""
+
+    position_rms_m: float | None = None
+    position_peak_m: float | None = None
+    orientation_rms_rad: float | None = None
+    orientation_peak_rad: float | None = None
+
+
+@dataclass(frozen=True)
+class TrackingMetrics:
+    """自由空间圆形/8 字跟踪门禁所需的完整测量结果。"""
+
+    segments: tuple[tuple[str, TrackingErrorMetrics], ...] = ()
+    overall: TrackingErrorMetrics = TrackingErrorMetrics()
+    peak_joint_torque_Nm: float | None = None
+    torque_saturation_ratio: float | None = None
+    max_contacts: int | None = None
+
+    def segment(self, name: str) -> TrackingErrorMetrics | None:
+        """按轨迹段名称查询指标，未知名称返回 None。"""
+        return dict(self.segments).get(name)
+
+
+@dataclass(frozen=True)
+class TrackingThresholds:
+    """自由空间跟踪通过柔顺对接前的默认门槛。"""
+
+    circle_position_rms_m: float = 0.005
+    figure8_position_rms_m: float = 0.005
+    position_peak_m: float = 0.015
+    orientation_rms_rad: float = float(np.deg2rad(0.5))
+    torque_saturation_ratio: float = 0.01
+    max_contacts: int = 0
+
+
+@dataclass(frozen=True)
+class TrackingGateResult:
+    """门禁判定；未跑完轨迹时 ``status`` 为 ``INCOMPLETE``。"""
+
+    metrics: TrackingMetrics
+    thresholds: TrackingThresholds
+    status: str
+    failures: tuple[str, ...] = ()
+
+    @property
+    def passed(self) -> bool:
+        return self.status == "PASS"
+
+
 def _stack(rows: list, cols: int) -> np.ndarray | None:
     """把逐 step 的等长向量列表堆叠为 (n, cols) 矩阵；为空或形状不符时返回 None。"""
     if len(rows) == 0:
@@ -294,4 +345,182 @@ def tracking_summary(log: Log, segments: Sequence[tuple[str, float, float]]) -> 
     else:
         lines.append(f"  {_label_pad('位置跟踪 RMS')}: {total[0]:.4f} mm")
         lines.append(f"  {_label_pad('峰值误差')}: {total[1]:.4f} mm")
+    return "\n".join(lines)
+
+
+def _tracking_error_metrics(position_errors: np.ndarray,
+                            orientation_errors: np.ndarray | None,
+                            mask: np.ndarray) -> TrackingErrorMetrics:
+    """从一个逐步掩码计算位置/姿态 RMS 与峰值。"""
+    pos = position_errors[mask]
+    ori = orientation_errors[mask] if orientation_errors is not None else np.empty(0)
+    return TrackingErrorMetrics(
+        position_rms_m=float(np.sqrt(np.mean(pos**2))) if pos.size else None,
+        position_peak_m=float(np.max(pos)) if pos.size else None,
+        orientation_rms_rad=float(np.sqrt(np.mean(ori**2))) if ori.size else None,
+        orientation_peak_rad=float(np.max(ori)) if ori.size else None,
+    )
+
+
+def compute_tracking_metrics(
+        log: Log, segments: Sequence[tuple[str, float, float]]) -> TrackingMetrics:
+    """从 ``Log`` 计算圆形/8 字跟踪门禁指标。
+
+    ``segments`` 使用轨迹规划器公开的 ``(name, start, end)`` 结构。姿态误差、
+    力矩限幅标记和接触数均是可选的向后兼容遥测字段；长度不匹配时相应指标为
+    ``None``，由门禁作为数据不足处理。
+    """
+    n_steps = len(log.t_list)
+    t_arr = np.asarray(log.t_list, dtype=float)
+    position_errors = np.asarray(log.error, dtype=float)
+    if t_arr.size != n_steps or position_errors.size != n_steps:
+        position_errors = np.empty(0)
+        t_arr = np.empty(0)
+
+    # 门禁的总指标只描述实际测试窗口，而非轨迹结束后的保持段。分段仍保持
+    # [start, end) 语义；总窗口按调用方给定的最早开始与最晚结束确定。
+    window_mask: np.ndarray | None = None
+    if position_errors.size and segments:
+        bounds = np.asarray([(start, end) for _, start, end in segments], dtype=float)
+        if bounds.shape == (len(segments), 2) and np.all(np.isfinite(bounds)) \
+                and np.all(bounds[:, 1] > bounds[:, 0]):
+            window_start = float(np.min(bounds[:, 0]))
+            window_end = float(np.max(bounds[:, 1]))
+            window_mask = (t_arr >= window_start) & (t_arr < window_end)
+
+    orientation_norms = None
+    if len(log.orientation_errors) == n_steps:
+        orientation_array = np.asarray(log.orientation_errors, dtype=float)
+        if orientation_array.shape == (n_steps, 3):
+            orientation_norms = np.linalg.norm(orientation_array, axis=1)
+
+    segment_metrics = tuple(
+        (name, _tracking_error_metrics(
+            position_errors, orientation_norms,
+            (t_arr >= start) & (t_arr < end),
+        ))
+        for name, start, end in segments
+    ) if position_errors.size else tuple(
+        (name, TrackingErrorMetrics()) for name, _, _ in segments
+    )
+    overall = _tracking_error_metrics(
+        position_errors, orientation_norms, window_mask,
+    ) if window_mask is not None else TrackingErrorMetrics()
+
+    tau = np.asarray(log.tau_hist, dtype=float)
+    peak_torque = None
+    if window_mask is not None and tau.ndim == 2 and tau.shape[0] == n_steps and tau.size:
+        tau_window = tau[window_mask]
+        if tau_window.size:
+            peak_torque = float(np.max(np.abs(tau_window)))
+
+    saturation = getattr(log, "torque_saturated", [])
+    saturation_ratio = None
+    if window_mask is not None and len(saturation) == n_steps and np.any(window_mask):
+        saturation_ratio = float(np.mean(np.asarray(saturation, dtype=bool)[window_mask]))
+
+    contacts = getattr(log, "contact_counts", [])
+    max_contacts = None
+    if window_mask is not None and len(contacts) == n_steps and np.any(window_mask):
+        max_contacts = int(np.max(np.asarray(contacts, dtype=int)[window_mask]))
+
+    return TrackingMetrics(
+        segments=segment_metrics,
+        overall=overall,
+        peak_joint_torque_Nm=peak_torque,
+        torque_saturation_ratio=saturation_ratio,
+        max_contacts=max_contacts,
+    )
+
+
+def evaluate_tracking_gate(metrics: TrackingMetrics, thresholds: TrackingThresholds,
+                           *, complete: bool) -> TrackingGateResult:
+    """按门槛判定跟踪测试；未完整覆盖轨迹只报告 ``INCOMPLETE``。"""
+    if not complete:
+        return TrackingGateResult(metrics, thresholds, "INCOMPLETE")
+
+    failures: list[str] = []
+
+    def is_finite_scalar(value: object) -> bool:
+        """门禁只接受有限标量；NaN/inf/非标量都必须 fail closed。"""
+        try:
+            return bool(np.isscalar(value) and np.isfinite(value))
+        except TypeError:
+            return False
+
+    def nonfinite(label: str, value: object) -> None:
+        if value is not None and not is_finite_scalar(value):
+            failures.append(f"{label}={value!r}（非有限或非标量）")
+
+    # 即使某项当前没有阈值，也不能让非有限遥测借由未参与比较而通过门禁。
+    for segment_name, stats in metrics.segments:
+        nonfinite(f"{segment_name}位置 RMS[m]", stats.position_rms_m)
+        nonfinite(f"{segment_name}位置峰值[m]", stats.position_peak_m)
+        nonfinite(f"{segment_name}姿态 RMS[rad]", stats.orientation_rms_rad)
+        nonfinite(f"{segment_name}姿态峰值[rad]", stats.orientation_peak_rad)
+    nonfinite("全程位置 RMS[m]", metrics.overall.position_rms_m)
+    nonfinite("全程位置峰值[m]", metrics.overall.position_peak_m)
+    nonfinite("全程姿态 RMS[rad]", metrics.overall.orientation_rms_rad)
+    nonfinite("全程姿态峰值[rad]", metrics.overall.orientation_peak_rad)
+    nonfinite("峰值关节力矩[Nm]", metrics.peak_joint_torque_Nm)
+    nonfinite("力矩限幅比例", metrics.torque_saturation_ratio)
+    nonfinite("最大接触数", metrics.max_contacts)
+
+    def upper_bound(label: str, value: float | int | None, limit: float | int) -> None:
+        if value is None:
+            failures.append(f"{label}=n/a（缺少数据）")
+        elif not is_finite_scalar(value):
+            return
+        elif not is_finite_scalar(limit):
+            failures.append(f"{label} 阈值={limit!r}（非有限或非标量）")
+        elif value > limit:
+            failures.append(f"{label}={value:.6g} > {limit:.6g}")
+
+    circle = metrics.segment("圆周")
+    figure8 = metrics.segment("8字")
+    upper_bound("圆周位置 RMS[m]", None if circle is None else circle.position_rms_m,
+                thresholds.circle_position_rms_m)
+    upper_bound("8字位置 RMS[m]", None if figure8 is None else figure8.position_rms_m,
+                thresholds.figure8_position_rms_m)
+    upper_bound("全程位置峰值[m]", metrics.overall.position_peak_m,
+                thresholds.position_peak_m)
+    upper_bound("全程姿态 RMS[rad]", metrics.overall.orientation_rms_rad,
+                thresholds.orientation_rms_rad)
+    upper_bound("力矩限幅比例", metrics.torque_saturation_ratio,
+                thresholds.torque_saturation_ratio)
+    upper_bound("最大接触数", metrics.max_contacts, thresholds.max_contacts)
+    return TrackingGateResult(
+        metrics, thresholds, "PASS" if not failures else "FAIL", tuple(failures))
+
+
+def format_tracking_gate(result: TrackingGateResult) -> str:
+    """以可审计的 PASS/FAIL/INCOMPLETE 文本格式输出跟踪门禁。"""
+    def metric(value: float | None, scale: float = 1.0, unit: str = "") -> str:
+        if value is None:
+            return "n/a"
+        return f"{value * scale:.4f}{unit}"
+
+    lines = ["=" * 64, f"自由空间跟踪门禁: {result.status}", "=" * 64]
+    for name, stats in result.metrics.segments:
+        lines.append(
+            f"  {name}: pos RMS {metric(stats.position_rms_m, 1e3, ' mm')}, "
+            f"peak {metric(stats.position_peak_m, 1e3, ' mm')}; "
+            f"ori RMS {metric(stats.orientation_rms_rad, 180.0 / np.pi, ' deg')}, "
+            f"peak {metric(stats.orientation_peak_rad, 180.0 / np.pi, ' deg')}")
+    overall = result.metrics.overall
+    lines.extend([
+        f"  全程: pos RMS {metric(overall.position_rms_m, 1e3, ' mm')}, "
+        f"peak {metric(overall.position_peak_m, 1e3, ' mm')}; "
+        f"ori RMS {metric(overall.orientation_rms_rad, 180.0 / np.pi, ' deg')}, "
+        f"peak {metric(overall.orientation_peak_rad, 180.0 / np.pi, ' deg')}",
+        f"  峰值关节力矩: {metric(result.metrics.peak_joint_torque_Nm, 1.0, ' N m')}",
+        f"  力矩限幅比例: {metric(result.metrics.torque_saturation_ratio, 100.0, '%')}",
+        f"  最大接触数: {result.metrics.max_contacts if result.metrics.max_contacts is not None else 'n/a'}",
+    ])
+    if result.status == "INCOMPLETE":
+        lines.append("  结果: INCOMPLETE（仿真时长不足，未作为门禁失败）")
+    elif result.failures:
+        lines.append("  失败项: " + "; ".join(result.failures))
+    else:
+        lines.append("  结果: PASS（可进入柔顺力控对接测试）")
     return "\n".join(lines)
