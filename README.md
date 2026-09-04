@@ -177,7 +177,7 @@ uv run docking --scene scenes/fr3_docking.yaml --quick      # FR3 对接
 
 ## 绘图风格
 
-项目绘图统一走 [SciencePlots](https://github.com/garrettj403/SciencePlots) 的 `["science", "ieee", "no-latex"]` 风格（IEEE 单栏、不依赖 LaTeX），并叠加 Noto CJK 中文字体回退与 `axes.unicode_minus=False`（规避中文字体缺 U+2212 负号的问题）。入口：`compliant_docking.plotting.apply_style()` 与 `plot_docking_log(log, out_dir, scene_name=...)`，每张图同时输出 PNG + PDF。运行 `docking --scene ...` 完成后图件落在 `figure/`，文件名带场景前缀。
+项目绘图统一走 [SciencePlots](https://github.com/garrettj403/SciencePlots) 的 `["science", "ieee", "no-latex"]` 风格（IEEE 单栏、不依赖 LaTeX），并叠加 Noto CJK 中文字体回退与 `axes.unicode_minus=False`（规避中文字体缺 U+2212 负号的问题）。入口：`compliant_docking.plotting.apply_style()` 与 `plot_docking_log(log, out_dir, scene_name=...)`，每张图同时输出 PNG + PDF。运行 `docking --scene ...` 完成后图件按场景归档在 `figure/<场景名>/`（如 `figure/iiwa14_docking/`），文件名带场景前缀。
 
 ## 仓库结构
 
