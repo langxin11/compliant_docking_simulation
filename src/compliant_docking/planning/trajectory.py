@@ -255,3 +255,191 @@ class TwoPhaseDockingTrajectory:
             return self._approach.get_state(t)
         # t ≥ t1：第二段按局部时间采样；超过 t2 时内部 clip 停在 final（vel/acc = 0）
         return self._docking.get_state(t - self._t1)
+
+
+class CircleFigure8Trajectory:
+    """
+    圆形 + 8 字形轨迹跟踪测试规划器：过渡 → 竖直圆 → 过渡 → 平面 8 字 → 保持
+    Circle + figure-8 trajectory planner for controller tracking tests (hold at the end)
+
+    在不考虑对接的条件下测试控制器的轨迹跟踪能力（轨迹形状参考同类任务空间
+    跟踪实验，速度/加速度改为对位置公式解析求导，无数值差分）。
+
+    时间结构（四段 + 保持）：
+    - 段1 过渡 [0, T_tr)：start_pos → 圆起点 P1（rest-to-rest 五次时间缩放）；
+    - 段2 圆周 [T_tr, T_tr+T_c)：竖直圆（y-z 平面），θ = 2π·f_c·(t-t0)；
+    - 段3 过渡 [T_tr+T_c, 2·T_tr+T_c)：圆终点 P2 → 8 字中心 C（rest-to-rest）；
+    - 段4 8字 [2·T_tr+T_c, total)：水平 8 字（x-y 平面），φ = 2π·f_8·(t-t0)；
+    - t ≥ total：保持在 8 字结束点，速度/加速度为零。
+
+    几何 / Geometry:
+    - 圆心 C = start_pos + [0, 0, circle_center_offset]（默认在起点正下方 0.06 m）；
+    - 圆起点 P1 = C + [0, r, 0]；圆终点 P2 = 段2 结束时刻的圆周位置
+      （f_c·T_c 非整圈时 P2 ≠ P1，过渡段3 必须从 P2 出发）；
+    - 8 字为 Lissajous 曲线 p = C + [ax·sinφ, ay·sin(2φ), 0]。
+
+    连续性说明 / Continuity note:
+    过渡段为 rest-to-rest（端点速度/加速度为零），段位置全程连续；但圆周/8 字段
+    的固有起终点速度不为零，故段交界处速度存在阶跃——这正是跟踪测试要暴露的
+    加加速度激励，属预期行为。
+    """
+
+    def __init__(self, start_pos: np.ndarray, *,
+                 transition_duration: float = 1.5,
+                 circle_duration: float = 5.0,
+                 circle_radius: float = 0.10,
+                 circle_frequency: float = 0.2,
+                 circle_center_offset: float = -0.06,
+                 figure8_duration: float = 5.0,
+                 figure8_radius_x: float = 0.10,
+                 figure8_radius_y: float = 0.07,
+                 figure8_frequency: float = 0.2):
+        """
+        Initialize the circle + figure-8 tracking-test trajectory
+
+        参数 / Parameters:
+        - start_pos: 轨迹出发点 (3D) / Start position (3D)
+        - transition_duration: 过渡段时长 T_tr [s] / Transition segment duration
+        - circle_duration: 圆周段时长 T_c [s] / Circle segment duration
+        - circle_radius: 圆周半径 r [m] / Circle radius
+        - circle_frequency: 圆周频率 f_c [Hz] / Circle frequency
+        - circle_center_offset: 圆心相对 start_pos 的 z 偏移 [m]（可正可负） /
+            Circle center offset below/above the start position
+        - figure8_duration: 8 字段时长 T_8 [s] / Figure-8 segment duration
+        - figure8_radius_x / figure8_radius_y: 8 字 x/y 半幅值 [m] / Figure-8 radii
+        - figure8_frequency: 8 字频率 f_8 [Hz] / Figure-8 frequency
+        """
+        assert start_pos.shape == (3,), "Start position must be 3D vector"
+        assert transition_duration > 0, "Transition duration must be positive"
+        assert circle_duration > 0, "Circle duration must be positive"
+        assert circle_radius > 0, "Circle radius must be positive"
+        assert circle_frequency > 0, "Circle frequency must be positive"
+        assert np.isfinite(circle_center_offset), "Circle center offset must be finite"
+        assert figure8_duration > 0, "Figure-8 duration must be positive"
+        assert figure8_radius_x > 0, "Figure-8 radius x must be positive"
+        assert figure8_radius_y > 0, "Figure-8 radius y must be positive"
+        assert figure8_frequency > 0, "Figure-8 frequency must be positive"
+
+        # 存副本，防外部修改 / Store a copy so external mutation cannot affect us
+        self.start_pos = np.array(start_pos, dtype=float)
+
+        self._t_tr = float(transition_duration)
+        self._t_c = float(circle_duration)
+        self._r_c = float(circle_radius)
+        self._f_c = float(circle_frequency)
+        self._ax8 = float(figure8_radius_x)
+        self._ay8 = float(figure8_radius_y)
+        self._f_8 = float(figure8_frequency)
+
+        # 关键几何点 / Key waypoints
+        self._center = self.start_pos + np.array([0.0, 0.0, float(circle_center_offset)])
+        self._p1 = self._center + np.array([0.0, self._r_c, 0.0])
+        # 圆终点 = 段2 结束时刻的圆周位置（f_c·T_c 非整圈时不在 P1）
+        theta_end = 2.0 * np.pi * self._f_c * self._t_c
+        self._p2 = self._center + self._r_c * np.array(
+            [0.0, np.cos(theta_end), np.sin(theta_end)])
+        # 8 字结束点（t ≥ total 时保持于此）
+        phi_end = 2.0 * np.pi * self._f_8 * float(figure8_duration)
+        self._end_pos = self._center + np.array(
+            [self._ax8 * np.sin(phi_end), self._ay8 * np.sin(2.0 * phi_end), 0.0])
+
+        # 段边界时间 / Segment boundary times
+        self._t_8 = float(figure8_duration)
+        self._t1 = self._t_tr
+        self._t2 = self._t_tr + self._t_c
+        self._t3 = 2.0 * self._t_tr + self._t_c
+        self._total = 2.0 * self._t_tr + self._t_c + self._t_8
+
+    # ---- 结构属性（供指标分段统计） / Structural properties (for per-segment metrics) ----
+
+    @property
+    def durations(self) -> tuple[float, float, float]:
+        """(过渡段 T_tr, 圆周段 T_c, 8 字段 T_8) 时长（秒）/ (transition, circle, figure-8) durations"""
+        return (self._t_tr, self._t_c, self._t_8)
+
+    @property
+    def total_duration(self) -> float:
+        """轨迹总时长 2·T_tr + T_c + T_8（秒）/ Total duration 2·T_tr + T_c + T_8 (s)"""
+        return self._total
+
+    @property
+    def segments(self) -> tuple[tuple[str, float, float], ...]:
+        """四段 (名称, t_start, t_end)：过渡1/圆周/过渡2/8字 /
+        The four segments as (name, t_start, t_end): transition/circle/transition/figure-8"""
+        return (
+            ("过渡1", 0.0, self._t1),
+            ("圆周", self._t1, self._t2),
+            ("过渡2", self._t2, self._t3),
+            ("8字", self._t3, self._total),
+        )
+
+    # ---- 采样 / Sampling ----
+
+    @staticmethod
+    def _quintic_transition(a: np.ndarray, b: np.ndarray,
+                            u: float) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """
+        rest-to-rest 五次时间缩放的过渡段状态（u = (t-t0)/T 已归一化）/
+        Quintic rest-to-rest transition state at normalized time u
+
+        s(u) = 10u³ − 15u⁴ + 6u⁵，p = A + s(u)·(B−A)，
+        v = s'(u)/T·(B−A)，a = s''(u)/T²·(B−A)；T 因子已折算进返回值的调用侧 /
+        The 1/T and 1/T² factors are applied by the caller
+        """
+        s = 10.0 * u**3 - 15.0 * u**4 + 6.0 * u**5
+        ds = 30.0 * u**2 - 60.0 * u**3 + 30.0 * u**4
+        dds = 60.0 * u - 180.0 * u**2 + 120.0 * u**3
+        delta = b - a
+        return a + s * delta, ds * delta, dds * delta
+
+    def get_state(self, t: float) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """
+        获取时刻 t 的位置/速度/加速度 / Get position, velocity and acceleration at time t
+
+        时间分段：
+        - t < 0：按 t = 0 处理（停在起点）；
+        - t ∈ [0, T_tr)：过渡段1（start_pos → P1）；
+        - t ∈ [T_tr, T_tr+T_c)：圆周段（竖直圆，y-z 平面）；
+        - t ∈ [T_tr+T_c, 2·T_tr+T_c)：过渡段2（P2 → C）；
+        - t ∈ [2·T_tr+T_c, total)：8 字段（水平，x-y 平面）；
+        - t ≥ total：保持在 8 字结束点，速度/加速度为 0。
+
+        参数 / Parameters:
+            t: 当前时间（秒） / Current time (s)
+
+        返回 / Returns:
+            (pos, vel, acc) 三个 3D 向量 / 3D numpy arrays
+        """
+        if t < 0.0:
+            t = 0.0
+        if t >= self._total:
+            return self._end_pos.copy(), np.zeros(3), np.zeros(3)
+
+        if t < self._t1:
+            # 段1 过渡：start_pos → P1（1/T、1/T² 因子在此折算）
+            pos, vel, acc = self._quintic_transition(self.start_pos, self._p1, t / self._t_tr)
+            return pos, vel / self._t_tr, acc / self._t_tr**2
+        if t < self._t2:
+            # 段2 圆周：θ = ω·(t−t0)，p = C + r·[0, cosθ, sinθ]
+            theta_dot = 2.0 * np.pi * self._f_c
+            theta = theta_dot * (t - self._t1)
+            pos = self._center + self._r_c * np.array([0.0, np.cos(theta), np.sin(theta)])
+            vel = self._r_c * theta_dot * np.array([0.0, -np.sin(theta), np.cos(theta)])
+            acc = self._r_c * theta_dot**2 * np.array([0.0, -np.cos(theta), -np.sin(theta)])
+            return pos, vel, acc
+        if t < self._t3:
+            # 段3 过渡：P2 → C
+            u = (t - self._t2) / self._t_tr
+            pos, vel, acc = self._quintic_transition(self._p2, self._center, u)
+            return pos, vel / self._t_tr, acc / self._t_tr**2
+
+        # 段4 8 字：p = C + [ax·sinφ, ay·sin(2φ), 0]
+        phi_dot = 2.0 * np.pi * self._f_8
+        phi = phi_dot * (t - self._t3)
+        pos = self._center + np.array(
+            [self._ax8 * np.sin(phi), self._ay8 * np.sin(2.0 * phi), 0.0])
+        vel = phi_dot * np.array(
+            [self._ax8 * np.cos(phi), 2.0 * self._ay8 * np.cos(2.0 * phi), 0.0])
+        acc = phi_dot**2 * np.array(
+            [-self._ax8 * np.sin(phi), -4.0 * self._ay8 * np.sin(2.0 * phi), 0.0])
+        return pos, vel, acc

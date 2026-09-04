@@ -3,6 +3,7 @@ import numpy as np
 import pytest
 
 from compliant_docking.planning.trajectory import (
+    CircleFigure8Trajectory,
     DecoupledQuinticTrajectory,
     TwoPhaseDockingTrajectory,
 )
@@ -213,3 +214,137 @@ class TestTwoPhaseWaypoints:
         assert np.all(np.diff(positions[:, 2]) <= 1e-12)
         assert positions[:, 2].max() <= TP_START[2] + 1e-12
         assert positions[:, 2].min() >= TP_FINAL[2] - 1e-12
+
+
+# ---- CircleFigure8Trajectory：圆+8字跟踪测试轨迹（过渡→竖直圆→过渡→平面8字→保持） ----
+
+# 默认参数下圆心在 START 正下方 0.06 m；f_c·T_c = f_8·T_8 = 1（整周期）
+CF8_CENTER = START + np.array([0.0, 0.0, -0.06])
+CF8_P1 = CF8_CENTER + np.array([0.0, 0.10, 0.0])  # 圆起点（整圈时圆终点 P2 = P1）
+
+
+def test_circle_figure8_analytic_matches_finite_difference():
+    """随机参数实例：全时程 0.01s 采样，解析 vel/acc 与中心差分 pos 导数一致。
+
+    段交界处速度/加速度存在固有阶跃（圆周/8 字起终点速度非零），中心差分
+    在交界邻域（guard=1e-3 s，远大于差分步长 1e-5 s）内无效，跳过该邻域。
+    """
+    rng = np.random.default_rng(2026)
+    traj = CircleFigure8Trajectory(
+        START + rng.uniform(-0.05, 0.05, 3),
+        transition_duration=float(rng.uniform(0.8, 2.0)),
+        circle_duration=float(rng.uniform(3.0, 6.0)),
+        circle_radius=float(rng.uniform(0.05, 0.15)),
+        circle_frequency=float(rng.uniform(0.1, 0.4)),
+        circle_center_offset=float(rng.uniform(-0.10, -0.02)),
+        figure8_duration=float(rng.uniform(3.0, 6.0)),
+        figure8_radius_x=float(rng.uniform(0.05, 0.15)),
+        figure8_radius_y=float(rng.uniform(0.04, 0.12)),
+        figure8_frequency=float(rng.uniform(0.1, 0.4)),
+    )
+    total = traj.total_duration
+    interior_junctions = np.array([seg[2] for seg in traj.segments][:-1])  # t1/t2/t3
+    h = 1e-5
+    guard = 1e-3
+
+    checked = 0
+    for t in np.arange(0.0, total, 0.01):
+        if t < guard or t > total - guard:
+            continue
+        if np.min(np.abs(interior_junctions - t)) < guard:
+            continue
+        pos_p, vel_p, _ = traj.get_state(t + h)
+        pos_m, vel_m, _ = traj.get_state(t - h)
+        _, vel, acc = traj.get_state(t)
+        np.testing.assert_allclose(
+            vel, (pos_p - pos_m) / (2 * h), rtol=1e-4, atol=1e-6, err_msg=f"vel at t={t}")
+        np.testing.assert_allclose(
+            acc, (vel_p - vel_m) / (2 * h), rtol=1e-4, atol=1e-6, err_msg=f"acc at t={t}")
+        checked += 1
+    assert checked > 800  # 采样基本覆盖全时程
+
+
+def test_circle_figure8_boundary_conditions():
+    """端点与段交界：t=0 停在起点；交界位置左右极限连续（1e-12）且 rest 侧 vel/acc≈0；
+    t≥total 停在 8 字结束点（默认整周期 = 圆心 C）。"""
+    traj = CircleFigure8Trajectory(START)
+    t_tr, t_c, _ = traj.durations
+    total = traj.total_duration
+
+    # t=0（含 t<0 钳制）：pos=start_pos、vel=acc=0
+    for t_zero in (0.0, -1.0):
+        pos0, vel0, acc0 = traj.get_state(t_zero)
+        np.testing.assert_allclose(pos0, START, atol=1e-12)
+        np.testing.assert_allclose(vel0, np.zeros(3), atol=1e-12)
+        np.testing.assert_allclose(acc0, np.zeros(3), atol=1e-12)
+
+    # 四个段交界（T_tr、T_tr+T_c、2T_tr+T_c、total）：位置左右极限连续（atol=1e-12）
+    # get_state(tj) 落在后一段（区间 [t0,t1) 约定），nextafter 取前一段极限
+    for tj in (t_tr, t_tr + t_c, 2 * t_tr + t_c, total):
+        pos_at, _, _ = traj.get_state(tj)
+        pos_left, _, _ = traj.get_state(np.nextafter(tj, -np.inf))
+        np.testing.assert_allclose(pos_at, pos_left, atol=1e-12, err_msg=f"junction t={tj}")
+
+    # 交界位置即关键路点：P1（圆起点）、P2（圆终点）、C（8 字中心）
+    theta_end = 2.0 * np.pi * 0.2 * 5.0
+    p2 = CF8_CENTER + 0.10 * np.array([0.0, np.cos(theta_end), np.sin(theta_end)])
+    np.testing.assert_allclose(traj.get_state(t_tr)[0], CF8_P1, atol=1e-12)
+    np.testing.assert_allclose(traj.get_state(t_tr + t_c)[0], p2, atol=1e-12)
+    np.testing.assert_allclose(traj.get_state(2 * t_tr + t_c)[0], CF8_CENTER, atol=1e-12)
+
+    # 交界处 rest-to-rest 一侧（过渡段端点）速度/加速度 ≈ 0：
+    # 圆周/8 字侧起终点速度非零（固有阶跃），只检查过渡段/保持段一侧
+    _, vel_l1, acc_l1 = traj.get_state(np.nextafter(t_tr, -np.inf))  # 过渡1 结束
+    np.testing.assert_allclose(vel_l1, np.zeros(3), atol=1e-9)
+    np.testing.assert_allclose(acc_l1, np.zeros(3), atol=1e-9)
+    _, vel_j2, acc_j2 = traj.get_state(t_tr + t_c)  # 过渡2 起点（u=0，恰为 0）
+    np.testing.assert_allclose(vel_j2, np.zeros(3), atol=1e-12)
+    np.testing.assert_allclose(acc_j2, np.zeros(3), atol=1e-12)
+    _, vel_l3, acc_l3 = traj.get_state(np.nextafter(2 * t_tr + t_c, -np.inf))  # 过渡2 结束
+    np.testing.assert_allclose(vel_l3, np.zeros(3), atol=1e-9)
+    np.testing.assert_allclose(acc_l3, np.zeros(3), atol=1e-9)
+
+    # t ≥ total：停在 8 字结束点（默认参数 f_8·T_8=1 整周期 → 结束点 = 圆心 C）
+    for t_hold in (total, total + 5.0):
+        pos_h, vel_h, acc_h = traj.get_state(t_hold)
+        np.testing.assert_allclose(pos_h, CF8_CENTER, atol=1e-12)
+        np.testing.assert_allclose(vel_h, np.zeros(3), atol=1e-12)
+        np.testing.assert_allclose(acc_h, np.zeros(3), atol=1e-12)
+
+
+def test_circle_figure8_segment_structure():
+    """durations/total_duration/segments 数值与结构正确；start_pos 存副本。"""
+    traj = CircleFigure8Trajectory(START)
+    assert traj.durations == (1.5, 5.0, 5.0)
+    assert traj.total_duration == pytest.approx(13.0, abs=1e-12)
+    assert traj.segments == (
+        ("过渡1", 0.0, 1.5),
+        ("圆周", 1.5, 6.5),
+        ("过渡2", 6.5, 8.0),
+        ("8字", 8.0, 13.0),
+    )
+
+    # start_pos 存副本：外部修改传入数组不影响轨迹
+    src = START.copy()
+    traj2 = CircleFigure8Trajectory(src)
+    src[:] = 99.0
+    np.testing.assert_allclose(traj2.start_pos, START, atol=1e-15)
+    np.testing.assert_allclose(traj2.get_state(0.0)[0], START, atol=1e-12)
+
+
+def test_circle_figure8_geometry():
+    """默认参数几何：圆周段半径恒 =r、x 恒 =C_x；8 字段 z 恒 =C_z 且 x/y 包络不超 (ax, ay)。"""
+    traj = CircleFigure8Trajectory(START)
+    r, ax8, ay8 = 0.10, 0.10, 0.07
+
+    # 圆周段 [1.5, 6.5)：到圆心距离恒 = r，x 恒 = C_x
+    pos_circle = np.array([traj.get_state(t)[0] for t in np.arange(1.5, 6.5, 0.01)])
+    np.testing.assert_allclose(
+        np.linalg.norm(pos_circle - CF8_CENTER, axis=1), r, atol=1e-12)
+    np.testing.assert_allclose(pos_circle[:, 0], CF8_CENTER[0], atol=1e-15)
+
+    # 8 字段 [8.0, 13.0)：z 恒 = C_z，x/y 包络 ≤ (ax, ay) + 1e-12
+    pos_fig = np.array([traj.get_state(t)[0] for t in np.arange(8.0, 13.0, 0.01)])
+    np.testing.assert_allclose(pos_fig[:, 2], CF8_CENTER[2], atol=1e-15)
+    assert np.all(np.abs(pos_fig[:, 0] - CF8_CENTER[0]) <= ax8 + 1e-12)
+    assert np.all(np.abs(pos_fig[:, 1] - CF8_CENTER[1]) <= ay8 + 1e-12)
