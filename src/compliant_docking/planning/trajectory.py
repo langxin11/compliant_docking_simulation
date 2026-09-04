@@ -279,9 +279,10 @@ class CircleFigure8Trajectory:
     - 8 字为 Lissajous 曲线 p = C + [ax·sinφ, ay·sin(2φ), 0]。
 
     连续性说明 / Continuity note:
-    过渡段为 rest-to-rest（端点速度/加速度为零），段位置全程连续；但圆周/8 字段
-    的固有起终点速度不为零，故段交界处速度存在阶跃——这正是跟踪测试要暴露的
-    加加速度激励，属预期行为。
+    每一段均使用五次时间缩放。圆周和 8 字的几何相位也由该缩放推进，因此在每个
+    段边界位置、速度和加速度都连续（C2）；这使测试聚焦于轨迹跟踪，而不是人为的
+    速度阶跃。``circle_frequency`` / ``figure8_frequency`` 表示该段总圈数除以该段
+    时长的平均频率，故总相位仍为 ``2π·frequency·duration``。
     """
 
     def __init__(self, start_pos: np.ndarray, *,
@@ -392,6 +393,15 @@ class CircleFigure8Trajectory:
         delta = b - a
         return a + s * delta, ds * delta, dds * delta
 
+    @staticmethod
+    def _quintic_scale(u: float) -> tuple[float, float, float]:
+        """五次时间缩放及其对归一化时间的前两阶导数。"""
+        return (
+            10.0 * u**3 - 15.0 * u**4 + 6.0 * u**5,
+            30.0 * u**2 - 60.0 * u**3 + 30.0 * u**4,
+            60.0 * u - 180.0 * u**2 + 120.0 * u**3,
+        )
+
     def get_state(self, t: float) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
         获取时刻 t 的位置/速度/加速度 / Get position, velocity and acceleration at time t
@@ -420,12 +430,18 @@ class CircleFigure8Trajectory:
             pos, vel, acc = self._quintic_transition(self.start_pos, self._p1, t / self._t_tr)
             return pos, vel / self._t_tr, acc / self._t_tr**2
         if t < self._t2:
-            # 段2 圆周：θ = ω·(t−t0)，p = C + r·[0, cosθ, sinθ]
-            theta_dot = 2.0 * np.pi * self._f_c
-            theta = theta_dot * (t - self._t1)
+            # 段2 圆周：相位以五次时间缩放推进，边界速度/加速度均为零。
+            u = (t - self._t1) / self._t_c
+            s, ds, dds = self._quintic_scale(u)
+            theta_total = 2.0 * np.pi * self._f_c * self._t_c
+            theta = theta_total * s
+            theta_dot = theta_total * ds / self._t_c
+            theta_ddot = theta_total * dds / self._t_c**2
             pos = self._center + self._r_c * np.array([0.0, np.cos(theta), np.sin(theta)])
             vel = self._r_c * theta_dot * np.array([0.0, -np.sin(theta), np.cos(theta)])
-            acc = self._r_c * theta_dot**2 * np.array([0.0, -np.cos(theta), -np.sin(theta)])
+            acc = self._r_c * (
+                theta_ddot * np.array([0.0, -np.sin(theta), np.cos(theta)])
+                + theta_dot**2 * np.array([0.0, -np.cos(theta), -np.sin(theta)]))
             return pos, vel, acc
         if t < self._t3:
             # 段3 过渡：P2 → C
@@ -433,13 +449,19 @@ class CircleFigure8Trajectory:
             pos, vel, acc = self._quintic_transition(self._p2, self._center, u)
             return pos, vel / self._t_tr, acc / self._t_tr**2
 
-        # 段4 8 字：p = C + [ax·sinφ, ay·sin(2φ), 0]
-        phi_dot = 2.0 * np.pi * self._f_8
-        phi = phi_dot * (t - self._t3)
+        # 段4 8 字：相位以五次时间缩放推进，保证与前段和保持段 C2 连续。
+        u = (t - self._t3) / self._t_8
+        s, ds, dds = self._quintic_scale(u)
+        phi_total = 2.0 * np.pi * self._f_8 * self._t_8
+        phi = phi_total * s
+        phi_dot = phi_total * ds / self._t_8
+        phi_ddot = phi_total * dds / self._t_8**2
         pos = self._center + np.array(
             [self._ax8 * np.sin(phi), self._ay8 * np.sin(2.0 * phi), 0.0])
         vel = phi_dot * np.array(
             [self._ax8 * np.cos(phi), 2.0 * self._ay8 * np.cos(2.0 * phi), 0.0])
-        acc = phi_dot**2 * np.array(
+        acc = phi_ddot * np.array(
+            [self._ax8 * np.cos(phi), 2.0 * self._ay8 * np.cos(2.0 * phi), 0.0])
+        acc += phi_dot**2 * np.array(
             [-self._ax8 * np.sin(phi), -4.0 * self._ay8 * np.sin(2.0 * phi), 0.0])
         return pos, vel, acc

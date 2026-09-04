@@ -226,8 +226,8 @@ CF8_P1 = CF8_CENTER + np.array([0.0, 0.10, 0.0])  # 圆起点（整圈时圆终�
 def test_circle_figure8_analytic_matches_finite_difference():
     """随机参数实例：全时程 0.01s 采样，解析 vel/acc 与中心差分 pos 导数一致。
 
-    段交界处速度/加速度存在固有阶跃（圆周/8 字起终点速度非零），中心差分
-    在交界邻域（guard=1e-3 s，远大于差分步长 1e-5 s）内无效，跳过该邻域。
+    分段表达式虽在交界处 C2 连续，但中心差分跨越两套浮点计算路径；这里跳过
+    极小交界邻域，把有限差分测试聚焦于各段解析导数，边界连续性由专门测试覆盖。
     """
     rng = np.random.default_rng(2026)
     traj = CircleFigure8Trajectory(
@@ -265,7 +265,7 @@ def test_circle_figure8_analytic_matches_finite_difference():
 
 
 def test_circle_figure8_boundary_conditions():
-    """端点与段交界：t=0 停在起点；交界位置左右极限连续（1e-12）且 rest 侧 vel/acc≈0；
+    """端点与段交界：t=0 停在起点；交界位置左右极限连续且 vel/acc≈0；
     t≥total 停在 8 字结束点（默认整周期 = 圆心 C）。"""
     traj = CircleFigure8Trajectory(START)
     t_tr, t_c, _ = traj.durations
@@ -292,8 +292,8 @@ def test_circle_figure8_boundary_conditions():
     np.testing.assert_allclose(traj.get_state(t_tr + t_c)[0], p2, atol=1e-12)
     np.testing.assert_allclose(traj.get_state(2 * t_tr + t_c)[0], CF8_CENTER, atol=1e-12)
 
-    # 交界处 rest-to-rest 一侧（过渡段端点）速度/加速度 ≈ 0：
-    # 圆周/8 字侧起终点速度非零（固有阶跃），只检查过渡段/保持段一侧
+    # 交界处五次时间缩放使两侧速度/加速度均为零；此处检查关键边界样本，
+    # 左右两侧的完整 C2 对比由下一项专门测试覆盖。
     _, vel_l1, acc_l1 = traj.get_state(np.nextafter(t_tr, -np.inf))  # 过渡1 结束
     np.testing.assert_allclose(vel_l1, np.zeros(3), atol=1e-9)
     np.testing.assert_allclose(acc_l1, np.zeros(3), atol=1e-9)
@@ -310,6 +310,16 @@ def test_circle_figure8_boundary_conditions():
         np.testing.assert_allclose(pos_h, CF8_CENTER, atol=1e-12)
         np.testing.assert_allclose(vel_h, np.zeros(3), atol=1e-12)
         np.testing.assert_allclose(acc_h, np.zeros(3), atol=1e-12)
+
+
+def test_circle_figure8_is_c2_at_every_segment_boundary():
+    """圆/8 字相位同样经五次时间缩放，所有段边界应 C2 连续。"""
+    traj = CircleFigure8Trajectory(START)
+    for _, _, boundary in traj.segments:
+        _, vel_at, acc_at = traj.get_state(boundary)
+        _, vel_left, acc_left = traj.get_state(np.nextafter(boundary, -np.inf))
+        np.testing.assert_allclose(vel_left, vel_at, atol=1e-8)
+        np.testing.assert_allclose(acc_left, acc_at, atol=1e-7)
 
 
 def test_circle_figure8_segment_structure():
