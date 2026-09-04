@@ -1,0 +1,34 @@
+# 跟踪测试场景（不考虑对接）：iiwa14 + 公头锥，圆+8字轨迹用于测试控制器
+# 轨迹跟踪能力。零摩擦模型（iiwa14_arm.xml 无 frictionloss）走默认阻抗增益，
+# 无母头段（不挂 target）、无 impedance 覆盖；轨迹从 init_pos 出发，
+# 圆心自动在其下方 0.06 m。
+scene:
+  name: iiwa14_tracking
+
+robot:
+  mjcf: assets/iiwa14/iiwa14_arm.xml      # 纯机械臂（不含工具/目标）
+  pin_model: assets/iiwa14/iiwa14_dock.urdf  # Pinocchio 用：臂+公头圆柱的组合 URDF（与 models.PIN_URDF 同一文件）
+  ee_site: attachment_site                # MJCF 挂载锚点（法兰 site）
+  ee_frame: cylinder_link                 # Pinocchio 末端 frame 名
+
+tool:                                     # 公头：挂载到 robot.ee_site
+  mjcf: assets/interfaces/male_cone.xml
+  prefix: tool_                           # attach 后所有名称加此前缀
+  pose: {pos: [0.0, 0.0, 0.015], quat: [1.0, 0.0, 0.0, 0.0]}  # 相对 ee_site
+
+physics:                                  # 与历史 XML option 一致
+  timestep: 0.001
+  gravity: [0.0, 0.0, 0.0]
+  integrator: implicitfast
+  cone: elliptic
+  sdf_iterations: 10
+  sdf_initpoints: 40
+
+task:                                     # 任务初始条件（与对接场景同款初值，轨迹由 tracking 规划器定义）
+  init_pos: [0.0, 0.5, 0.5]
+  init_ori: [[1, 0, 0], [0, -1, 0], [0, 0, -1]]
+  ik_guess: [0.0, 0.5, 0.0, -1.0, 0.0, 1.5, 0.0]
+  stroke: [0.0, 0.0, 0.0]  # 跟踪场景不用 stroke（轨迹由 tracking 规划器定义，target_pos=init_pos）
+
+trajectory:                               # 圆+8字跟踪测试（其余参数走 TrajectorySpec 默认值）
+  type: tracking

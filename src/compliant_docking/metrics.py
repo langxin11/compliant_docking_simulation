@@ -27,6 +27,7 @@
 from __future__ import annotations
 
 import unicodedata
+from collections.abc import Sequence
 from dataclasses import dataclass
 
 import numpy as np
@@ -244,4 +245,53 @@ def format_metrics(m: DockingMetrics) -> str:
         row("稳态横向误差", num(m.final_lateral_error_m, "m", ".6f")),
         row("稳态姿态误差", num(m.final_orientation_error_rad, "rad", ".6f")),
     ]
+    return "\n".join(lines)
+
+
+def tracking_summary(log: Log, segments: Sequence[tuple[str, float, float]]) -> str:
+    """圆+8字跟踪测试的分段误差统计（位置误差 RMS/峰值，单位 mm）。
+
+    按 segments 给出的时间窗 [t0, t1) 切片 log.error（每步末端位置误差范数，m），
+    计算每段 RMS 与峰值并换算为 mm；再加总全时程（全部采样点，含段外保持段）的
+    RMS/峰值。输出多行中文文本，打印风格与 format_metrics 对齐。
+
+    参数 / Args:
+        log: 仿真日志（t_list 与 error 逐 step 对齐）
+        segments: [(名称, t_start, t_end), ...]，与
+            CircleFigure8Trajectory.segments 同构
+    """
+    t_arr = np.asarray(log.t_list, dtype=float)
+    err = np.asarray(log.error, dtype=float)
+    if t_arr.size != err.size:
+        err = err[:0]  # 时间与误差不对齐时不做统计（全部 n/a）
+
+    def stats_mm(values: np.ndarray) -> tuple[float, float] | None:
+        """(RMS, 峰值)，单位 mm；空切片返回 None。"""
+        if values.size == 0:
+            return None
+        rms = float(np.sqrt(np.mean(values**2)) * 1e3)
+        peak = float(np.max(values) * 1e3)
+        return rms, peak
+
+    lines = [
+        "=" * 64,
+        "轨迹跟踪统计（圆+8字，按段位置误差）",
+        "=" * 64,
+        "[分段统计]",
+    ]
+    for name, t0, t1 in segments:
+        seg = stats_mm(err[(t_arr >= t0) & (t_arr < t1)]) if err.size else None
+        if seg is None:
+            lines.append(f"  {_label_pad(name)}: n/a")
+        else:
+            lines.append(f"  {_label_pad(name)}: RMS {seg[0]:.4f} mm, 峰值 {seg[1]:.4f} mm")
+
+    lines.append("[全时程]")
+    total = stats_mm(err)
+    if total is None:
+        lines.append(f"  {_label_pad('位置跟踪 RMS')}: n/a")
+        lines.append(f"  {_label_pad('峰值误差')}: n/a")
+    else:
+        lines.append(f"  {_label_pad('位置跟踪 RMS')}: {total[0]:.4f} mm")
+        lines.append(f"  {_label_pad('峰值误差')}: {total[1]:.4f} mm")
     return "\n".join(lines)

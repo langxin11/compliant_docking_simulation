@@ -39,6 +39,9 @@ _CONES = {
     "elliptic": int(mujoco.mjtCone.mjCONE_ELLIPTIC),
 }
 
+# trajectory.type 的 YAML 合法取值（两段式对接 / 圆+8字跟踪测试）
+_TRAJECTORY_TYPES = {"twophase", "tracking"}
+
 
 def _enum_value(table: dict[str, int], kind: str, value: str) -> int:
     """查 YAML 字符串对应的 MuJoCo 枚举 int；未知取值报清晰错误。"""
@@ -121,25 +124,54 @@ class ImpedanceOverride:
 
 @dataclass(frozen=True)
 class TrajectorySpec:
-    """两段式对接轨迹参数（接近段宽松限速 + 对接段严格限速，可选）。
+    """轨迹段参数（可选）：两段式对接 或 圆+8字跟踪测试。
 
-    对应场景 YAML 的可选 ``trajectory`` 扁平段（缺省时走历史单段五次轨迹）：
+    对应场景 YAML 的可选 ``trajectory`` 扁平段；``type`` 区分两类规划器
+    （缺省 ``"twophase"``，既有 YAML 不写 type 时行为不变）：
 
     .. code-block:: yaml
 
         trajectory:
+          type: twophase       # 可选 "twophase" | "tracking"（缺省 twophase）
+          # ---- twophase 专用 ----
           standoff: 0.06        # 预对接点沿接近轴的后撤距离 [m]
           v_max_approach: 0.10  # 接近段线速度上限 [m/s]
           a_max_approach: 0.20  # 接近段线加速度上限 [m/s^2]
           v_max_docking: 0.02   # 对接段线速度上限 [m/s]
           a_max_docking: 0.05   # 对接段线加速度上限 [m/s^2]
+          # ---- tracking 专用（圆+8字跟踪测试） ----
+          transition_duration: 1.5   # 过渡段时长 [s]
+          circle_duration: 5.0       # 圆周段时长 [s]
+          circle_radius: 0.10        # 圆周半径 [m]
+          circle_frequency: 0.2      # 圆周频率 [Hz]
+          circle_center_offset: -0.06  # 圆心相对起点的 z 偏移 [m]
+          figure8_duration: 5.0      # 8 字段时长 [s]
+          figure8_radius_x: 0.10     # 8 字 x 半幅值 [m]
+          figure8_radius_y: 0.07     # 8 字 y 半幅值 [m]
+          figure8_frequency: 0.2     # 8 字频率 [Hz]
+
+    所有字段带默认值：tracking 场景只写 ``type: tracking`` 即可（twophase 字段
+    用默认值占位），twophase 场景沿用既有五参数写法（tracking 字段用默认值）。
     """
 
-    standoff: float
-    v_max_approach: float
-    a_max_approach: float
-    v_max_docking: float
-    a_max_docking: float
+    # ---- 两段式对接（既有字段，默认值取自 iiwa14_docking_twophase.yaml） ----
+    standoff: float = 0.10
+    v_max_approach: float = 0.10
+    a_max_approach: float = 0.20
+    v_max_docking: float = 0.02
+    a_max_docking: float = 0.05
+
+    # ---- 类型开关 + 圆+8字跟踪测试 ----
+    type: str = "twophase"  # "twophase" | "tracking"（load_scene 校验取值）
+    transition_duration: float = 1.5
+    circle_duration: float = 5.0
+    circle_radius: float = 0.10
+    circle_frequency: float = 0.2
+    circle_center_offset: float = -0.06
+    figure8_duration: float = 5.0
+    figure8_radius_x: float = 0.10
+    figure8_radius_y: float = 0.07
+    figure8_frequency: float = 0.2
 
 
 @dataclass(frozen=True)
@@ -149,11 +181,11 @@ class Scene:
     name: str
     robot: RobotSpec
     tool: ToolSpec
-    target: TargetSpec
     physics: PhysicsSpec
     task: TaskSpec
     path: Path  # 场景 YAML 的绝对路径
-    trajectory: TrajectorySpec | None = None  # 可选两段式轨迹参数（缺省走单段五次）
+    target: TargetSpec | None = None  # 可选：跟踪测试场景不挂母头
+    trajectory: TrajectorySpec | None = None  # 可选轨迹段（两段式对接 / 圆+8字跟踪；缺省走单段五次）
     impedance: ImpedanceOverride | None = None  # 可选阻抗增益覆盖（缺省走 ImpedanceConfig）
 
     # ---- 解析后的名称属性（下阶段接线时使用） ----
@@ -190,12 +222,15 @@ class Scene:
         tool_root.quat = self.tool.pose_quat
         arm.site(self.robot.ee_site).attach_body(tool_root, prefix=self.tool.prefix)
 
-        # 3) 母头：worldbody 加 frame，母头根 body 挂到 frame（世界系固定）
-        female = mujoco.MjSpec.from_file(str(self.target.mjcf))
-        frame = arm.worldbody.add_frame(
-            name="target_frame", pos=self.target.pos, quat=self.target.quat
-        )
-        frame.attach_body(female.body("dock"), prefix=self.target.prefix)
+        # 3) 母头：worldbody 加 frame，母头根 body 挂到 frame（世界系固定）。
+        #    target 为 None（跟踪测试场景）时跳过母头挂载，其余流程不变 /
+        #    Skip the female-side attach entirely for tracking scenes (target=None)
+        if self.target is not None:
+            female = mujoco.MjSpec.from_file(str(self.target.mjcf))
+            frame = arm.worldbody.add_frame(
+                name="target_frame", pos=self.target.pos, quat=self.target.quat
+            )
+            frame.attach_body(female.body("dock"), prefix=self.target.prefix)
 
         # 4) 环境胶水：地面/平行光/可视化 site/跟随相机
         arm.worldbody.add_geom(
@@ -281,11 +316,21 @@ def load_scene(path: str | Path) -> Scene:
     scene = raw["scene"]
     robot = raw["robot"]
     tool = raw["tool"]
-    target = raw["target"]
     physics = raw["physics"]
     task = raw["task"]
-    trajectory = TrajectorySpec(**raw["trajectory"]) if "trajectory" in raw else None
+    target = raw.get("target")  # 跟踪测试场景无母头段（target=None）
     impedance = ImpedanceOverride(**raw["impedance"]) if "impedance" in raw else None
+
+    # trajectory 段解析后校验 type 合法取值，再构造 TrajectorySpec /
+    # Validate trajectory.type against the legal values before constructing the spec
+    trajectory = None
+    if "trajectory" in raw:
+        traj_type = str(raw["trajectory"].get("type", "twophase"))
+        if traj_type not in _TRAJECTORY_TYPES:
+            options = ", ".join(sorted(_TRAJECTORY_TYPES))
+            raise ValueError(
+                f"scene 配置 trajectory.type 不支持 {traj_type!r}，可选值: {options}")
+        trajectory = TrajectorySpec(**raw["trajectory"])
 
     return Scene(
         name=str(scene["name"]),
@@ -306,7 +351,7 @@ def load_scene(path: str | Path) -> Scene:
             prefix=str(target["prefix"]),
             pos=np.asarray(target["pos"], dtype=float),
             quat=np.asarray(target["quat"], dtype=float),
-        ),
+        ) if target is not None else None,
         physics=PhysicsSpec(
             timestep=float(physics["timestep"]),
             gravity=np.asarray(physics["gravity"], dtype=float),

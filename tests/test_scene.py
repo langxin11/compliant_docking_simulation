@@ -222,3 +222,42 @@ def test_fr3_pin_model_from_mjcf(fr3_scene):
     assert model.nq == 7
     np.testing.assert_array_equal(model.gravity.linear, np.zeros(3))
     assert model.getFrameId("attachment_site") < model.nframes
+
+
+# ---- 跟踪测试场景（无母头，圆+8字轨迹） ----
+
+TRACKING_SCENE_YAMLS = [
+    REPO_ROOT / "scenes" / "fr3_tracking.yaml",
+    REPO_ROOT / "scenes" / "iiwa14_tracking.yaml",
+]
+
+
+@pytest.mark.parametrize("scene_yaml", TRACKING_SCENE_YAMLS, ids=lambda p: p.stem)
+def test_tracking_scenes_load_and_build(scene_yaml):
+    """跟踪场景：target=None、trajectory.type=tracking；模型可编译且无 target_ 前缀 body。"""
+    scene = load_scene(scene_yaml)
+
+    assert scene.target is None
+    assert scene.trajectory is not None
+    assert scene.trajectory.type == "tracking"
+
+    model = scene.build_mjmodel()
+    assert model.nq == 7
+    # 母头未挂载：target_dock 查无此名（mj_name2id 返回 -1）
+    assert mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_BODY, "target_dock") == -1
+    # 公头侧对象不受 target 影响（sensor_site / 相机锚点仍在）
+    assert mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_SITE, "tool_sensor_site") >= 0
+    assert mujoco.mj_name2id(model, mujoco.mjtObj.mjOBJ_CAMERA, "track_cam") >= 0
+
+
+def test_trajectory_spec_type_validation(tmp_path):
+    """trajectory.type 非法取值：load_scene 报 ValueError（信息含非法值与合法取值）。"""
+    base = (REPO_ROOT / "scenes" / "iiwa14_docking.yaml").read_text(encoding="utf-8")
+    bad_path = tmp_path / "bad_scene.yaml"
+    bad_path.write_text(base + "\ntrajectory:\n  type: lissajous\n", encoding="utf-8")
+
+    with pytest.raises(ValueError) as exc_info:
+        load_scene(bad_path)
+    message = str(exc_info.value)
+    assert "lissajous" in message  # 含非法值
+    assert "twophase" in message and "tracking" in message  # 含合法取值

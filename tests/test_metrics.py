@@ -10,7 +10,7 @@ import pytest
 
 from compliant_docking.config import ImpedanceConfig
 from compliant_docking.control.task_space import TaskSpaceController
-from compliant_docking.metrics import compute_metrics, format_metrics
+from compliant_docking.metrics import compute_metrics, format_metrics, tracking_summary
 from compliant_docking.models import load_pin_model
 from compliant_docking.planning.kinematics import compute_ik
 from compliant_docking.planning.trajectory import DecoupledQuinticTrajectory
@@ -162,3 +162,31 @@ def test_axis_normalization_robust(metrics_result):
     assert m_scaled.peak_axial_force_N == pytest.approx(metrics.peak_axial_force_N)
     assert m_scaled.steady_axial_force_N == pytest.approx(metrics.steady_axial_force_N)
     assert m_scaled.final_lateral_error_m == pytest.approx(metrics.final_lateral_error_m)
+
+
+# ---- tracking_summary：圆+8字跟踪测试分段统计（合成 Log） ----
+
+def test_tracking_summary_synthetic():
+    """合成 Log（每段恒定误差）：分段/全时程 RMS 与峰值数值正确（单位 mm）。"""
+    log = Log()
+    log.reset_logs()
+    segments = [("过渡1", 0.0, 1.0), ("圆周", 1.0, 2.0)]
+    for k in range(20):
+        t = 0.1 * k
+        error = 0.001 if t < 1.0 else 0.002  # 过渡1 恒 1 mm，圆周恒 2 mm
+        log.store_data(
+            t, np.zeros(7), np.zeros(7), np.zeros(3), np.zeros(3), error,
+            np.zeros(3), np.zeros(3), np.zeros(3), np.zeros(7),
+            np.zeros(3), np.zeros(3))
+
+    text = tracking_summary(log, segments)
+
+    # 各段名称出现；恒定误差 → RMS = 峰值 = 段值（1.0000 / 2.0000 mm）
+    assert "过渡1" in text and "圆周" in text
+    assert "RMS 1.0000 mm" in text
+    assert "RMS 2.0000 mm" in text
+    assert "峰值 1.0000 mm" in text
+    assert "峰值 2.0000 mm" in text
+    assert "全时程" in text
+    # 全时程：10×1mm + 10×2mm → RMS = sqrt(2.5) ≈ 1.5811 mm，峰值 2.0000 mm
+    assert "1.5811" in text

@@ -32,10 +32,11 @@ import pinocchio as pin
 from compliant_docking.config import DockingConfig, HQPConfig, ImpedanceConfig
 from compliant_docking.control.hqp_ac import HQPAdaptiveController
 from compliant_docking.control.task_space import TaskSpaceController
-from compliant_docking.metrics import compute_metrics, format_metrics
+from compliant_docking.metrics import compute_metrics, format_metrics, tracking_summary
 from compliant_docking.models import load_pin_model
 from compliant_docking.planning.kinematics import compute_ik
 from compliant_docking.planning.trajectory import (
+    CircleFigure8Trajectory,
     DecoupledQuinticTrajectory,
     TwoPhaseDockingTrajectory,
 )
@@ -286,9 +287,15 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
     print(f"Initial end-effector position: {H_init.translation}")
     print(f"Initial joint positions: {q_init}", success)
 
+    # 跟踪测试模式（trajectory.type == "tracking"）：圆+8字跟踪测试不对接 /
+    # Tracking-test mode: circle + figure-8 tracking, no docking target involved
+    is_tracking = scene.trajectory is not None and scene.trajectory.type == "tracking"
+
     # Set target position (relative motion): 目标 = 初始位置 + 对接行程 /
     # Target = initial position + docking stroke (from scene)
-    target_pos = init_pos + scene.task.stroke
+    # 跟踪测试分支下目标位置即初始位置（MujRobot 构造仍需要 target_pos） /
+    # In tracking mode target_pos = init_pos (MujRobot construction still needs it)
+    target_pos = init_pos if is_tracking else init_pos + scene.task.stroke
     print(f"Target position: {target_pos}")
 
     # Initialize robot simulation with parameters
@@ -305,13 +312,34 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
     )
 
     # Create trajectory planner
-    # 3) 构建任务空间轨迹规划器：场景提供 trajectory 段时用两段式对接轨迹
-    #    （接近段宽松限速 + 对接段严格限速，Ren & Shan 2026 任务结构的简化版），
-    #    此时 cfg.traj_duration 被忽略；否则维持历史单段解耦五次轨迹 /
-    # 3) Build task-space trajectory planner: two-phase docking trajectory when the
-    #    scene provides a trajectory section (approach loose limits + docking strict
-    #    limits; cfg.traj_duration ignored), else the legacy single-phase quintic
-    if scene.trajectory is not None:
+    # 3) 构建任务空间轨迹规划器，三路分发：trajectory.type == "tracking" 时用
+    #    圆+8字跟踪测试轨迹（过渡→竖直圆→过渡→平面8字→保持，用于测试控制器
+    #    轨迹跟踪能力，cfg.traj_duration 被忽略）；trajectory 段（缺省 twophase）
+    #    用两段式对接轨迹（接近段宽松限速 + 对接段严格限速，Ren & Shan 2026
+    #    任务结构的简化版），此时 cfg.traj_duration 被忽略；无 trajectory 段则
+    #    维持历史单段解耦五次轨迹 /
+    #    Three-way planner dispatch: "tracking" → circle + figure-8 tracking-test
+    #    trajectory (cfg.traj_duration ignored); trajectory section (default
+    #    twophase) → two-phase docking trajectory; else the legacy quintic
+    if is_tracking:
+        traj_spec = scene.trajectory
+        trajector_planner = CircleFigure8Trajectory(
+            init_pos,
+            transition_duration=traj_spec.transition_duration,
+            circle_duration=traj_spec.circle_duration,
+            circle_radius=traj_spec.circle_radius,
+            circle_frequency=traj_spec.circle_frequency,
+            circle_center_offset=traj_spec.circle_center_offset,
+            figure8_duration=traj_spec.figure8_duration,
+            figure8_radius_x=traj_spec.figure8_radius_x,
+            figure8_radius_y=traj_spec.figure8_radius_y,
+            figure8_frequency=traj_spec.figure8_frequency,
+        )
+        t_tr, t_c, t_8 = trajector_planner.durations
+        print(f"轨迹: 圆+8字跟踪测试（过渡 {t_tr:.3f} + 圆 {t_c:.3f} + "
+              f"过渡 {t_tr:.3f} + 8字 {t_8:.3f}，总时长 "
+              f"{trajector_planner.total_duration:.3f} s）")
+    elif scene.trajectory is not None:
         traj_spec = scene.trajectory
         trajector_planner = TwoPhaseDockingTrajectory(
             init_pos, target_pos,
@@ -341,14 +369,20 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
         r_des=init_ori,
     )
 
-    # 4) 对接性能指标（Ren & Shan 2026, Acta Astronautica, Table 10 三层指标）：
-    #    复用前已构建的 pin_model（不重复加载）；对接轴 = 轨迹推进方向（stroke）归一化。
+    # 4) 性能指标输出：
+    #    - 跟踪测试模式：跳过对接指标（无接触/无对接轴），改为按轨迹段打印
+    #      位置跟踪统计（tracking_summary）；
+    #    - 对接模式：对接性能指标（Ren & Shan 2026, Acta Astronautica,
+    #      Table 10 三层指标），复用前已构建的 pin_model（不重复加载）；
+    #      对接轴 = 轨迹推进方向（stroke）归一化。
     #    本阶段指标仅打印到 stdout（不落盘），打印必须发生在 CLI 汇总行之前 /
-    #    Compute and print docking performance metrics; stdout only (no persistence).
-    #    Must print before the CLI summary line.
-    axis = scene.task.stroke / np.linalg.norm(scene.task.stroke)
-    metrics = compute_metrics(log, pin_model, axis=axis, ee_frame=scene.robot.ee_frame)
-    print(format_metrics(metrics))
+    #    Print metrics to stdout only (no persistence), before the CLI summary line
+    if is_tracking:
+        print(tracking_summary(log, trajector_planner.segments))
+    else:
+        axis = scene.task.stroke / np.linalg.norm(scene.task.stroke)
+        metrics = compute_metrics(log, pin_model, axis=axis, ee_frame=scene.robot.ee_frame)
+        print(format_metrics(metrics))
 
     return log
 

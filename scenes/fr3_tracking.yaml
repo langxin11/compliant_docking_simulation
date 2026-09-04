@@ -1,0 +1,38 @@
+# 跟踪测试场景（不考虑对接）：FR3 + 公头锥，圆+8字轨迹用于测试控制器
+# 轨迹跟踪能力。FR3 保留上游真实减速器摩擦（fr3_arm.xml：joints1-4 1.137 N·m 等），
+# 以暴露低速摩擦跟踪缺陷；无母头段（不挂 target），轨迹从 init_pos 出发，
+# 圆心自动在其下方 0.06 m。
+scene:
+  name: fr3_tracking
+
+robot:
+  mjcf: assets/fr3/fr3_arm.xml
+  pin_model: assets/fr3/fr3_arm.xml      # MJCF 直读（load_pin_model 按后缀分发）
+  ee_site: attachment_site
+  ee_frame: attachment_site
+
+tool:
+  mjcf: assets/interfaces/male_cone.xml         # 花冠公头（与 iiwa14 场景同款接口片段）
+  prefix: tool_
+  pose: {pos: [0.0, 0.0, 0.015], quat: [1.0, 0.0, 0.0, 0.0]}
+
+physics:
+  timestep: 0.001
+  gravity: [0.0, 0.0, 0.0]
+  integrator: implicitfast
+  cone: elliptic
+  sdf_iterations: 10
+  sdf_initpoints: 40
+
+impedance:                                # FR3 真实摩擦下的刚度覆盖（静摩擦死区 ∝ 1/k）
+  k: 300.0
+  d: 100.0
+
+task:
+  init_pos: [0.0, 0.5, 0.5]
+  init_ori: [[1, 0, 0], [0, -1, 0], [0, 0, -1]]
+  ik_guess: [0.0, 0.0, 0.0, -1.57079, 0.0, 1.57079, -0.7853]  # FR3 home 位形
+  stroke: [0.0, 0.0, 0.0]  # 跟踪场景不用 stroke（轨迹由 tracking 规划器定义，target_pos=init_pos）
+
+trajectory:                               # 圆+8字跟踪测试（其余参数走 TrajectorySpec 默认值）
+  type: tracking
