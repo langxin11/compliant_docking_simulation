@@ -34,6 +34,7 @@ _QP_SOLVED = proxsuite.proxqp.QPSolverOutput.PROXQP_SOLVED
 
 # 主任务 H 矩阵数值正则化量（保证严格凸）
 _H_REG = 1e-8
+_FRAME_REFERENCE = pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
 
 
 class HQPAdaptiveController:
@@ -49,6 +50,7 @@ class HQPAdaptiveController:
                  ee_frame: str = "cylinder_link",
                  r_des: np.ndarray | None = None,
                  frictionloss: np.ndarray | None = None,
+                 damping: np.ndarray | None = None,
                  impedance: ImpedanceConfig | None = None):
         """初始化控制器：预解析限位并预建两个 ProxQP 实例（主任务/零空间）。
 
@@ -92,6 +94,8 @@ class HQPAdaptiveController:
         # 摩擦前馈幅值（零向量 = 无补偿，行为与历史实现一致）
         self.frictionloss = (np.zeros(self.n) if frictionloss is None
                              else np.asarray(frictionloss, dtype=float).reshape(self.n))
+        self.damping = (np.zeros(self.n) if damping is None
+                        else np.asarray(damping, dtype=float).reshape(self.n))
         self._friction_v0 = 0.01  # tanh 平滑化速度阈值 [rad/s]
 
         # 期望姿态（世界系 3×3）
@@ -154,7 +158,7 @@ class HQPAdaptiveController:
         pin.updateFramePlacements(self.model, self.data)
         H = self.data.oMf[self.frame_id]
         J = np.array(pin.computeFrameJacobian(
-            self.model, self.data, q, self.frame_id, pin.ReferenceFrame.WORLD))
+            self.model, self.data, q, self.frame_id, _FRAME_REFERENCE))
         return H.translation.copy(), J[:3, :] @ v, H.rotation.copy()
 
     # ------------------------------------------------------------------
@@ -178,9 +182,9 @@ class HQPAdaptiveController:
         return sqrt_L @ sqrt_K + sqrt_K @ sqrt_L
 
     def _manipulability(self, q: np.ndarray) -> float:
-        """Eq.(38)：ω = sqrt(det(J Jᵀ))（6 维任务雅可比，世界系）。"""
+        """Eq.(38)：ω = sqrt(det(J Jᵀ))（6 维、世界轴对齐 frame 原点雅可比）。"""
         J = np.array(pin.computeFrameJacobian(
-            self.model, self.data, q, self.frame_id, pin.ReferenceFrame.WORLD))
+            self.model, self.data, q, self.frame_id, _FRAME_REFERENCE))
         return float(np.sqrt(max(np.linalg.det(J @ J.T), 0.0)))
 
     def _manipulability_gradient(self, q: np.ndarray, delta: float = 1e-6) -> np.ndarray:
@@ -275,15 +279,15 @@ class HQPAdaptiveController:
         if self.q_col is None:
             self.q_col = q.copy()
 
-        # 1) FK + 世界系雅可比及其时间导数（需 forwardKinematics(q, v) 序列）
+        # 1) FK + 世界轴对齐 frame 原点雅可比及同参考系时间导数。
         pin.forwardKinematics(self.model, self.data, q, v)
         pin.computeJointJacobiansTimeVariation(self.model, self.data, q, v)
         pin.updateFramePlacements(self.model, self.data)
         R_cur = np.array(self.data.oMf[self.frame_id].rotation)
         J = np.array(pin.getFrameJacobian(
-            self.model, self.data, self.frame_id, pin.ReferenceFrame.WORLD))
+            self.model, self.data, self.frame_id, _FRAME_REFERENCE))
         J_dot = np.array(pin.getFrameJacobianTimeVariation(
-            self.model, self.data, self.frame_id, pin.ReferenceFrame.WORLD))
+            self.model, self.data, self.frame_id, _FRAME_REFERENCE))
         J_rot = J[3:, :]
 
         # 2) 动力学项：M（对称化）、ĥ = C(q,v)·v
@@ -293,7 +297,7 @@ class HQPAdaptiveController:
         h = np.array(self.data.C) @ v
         # 关节摩擦前馈（Pinocchio 模型不含 frictionloss，仿真侧有）：
         # 并入 ĥ 使力矩硬约束与输出力矩自动一致
-        h = h + self.frictionloss * np.tanh(v / self._friction_v0)
+        h = h + self.frictionloss * np.tanh(v / self._friction_v0) + self.damping * v
 
         # 任务空间惯性 Λ 及其逆（Λ⁻¹ = J M⁻¹ Jᵀ，pinv 稳健化后对称化）
         M_inv = np.linalg.pinv(M)

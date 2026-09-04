@@ -1,4 +1,4 @@
-"""摩擦前馈补偿测试：零摩擦为无操作，非零摩擦按 tanh 模型产生前馈力矩。"""
+"""MuJoCo 未进入 Pinocchio 模型的关节耗散项前馈补偿测试。"""
 import numpy as np
 import pytest
 
@@ -48,8 +48,32 @@ def test_friction_feedforward_matches_tanh_model(pin_model):
     np.testing.assert_allclose(tau_ff_fast - tau_base_fast, fl, atol=1e-3)
 
 
+def test_damping_feedforward_matches_mujoco_model(pin_model):
+    """阻尼前馈力矩差值应精确等于 ``dof_damping * qdot``。"""
+    q = np.array([0.1, 0.3, -0.4, 0.2, 0.5, -0.3, 0.2])
+    v = np.array([0.05, -0.02, 0.03, 0.01, -0.04, 0.02, 0.01])
+    damping = np.array([0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0])
+    tau_base = _run(
+        TaskSpaceController(pin_model, 0.001, ImpedanceConfig(), friction_integral_gain=0.0),
+        q,
+        v,
+    )
+    tau_ff = _run(
+        TaskSpaceController(
+            pin_model,
+            0.001,
+            ImpedanceConfig(),
+            damping=damping,
+            friction_integral_gain=0.0,
+        ),
+        q,
+        v,
+    )
+    np.testing.assert_allclose(tau_ff - tau_base, damping * v, atol=1e-10)
+
+
 def test_integral_gain_auto_gating(pin_model):
-    """I 项自动门控：摩擦非零自动启用（40），零摩擦恒 0（iiwa 路径行为不变）。"""
+    """I 项自动门控：摩擦非零自动启用（150），零摩擦恒 0（iiwa 路径行为不变）。"""
     q = np.array([0.1, 0.3, -0.4, 0.2, 0.5, -0.3, 0.2])
     ctrl_ff = TaskSpaceController(pin_model, 0.001, ImpedanceConfig(),
                                   frictionloss=np.full(7, 1.137))

@@ -4,7 +4,8 @@
     pytest -m "not slow"   # 快速套件（默认）：3 s 无接触跟踪
     pytest -m slow         # 慢速套件：12 s 全接触回归（约 2-4 分钟），数值锚点不可调整
 
-数值锚点为重构前实测的行为基准（refactor 行为不变的判据）；若失败说明重构改变了行为。
+数值锚点是在修正操作空间动力学项后，以保守默认阻抗重新测得的行为基准。
+它同时约束确定性结果与接触瞬态上界；若失败说明控制行为发生了变化。
 """
 import numpy as np
 import pinocchio as pin
@@ -104,15 +105,23 @@ def test_impedance_tracking_no_contact_3s(q_init):
 
 @pytest.mark.slow
 def test_contact_regression_12s(q_init):
-    """慢速回归：12 s 全接触行为锚点（阈值即基准，失败说明重构改变了行为，不可调整）。"""
+    """慢速回归：12 s 全接触行为锚点及保守接触峰值上界。
+
+    基线在修正 LOCAL_WORLD_ALIGNED 雅可比、Jdot 和标准操作空间映射后重建；
+    默认 k=50、d=80 使接触峰值低于原 18.785 N 基线，避免把旧实现的
+    数值错误当作需要保持的行为。容差仅覆盖平台浮点差异，不用于放宽判据。
+    """
     result = run_docking_loop(duration=12.0, q_init=q_init)
 
-    assert result["final_err_mm"] == pytest.approx(68.124, abs=0.5), (
-        f"final_err_mm={result['final_err_mm']:.3f} 偏离锚点 68.124"
+    assert result["final_err_mm"] == pytest.approx(68.095, abs=0.05), (
+        f"final_err_mm={result['final_err_mm']:.3f} 偏离锚点 68.095"
     )
-    assert result["max_contact_N"] == pytest.approx(18.785, abs=0.5), (
-        f"max_contact_N={result['max_contact_N']:.3f} 偏离锚点 18.785"
+    assert result["max_contact_N"] == pytest.approx(15.798, abs=0.05), (
+        f"max_contact_N={result['max_contact_N']:.3f} 偏离锚点 15.798"
     )
-    assert result["final_contact_N"] == pytest.approx(2.135, abs=0.1), (
-        f"final_contact_N={result['final_contact_N']:.3f} 偏离锚点 2.135"
+    assert result["max_contact_N"] <= 18.785, (
+        f"max_contact_N={result['max_contact_N']:.3f} 超过旧基线 18.785"
+    )
+    assert result["final_contact_N"] == pytest.approx(1.311, abs=0.02), (
+        f"final_contact_N={result['final_contact_N']:.3f} 偏离锚点 1.311"
     )

@@ -18,6 +18,10 @@ from scipy.linalg import pinv
 
 from ..config import ImpedanceConfig
 
+# 任务变量是末端 frame 原点的世界系位置、线速度和角速度。WORLD 的线速度块
+# 表示相对世界原点的空间运动，不适合这一语义；统一使用世界轴对齐的 frame 原点量。
+_FRAME_REFERENCE = pin.ReferenceFrame.LOCAL_WORLD_ALIGNED
+
 
 class TaskSpaceController:
     """
@@ -28,6 +32,7 @@ class TaskSpaceController:
                  impedance: ImpedanceConfig | None = None,
                  ee_frame: str = "cylinder_link",
                  frictionloss: np.ndarray | None = None,
+                 damping: np.ndarray | None = None,
                  friction_integral_gain: float | None = None):
         """
         初始化控制器：设定 Pinocchio 模型、步长与阻抗参数 /
@@ -67,6 +72,10 @@ class TaskSpaceController:
         # 摩擦前馈幅值（零向量 = 无补偿，行为与历史实现一致）
         self.frictionloss = (np.zeros(self.model.nq) if frictionloss is None
                              else np.asarray(frictionloss, dtype=float).reshape(self.model.nq))
+        # MuJoCo 的 dof_damping 产生被动广义力 -damping*qdot；Pinocchio 模型不
+        # 保存该项，故以 +damping*qdot 前馈补偿，和 frictionloss 一样由场景组装模型提供。
+        self.damping = (np.zeros(self.model.nq) if damping is None
+                        else np.asarray(damping, dtype=float).reshape(self.model.nq))
         self._friction_v0 = 0.01  # tanh 平滑化速度阈值 [rad/s]
 
         # 静摩擦死区的积分补偿（速度前馈在零速时消失，I 项负责稳态残差；
@@ -92,7 +101,9 @@ class TaskSpaceController:
             [0, -1,  0],
             [0,  0, -1]])
 
-    def get_task_space_state(self, q: np.ndarray, v: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    def get_task_space_state(
+            self, q: np.ndarray, v: np.ndarray,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """
         计算当前末端位置与线速度（世界系）/
         Compute current end-effector position and linear velocity (world frame)
@@ -104,7 +115,7 @@ class TaskSpaceController:
         current_pos = H.translation
         current_ori = H.rotation
 
-        J = pin.computeFrameJacobian(self.model, self.data, q, self.end_effector_id, pin.ReferenceFrame.WORLD)
+        J = pin.computeFrameJacobian(self.model, self.data, q, self.end_effector_id, _FRAME_REFERENCE)
         J_pos = J[:3, :]
 
         current_vel = J_pos @ v  # 末端线速度（线速度雅可比 J_pos 乘关节速度）
@@ -126,7 +137,7 @@ class TaskSpaceController:
         # 姿态误差：log(Rd Rc^T)
         orientation_error = pin.log3(self.initial_orientation @ current_rot.T)
 
-        J = pin.computeFrameJacobian(self.model, self.data, q, self.end_effector_id, pin.ReferenceFrame.WORLD)
+        J = pin.computeFrameJacobian(self.model, self.data, q, self.end_effector_id, _FRAME_REFERENCE)
         J_pos = J[:3, :]
         J_rot = J[3:, :]
 
@@ -153,19 +164,21 @@ class TaskSpaceController:
         # 姿态的速度误差（希望角速度为0）：当前角速度取负
         vel_rot_err = -vel_rot_cur
 
-        # 2) 计算末端雅可比（世界系），拆分为平动与旋转部分
-        J = pin.computeFrameJacobian(self.model, self.data, q, self.end_effector_id, pin.ReferenceFrame.WORLD)
+        # 2) 计算末端 frame 原点的世界轴对齐雅可比及同参考系 J_dot。
+        pin.forwardKinematics(self.model, self.data, q, v)
+        pin.computeJointJacobiansTimeVariation(self.model, self.data, q, v)
+        pin.updateFramePlacements(self.model, self.data)
+        J = pin.getFrameJacobian(self.model, self.data, self.end_effector_id, _FRAME_REFERENCE)
         J_pos = J[:3, :]
         J_rot = J[3:, :]
 
         # 3) 机器人动力学项：广义质量矩阵 M 及其伪逆，权重矩阵 W（此处取单位阵）
         M = pin.crba(self.model, self.data, q)  # 质量矩阵
         M_inv = pinv(M)
-        W = np.eye(self.model.nq)
 
         # 4) 雅可比的时间变化项 J_dot（用于前馈/补偿项）
         J_dot = pin.getFrameJacobianTimeVariation(
-            self.model, self.data, self.end_effector_id, pin.ReferenceFrame.WORLD)
+            self.model, self.data, self.end_effector_id, _FRAME_REFERENCE)
 
         # 5) 科氏/离心项：C(q, v)·v（转为一维向量表示广义力）
         pin.computeCoriolisMatrix(self.model, self.data, q, v)
@@ -202,31 +215,28 @@ class TaskSpaceController:
         # 8) Rotational impedance: PD-like control on orientation/angular-velocity errors
         u_rot = (imp.k_rot * (ori_err) + imp.d_rot * (vel_rot_err)) / imp.m_rot
 
-        # 防止旋转控制过大（对 z 轴分量做简单限幅示例）
-        if np.linalg.norm(u_rot) > 0.1:
-            u_rot[2] = 0.001
-
         # 拼接平动与旋转的任务输入（6维）
         u = np.concatenate([u_pos, u_rot])
 
-        # 10) 组合雅可比并计算动力学一致映射矩阵（加权广义逆）
+        # 10) 组合雅可比并计算标准操作空间惯性/动力学一致广义逆。
         J_full = np.vstack([J_pos, J_rot])
-        # 动力学一致映射矩阵（操作空间惯性的变体实现），将任务输入映射为关节力矩
-        lambda_ = W @ M_inv.T @ J_full.T @ pinv(J_full @ M_inv @ W @ M_inv.T @ J_full.T)
+        Lambda = pinv(J_full @ M_inv @ J_full.T)
+        J_bar = M_inv @ J_full.T @ Lambda
 
         # 11) 零空间阻尼：抑制未约束自由度的速度振荡（阻尼由 ImpedanceConfig 提供） /
         # 11) Null-space damping (coefficient from ImpedanceConfig)
         D_null = imp.null_damping * np.eye(self.model.nq)
         v_null = v
-        N = (np.eye(self.model.nq) - lambda_ @ J_full @ M_inv)
-        null_term2 = -N @ D_null @ v_null.reshape(self.model.nq)
+        N = np.eye(self.model.nq) - J_bar @ J_full
+        null_term2 = -N.T @ D_null @ v_null.reshape(self.model.nq)
 
         # 12) 合成关节力矩：主任务项（含前馈与科氏/离心补偿）+ 零空间阻尼
-        tau = lambda_ @ (u - J_dot @ v + J_full @ M_inv @ (C)) + null_term2
+        tau = J_full.T @ Lambda @ (u - J_dot @ v) + C + null_term2
 
         # 13) 关节摩擦前馈补偿（Pinocchio 模型不含 frictionloss，仿真侧有：
         #     smooth tanh 逼近库仑摩擦，零摩擦时该项恒为零）
         tau = tau + self.frictionloss * np.tanh(v / self._friction_v0)
+        tau = tau + self.damping * v
 
         return tau
 
@@ -239,12 +249,15 @@ class TaskSpaceController:
 
         vel_rot_err = -vel_rot_cur
 
-        J = pin.computeFrameJacobian(self.model, self.data, q, self.end_effector_id, pin.ReferenceFrame.WORLD)
+        pin.forwardKinematics(self.model, self.data, q, v)
+        pin.computeJointJacobiansTimeVariation(self.model, self.data, q, v)
+        pin.updateFramePlacements(self.model, self.data)
+        J = pin.getFrameJacobian(self.model, self.data, self.end_effector_id, _FRAME_REFERENCE)
 
         M = pin.crba(self.model, self.data, q)
 
         J_dot = pin.getFrameJacobianTimeVariation(
-            self.model, self.data, self.end_effector_id, pin.ReferenceFrame.WORLD)
+            self.model, self.data, self.end_effector_id, _FRAME_REFERENCE)
 
         pin.computeCoriolisMatrix(self.model, self.data, q, v)
         C = self.data.C
@@ -281,7 +294,10 @@ class TaskSpaceController:
 
         vel_rot_err = -vel_rot_cur
 
-        J = pin.computeFrameJacobian(self.model, self.data, q, self.end_effector_id, pin.ReferenceFrame.WORLD)
+        pin.forwardKinematics(self.model, self.data, q, v)
+        pin.computeJointJacobiansTimeVariation(self.model, self.data, q, v)
+        pin.updateFramePlacements(self.model, self.data)
+        J = pin.getFrameJacobian(self.model, self.data, self.end_effector_id, _FRAME_REFERENCE)
         J_pos = J[:3, :]
         J_rot = J[3:, :]
 
@@ -289,7 +305,7 @@ class TaskSpaceController:
         M_inv = pinv(M)
 
         J_dot = pin.getFrameJacobianTimeVariation(
-            self.model, self.data, self.end_effector_id, pin.ReferenceFrame.WORLD)
+            self.model, self.data, self.end_effector_id, _FRAME_REFERENCE)
 
         pin.computeCoriolisMatrix(self.model, self.data, q, v)
         C = self.data.C
@@ -323,7 +339,10 @@ class TaskSpaceController:
         """
         pos_cur, vel_cur, _ = self.get_task_space_state(q, v)
 
-        J = pin.computeFrameJacobian(self.model, self.data, q, self.end_effector_id, pin.ReferenceFrame.WORLD)
+        pin.forwardKinematics(self.model, self.data, q, v)
+        pin.computeJointJacobiansTimeVariation(self.model, self.data, q, v)
+        pin.updateFramePlacements(self.model, self.data)
+        J = pin.getFrameJacobian(self.model, self.data, self.end_effector_id, _FRAME_REFERENCE)
         J_pos = J[:3, :]
 
         M = pin.crba(self.model, self.data, q)
@@ -332,7 +351,7 @@ class TaskSpaceController:
         lambda_ = M @ M_inv.T @ J_pos.T @ pinv(J_pos @ M_inv @ M @ M_inv.T @ J_pos.T)
 
         J_dot_full = pin.getFrameJacobianTimeVariation(
-            self.model, self.data, self.end_effector_id, pin.ReferenceFrame.WORLD)
+            self.model, self.data, self.end_effector_id, _FRAME_REFERENCE)
 
         J_dot_full = J_dot_full[:3, :]
 
@@ -379,13 +398,15 @@ class TaskSpaceController:
         Compute manipulability gradient (numerical) for det(JJ^T)
         """
         grad = np.zeros_like(q)
-        J_current = pin.computeFrameJacobian(self.model, self.data, q, self.end_effector_id)[:3, :]
+        J_current = pin.computeFrameJacobian(
+            self.model, self.data, q, self.end_effector_id, _FRAME_REFERENCE)[:3, :]
         manipulability_current = np.linalg.det(J_current @ J_current.T)
 
         for i in range(len(q)):
             q_delta = q.copy()
             q_delta[i] += delta
-            J_delta = pin.computeFrameJacobian(self.model, self.data, q_delta, self.end_effector_id)[:3, :]
+            J_delta = pin.computeFrameJacobian(
+                self.model, self.data, q_delta, self.end_effector_id, _FRAME_REFERENCE)[:3, :]
             manipulability_delta = np.linalg.det(J_delta @ J_delta.T)
             grad[i] = (manipulability_delta - manipulability_current) / delta
         return grad

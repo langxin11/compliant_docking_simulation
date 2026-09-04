@@ -9,8 +9,9 @@ class ImpedanceConfig:
     """操作空间阻抗参数（平动 m/d/k + 姿态 m_rot/d_rot/k_rot）与零空间阻尼。"""
 
     m: float = 10.0
-    d: float = 50.0
-    k: float = 100.0
+    # 保守的平动阻抗：在修正操作空间动力学项后，降低接触瞬态峰值。
+    d: float = 80.0
+    k: float = 50.0
     m_rot: float = 1.0
     d_rot: float = 10.0
     k_rot: float = 25.0
@@ -60,4 +61,3 @@ class HQPConfig:
     dt_p: float = 0.05
     torque_limit: float | None = None
     eps_abs: float = 1e-5
-
