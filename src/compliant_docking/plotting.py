@@ -165,4 +165,34 @@ def plot_docking_log(log: "Log", out_dir: str | Path, *,
         ax.set_xlabel("时间 [s]")
         _save(fig, f"{prefix}orientation_error")
 
+    # 6. 规划轨迹本体：上图为 3D 末端路径（规划虚线 vs 实际实线），
+    #    下图为速度剖面（两段式轨迹的对接段限速平台在此直接可见）。
+    #    Axes3D 的刻度/轴标签不参与 constrained_layout 的占位计算，会裁切进
+    #    下方子图，故本图关闭 constrained layout，改用手动边距 /
+    # 6. The planned trajectory itself: top panel is the 3D EE path
+    #    (planned dashed vs actual solid), bottom panel the speed profile,
+    #    where the slow docking-phase plateau is directly visible. Axes3D
+    #    tick/axis labels are not measured by constrained_layout (they would
+    #    be clipped under the lower panel), so manual margins are used here.
+    vel_des = np.asarray(log.vel_desired, dtype=float).reshape(-1, 3)
+    vel_act = np.asarray(log.vel_actual, dtype=float).reshape(-1, 3)
+    fig = plt.figure(figsize=(_FIG_WIDTH, 5.0))
+    ax3d = fig.add_subplot(2, 1, 1, projection="3d")
+    ax3d.plot(pos_des[:, 0], pos_des[:, 1], pos_des[:, 2], "--", label="规划")
+    ax3d.plot(pos_act[:, 0], pos_act[:, 1], pos_act[:, 2], "-", label="实际")
+    for axis in (ax3d.xaxis, ax3d.yaxis, ax3d.zaxis):
+        axis.set_major_locator(mpl.ticker.MaxNLocator(3))
+    ax3d.set_xlabel("X [m]")
+    ax3d.set_ylabel("Y [m]")
+    ax3d.set_zlabel("Z [m]")
+    ax3d.legend(ncols=2)
+    ax_sp = fig.add_subplot(2, 1, 2)
+    ax_sp.plot(t, np.linalg.norm(vel_des, axis=1), "--", label="规划")
+    ax_sp.plot(t, np.linalg.norm(vel_act, axis=1), "-", label="实际")
+    ax_sp.set_ylabel("末端速度 [m/s]")
+    ax_sp.set_xlabel("时间 [s]")
+    ax_sp.legend(ncols=2)
+    fig.subplots_adjust(left=0.15, right=0.84, top=0.97, bottom=0.10, hspace=0.42)
+    _save(fig, f"{prefix}planned_trajectory")
+
     return saved

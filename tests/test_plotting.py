@@ -65,7 +65,8 @@ def test_plot_docking_log_smoke(tmp_path):
     names = {f.name for f in files}
     for expected in ("unit_ee_tracking.png", "unit_ee_tracking.pdf",
                      "unit_tracking_error.png", "unit_contact_force.png",
-                     "unit_joint_torques.png", "unit_orientation_error.png"):
+                     "unit_joint_torques.png", "unit_orientation_error.png",
+                     "unit_planned_trajectory.png"):
         assert expected in names, f"missing figure: {expected}"
     for f in files:
         assert f.stat().st_size > 0, f"empty file: {f}"
