@@ -309,3 +309,26 @@ def test_tracking_metrics_exclude_post_trajectory_hold_window():
     assert reference.torque_saturation_ratio == pytest.approx(1.0 / 20.0)
     assert reference.max_contacts == 3
     assert held == reference
+
+
+def test_store_data_copies_mujoco_view_arrays():
+    """store_data 必须存 q/v 的副本：MuJoCo 的 data.qpos/qvel 切片是视图，
+    缓冲区随步进原地改写，若直接 append 引用，整列事后读到的都是末步值 /
+    store_data must copy q/v: MuJoCo data.qpos/qvel slices are views into a
+    buffer mutated in place, so appending references yields last-step values."""
+    log = Log()
+    log.reset_logs()
+
+    q = np.zeros(7)
+    v = np.zeros(7)
+    zero3 = np.zeros(3)
+    log.store_data(0.0, q, v, zero3, zero3, 0.0, zero3, zero3, zero3,
+                   np.zeros(7), zero3, zero3)
+    q[0] = 0.5  # 模拟下一步原地改写缓冲区 / simulate in-place buffer mutation
+    v[6] = 0.1
+    log.store_data(0.001, q, v, zero3, zero3, 0.0, zero3, zero3, zero3,
+                   np.zeros(7), zero3, zero3)
+
+    assert log.joint_angles[0][0] == pytest.approx(0.0)
+    assert log.joint_velocities[0][6] == pytest.approx(0.0)
+    assert log.joint_angles[1][0] == pytest.approx(0.5)

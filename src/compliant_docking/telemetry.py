@@ -82,8 +82,12 @@ class Log:
 
         self.t_list.append(t)
 
-        self.joint_angles.append(q)
-        self.joint_velocities.append(v)
+        # q/v 可能是 MuJoCo data.qpos/qvel 的视图（缓冲区随步进原地改写），
+        # 必须存副本，否则整列事后读到的都是末步值 /
+        # q/v may be views into MuJoCo's data.qpos/qvel buffers (mutated in
+        # place each step); store copies or every entry reads as the last step
+        self.joint_angles.append(np.array(q, copy=True))
+        self.joint_velocities.append(np.array(v, copy=True))
 
         self.pos_actual.append(pos_actual)
         self.vel_actual.append(vel_actual)
