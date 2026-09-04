@@ -79,7 +79,8 @@ graph TB
 场景：iiwa14 末端安装锥形对接头（SDF 非凸 mesh），对固定对接座沿 z 向下压完成对接。指令行程 18 cm，五次多项式轨迹 15 s，总仿真 18 s，控制频率 1 kHz。
 
 - 操作空间阻抗控制 + 接触力前馈：接触后 Z 向按阻抗参数柔顺让位，无持续冲击；
-- 接触力（MuJoCo 力传感器实测）：稳态约 **2.5 N**（首次接触瞬态约 19 N，在阻尼作用下迅速衰减至稳态）；
+- 接触回路保留 12 s 确定性安全回归：当前峰值约 **15.798 N**、12 s 时约
+  **1.311 N**，且峰值硬性要求不超过旧基线 18.785 N；该回归不是最终对接精度验收；
 - 非接触方向跟踪：X/Y 误差保持在 **±2 mm** 以内；
 - 主循环含力矩限幅与异常捕获，接触丰富的场景下长时仿真稳定。
 
@@ -92,7 +93,7 @@ graph TB
 
 | 方法 | 特点 |
 |---|---|
-| `compute_control_task_space_with_orientation_and_imp` | **主控制器**：位置/姿态双通道阻抗模型 `(m, d, k)` + 传感器接触力前馈；任务空间→关节空间映射采用 `M⁻¹` 加权伪逆并构造零空间投影算子 `N = I − ΛJ M⁻¹`，零空间注入阻尼抑制自运动 |
+| `compute_control_task_space_with_orientation_and_imp` | **主控制器**：位置/姿态双通道阻抗模型 `(m, d, k)` + 传感器接触力前馈；采用操作空间惯性 `Λ=(JM⁻¹Jᵀ)⁺`、动力学一致广义逆 `J̄=M⁻¹JᵀΛ` 与零空间投影 `N=I−J̄J`，通过 `Nᵀ` 注入关节阻尼抑制自运动 |
 | `compute_control_task_space_with_orientation` | 纯操作空间 PD（无阻抗、无力前馈），作为对照 |
 | `compute_control_task_space` | 位置子空间控制 + 可操作度（manipulability）梯度零空间优化，作为对照 |
 
@@ -111,6 +112,29 @@ uv sync                     # 创建环境并锁定依赖（uv.lock）
 uv run docking --quick      # CLI 冒烟：2 s 仿真验证环境
 uv run python experiments/run_docking.py   # 完整 18 s 对接仿真
 ```
+
+先运行自由空间轨迹跟踪门禁，再进入柔顺对接：
+
+```bash
+# 2 s 冒烟只检查链路，结果标记为 INCOMPLETE，不作性能判定
+uv run --frozen docking --scene scenes/iiwa14_tracking.yaml --quick
+
+# 完整覆盖圆形与 8 字轨迹；PASS 返回 0，FAIL 返回 2
+uv run --frozen docking --scene scenes/iiwa14_tracking.yaml --duration 13.1
+
+# FR3 使用同一套门禁流程
+uv run --frozen docking --scene scenes/fr3_tracking.yaml --duration 13.1
+```
+
+跟踪场景不装配母头，也不把 F/T 信号反馈给控制器，以隔离接触与柔顺控制影响；
+但仍记录原始传感器、真实接触数和力矩限幅情况。圆形与 8 字轨迹在段间保持位置、
+速度和加速度连续。验收阈值位于对应 `scenes/*_tracking.yaml` 的
+`tracking_thresholds` 段，可按实际对接精度需求调整；完整运行只有同时满足分段误差、
+姿态误差、力矩限幅比例和零接触要求才会输出 `PASS`。
+
+当前 1 ms 步长、默认参数的确定性基线：iiwa14 圆/8 字位置 RMS 分别约
+`0.236/0.269 mm`，FR3 分别约 `1.545/0.938 mm`；两者均无力矩限幅和接触。
+这些结果只证明自由空间跟踪链路合格，不代表柔顺接触与最终对接精度已经验收。
 
 运行测试：
 
