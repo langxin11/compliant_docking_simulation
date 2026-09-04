@@ -51,7 +51,9 @@ class HQPAdaptiveController:
                  r_des: np.ndarray | None = None,
                  frictionloss: np.ndarray | None = None,
                  damping: np.ndarray | None = None,
-                 impedance: ImpedanceConfig | None = None):
+                 impedance: ImpedanceConfig | None = None,
+                 friction_mode: str = "velocity",
+                 friction_tau_scale: float = 2.0):
         """初始化控制器：预解析限位并预建两个 ProxQP 实例（主任务/零空间）。
 
         参数 / Args:
@@ -97,6 +99,13 @@ class HQPAdaptiveController:
         self.damping = (np.zeros(self.n) if damping is None
                         else np.asarray(damping, dtype=float).reshape(self.n))
         self._friction_v0 = 0.01  # tanh 平滑化速度阈值 [rad/s]
+        # 摩擦前馈模式："velocity"（τ_ff=f·tanh(q̇/v₀)）或 "torque"
+        # （τ_ff=f·tanh(τ_pre/τ₀)，用补偿前力矩方向治零速死区；τ₀=f/scale），
+        # 与 TaskSpaceController 同语义
+        if friction_mode not in ("velocity", "torque"):
+            raise ValueError(f"friction_mode 不支持 {friction_mode!r}，可选 'velocity' 或 'torque'")
+        self.friction_mode = friction_mode
+        self.friction_tau_scale = float(friction_tau_scale)
 
         # 期望姿态（世界系 3×3）
         if r_des is None:
@@ -296,8 +305,14 @@ class HQPAdaptiveController:
         pin.computeCoriolisMatrix(self.model, self.data, q, v)
         h = np.array(self.data.C) @ v
         # 关节摩擦前馈（Pinocchio 模型不含 frictionloss，仿真侧有）：
-        # 并入 ĥ 使力矩硬约束与输出力矩自动一致
-        h = h + self.frictionloss * np.tanh(v / self._friction_v0) + self.damping * v
+        # 并入 ĥ 使力矩硬约束与输出力矩自动一致；torque 模式用补偿前 ĥ
+        # 的方向决定摩擦方向（与 TaskSpaceController 同语义）
+        if self.friction_mode == "torque":
+            h = h + self.frictionloss * np.tanh(
+                h * self.friction_tau_scale / np.maximum(self.frictionloss, 1e-9))
+        else:
+            h = h + self.frictionloss * np.tanh(v / self._friction_v0)
+        h = h + self.damping * v
 
         # 任务空间惯性 Λ 及其逆（Λ⁻¹ = J M⁻¹ Jᵀ，pinv 稳健化后对称化）
         M_inv = np.linalg.pinv(M)

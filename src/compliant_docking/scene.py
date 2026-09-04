@@ -200,6 +200,7 @@ class Scene:
     trajectory: TrajectorySpec | None = None  # 可选轨迹段（两段式对接 / 圆+8字跟踪；缺省走单段五次）
     tracking_thresholds: TrackingThresholds | None = None  # 跟踪门禁阈值（只在 type=tracking 时使用）
     impedance: ImpedanceOverride | None = None  # 可选阻抗增益覆盖（缺省走 ImpedanceConfig）
+    friction_comp: str = "velocity"  # 摩擦前馈模式："velocity" | "torque"（力矩方向，治零速死区）
 
     # ---- 解析后的名称属性（下阶段接线时使用） ----
 
@@ -333,6 +334,10 @@ def load_scene(path: str | Path) -> Scene:
     task = raw["task"]
     target = raw.get("target")  # 跟踪测试场景无母头段（target=None）
     impedance = ImpedanceOverride(**raw["impedance"]) if "impedance" in raw else None
+    friction_comp = str(raw.get("friction_comp", "velocity"))
+    if friction_comp not in ("velocity", "torque"):
+        raise ValueError(
+            f"scene 配置 friction_comp 不支持 {friction_comp!r}，可选值: velocity, torque")
 
     # trajectory 段解析后校验 type 合法取值，再构造 TrajectorySpec /
     # Validate trajectory.type against the legal values before constructing the spec
@@ -397,4 +402,5 @@ def load_scene(path: str | Path) -> Scene:
         trajectory=trajectory,
         tracking_thresholds=tracking_thresholds,
         impedance=impedance,
+    friction_comp=friction_comp,
     )

@@ -279,12 +279,13 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
         print(f"阻抗覆盖: k={imp_cfg.k} d={imp_cfg.d} k_rot={imp_cfg.k_rot} d_rot={imp_cfg.d_rot}")
     if controller == "impedance":
         task_dynamics = TaskSpaceController(pin_model, cfg.dt, imp_cfg, ee_frame=scene.robot.ee_frame,
-                                            frictionloss=frictionloss, damping=damping)
+                                            frictionloss=frictionloss, damping=damping,
+                                            friction_mode=scene.friction_comp)
     elif controller == "hqp":
         task_dynamics = HQPAdaptiveController(
             pin_model, cfg.dt, HQPConfig(torque_limit=cfg.max_torque),
             ee_frame=scene.robot.ee_frame, r_des=init_ori, frictionloss=frictionloss,
-            damping=damping, impedance=imp_cfg)
+            damping=damping, impedance=imp_cfg, friction_mode=scene.friction_comp)
         print(f"控制器: HQP-AC（Ren & Shan 2026 §3.2，关节位置/速度/力矩 QP 硬约束 + "
               f"接触力自适应刚度；力矩约束 ±{cfg.max_torque} N·m）")
     else:

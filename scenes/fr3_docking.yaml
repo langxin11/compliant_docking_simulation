@@ -3,7 +3,8 @@
 # 接口与 iiwa14 场景同款（花冠公头 male_cone + 花冠母头 female_socket）。
 # FR3 保留上游真实减速器摩擦（fr3_arm.xml：joints1-4 1.137 N·m 等），
 # 控制器由 run_docking 传入组装模型 dof_frictionloss 做前馈补偿
-# （τ_ff = frictionloss·tanh(q̇/0.01)），无补偿时摩擦会产生 ~16cm
+# （velocity 模式 τ_ff = frictionloss·tanh(q̇/0.01)；本场景启用 torque 模式：
+# τ_ff = frictionloss·tanh(τ_pre/(f/2))，以补偿前力矩方向决定摩擦方向，治零速死区粘滑），无补偿时摩擦会产生 ~16cm
 # 跟踪滞后导致无法入扣。
 scene:
   name: fr3_docking
@@ -34,6 +35,10 @@ physics:
   cone: elliptic
   sdf_iterations: 10
   sdf_initpoints: 40
+
+# 摩擦前馈模式：torque = 用补偿前力矩方向决定摩擦方向（零速死区补偿）/
+# torque = direction-of-commanded-torque friction feedforward (stiction deadzone)
+friction_comp: torque
 
 impedance:                                # FR3 真实摩擦下的刚度覆盖（静摩擦死区 ∝ 1/k）
   k: 300.0

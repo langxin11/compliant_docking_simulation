@@ -33,7 +33,9 @@ class TaskSpaceController:
                  ee_frame: str = "cylinder_link",
                  frictionloss: np.ndarray | None = None,
                  damping: np.ndarray | None = None,
-                 friction_integral_gain: float | None = None):
+                 friction_integral_gain: float | None = None,
+                 friction_mode: str = "velocity",
+                 friction_tau_scale: float = 2.0):
         """
         初始化控制器：设定 Pinocchio 模型、步长与阻抗参数 /
         Initialize controller: set Pinocchio model, time step and impedance params
@@ -77,6 +79,13 @@ class TaskSpaceController:
         self.damping = (np.zeros(self.model.nq) if damping is None
                         else np.asarray(damping, dtype=float).reshape(self.model.nq))
         self._friction_v0 = 0.01  # tanh 平滑化速度阈值 [rad/s]
+        # 摩擦前馈模式："velocity"（τ_ff=f·tanh(q̇/v₀)，零速时补偿消失，
+        # 低速任务易发粘滑）或 "torque"（τ_ff=f·tanh(τ_pre/τ₀)，用补偿前
+        # 力矩方向决定摩擦方向，力矩一出即被抬过静摩擦阈值；τ₀=f/scale）
+        if friction_mode not in ("velocity", "torque"):
+            raise ValueError(f"friction_mode 不支持 {friction_mode!r}，可选 'velocity' 或 'torque'")
+        self.friction_mode = friction_mode
+        self.friction_tau_scale = float(friction_tau_scale)
 
         # 静摩擦死区的积分补偿（速度前馈在零速时消失，I 项负责稳态残差；
         # 摩擦为零时增益恒 0，历史行为不变）。积分力限幅 ±10N 防饱和。
@@ -233,9 +242,14 @@ class TaskSpaceController:
         # 12) 合成关节力矩：主任务项（含前馈与科氏/离心补偿）+ 零空间阻尼
         tau = J_full.T @ Lambda @ (u - J_dot @ v) + C + null_term2
 
-        # 13) 关节摩擦前馈补偿（Pinocchio 模型不含 frictionloss，仿真侧有：
-        #     smooth tanh 逼近库仑摩擦，零摩擦时该项恒为零）
-        tau = tau + self.frictionloss * np.tanh(v / self._friction_v0)
+        # 13) 关节摩擦前馈补偿（Pinocchio 模型不含 frictionloss，仿真侧有）：
+        #     velocity 模式用平滑 tanh 逼近库仑摩擦（零速时补偿消失）；
+        #     torque 模式用补偿前力矩 τ_pre 的方向决定摩擦方向（治零速死区）
+        if self.friction_mode == "torque":
+            tau = tau + self.frictionloss * np.tanh(
+                tau * self.friction_tau_scale / np.maximum(self.frictionloss, 1e-9))
+        else:
+            tau = tau + self.frictionloss * np.tanh(v / self._friction_v0)
         tau = tau + self.damping * v
 
         return tau

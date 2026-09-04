@@ -87,3 +87,52 @@ def test_integral_gain_auto_gating(pin_model):
                                    frictionloss=np.full(7, 1.137), friction_integral_gain=0.0)
     np.testing.assert_allclose(_run(ctrl_ff0, q, v_moving) - t0,
                                np.full(7, 1.137) * np.tanh(0.05 / 0.01), atol=1e-10)
+
+
+def test_torque_mode_feedforward_matches_formula(pin_model):
+    """torque 模式：前馈差值 = f·tanh(scale·τ_pre/f)，τ_pre 为无摩擦基线力矩。"""
+    q = np.array([0.1, 0.3, -0.4, 0.2, 0.5, -0.3, 0.2])
+    v = np.array([0.05, -0.02, 0.03, 0.01, -0.04, 0.02, 0.01])
+    fl = np.array([1.137, 1.137, 1.137, 1.137, 0.763, 0.44, 0.248])
+    tau_base = _run(TaskSpaceController(pin_model, 0.001, ImpedanceConfig(),
+                                        friction_integral_gain=0.0, friction_mode="torque"),
+                    q, v)
+    tau_ff = _run(TaskSpaceController(pin_model, 0.001, ImpedanceConfig(), frictionloss=fl,
+                                      friction_integral_gain=0.0, friction_mode="torque"),
+                  q, v)
+    np.testing.assert_allclose(tau_ff - tau_base, fl * np.tanh(2.0 * tau_base / fl), atol=1e-10)
+
+
+def test_torque_mode_breaks_stiction_deadzone(pin_model):
+    """零速 + |τ_pre|>f 时：velocity 模式补偿为 0（死区），torque 模式 ≈ ±f。"""
+    q = np.array([0.1, 0.3, -0.4, 0.2, 0.5, -0.3, 0.2])
+    v = np.zeros(7)  # 关节静止：velocity 模式的死区场景
+    fl = np.full(7, 1.137)
+    # 用期望位置偏移制造非零 τ_pre（正方向推）
+    pos_des = np.array([0.0, 0.5, 0.45])  # 比当前末端低 5cm，阻抗产生正向推力矩
+    ctrl_zero = TaskSpaceController(pin_model, 0.001, ImpedanceConfig(),
+                                    friction_integral_gain=0.0, friction_mode="torque")
+    cur_pos, cur_vel, _ = ctrl_zero.get_task_space_state(q, v)
+    tau_base = ctrl_zero.compute_control_task_space_with_orientation_and_imp(
+        q, v, pos_des, np.zeros(3), np.zeros(3), cur_pos, cur_vel, np.zeros(3), np.zeros(3))
+    ctrl_vel = TaskSpaceController(pin_model, 0.001, ImpedanceConfig(), frictionloss=fl,
+                                   friction_integral_gain=0.0, friction_mode="velocity")
+    ctrl_tor = TaskSpaceController(pin_model, 0.001, ImpedanceConfig(), frictionloss=fl,
+                                   friction_integral_gain=0.0, friction_mode="torque")
+    tau_vel = ctrl_vel.compute_control_task_space_with_orientation_and_imp(
+        q, v, pos_des, np.zeros(3), np.zeros(3), cur_pos, cur_vel, np.zeros(3), np.zeros(3))
+    tau_tor = ctrl_tor.compute_control_task_space_with_orientation_and_imp(
+        q, v, pos_des, np.zeros(3), np.zeros(3), cur_pos, cur_vel, np.zeros(3), np.zeros(3))
+    ff_vel = tau_vel - tau_base
+    ff_tor = tau_tor - tau_base
+    # 零速下 velocity 模式补偿恒为零（死区），torque 模式给出同向非零补偿：
+    # |τ_pre|≥f 的关节为满额 ±f，小力矩关节按 tanh 平滑取部分值
+    assert np.all(ff_vel == 0.0)
+    assert np.all(np.sign(ff_tor) == np.sign(tau_base))
+    assert np.all(np.abs(ff_tor) > 0.0)
+    np.testing.assert_allclose(ff_tor, fl * np.tanh(2.0 * tau_base / fl), atol=1e-10)
+
+
+def test_invalid_friction_mode_rejected(pin_model):
+    with pytest.raises(ValueError, match="friction_mode"):
+        TaskSpaceController(pin_model, 0.001, ImpedanceConfig(), friction_mode="bogus")

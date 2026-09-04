@@ -322,3 +322,12 @@ def test_tracking_scene_rejects_target(tmp_path):
 
     with pytest.raises(ValueError, match="tracking 场景不得配置 target"):
         load_scene(bad_path)
+
+
+def test_scene_rejects_invalid_friction_comp(tmp_path):
+    """friction_comp 非法取值必须报错（合法：velocity | torque）。"""
+    base = (REPO_ROOT / "scenes" / "fr3_docking.yaml").read_text(encoding="utf-8")
+    bad_path = tmp_path / "bad_friction_comp.yaml"
+    bad_path.write_text(base + "\nfriction_comp: greedy\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="friction_comp"):
+        load_scene(bad_path)
