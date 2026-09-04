@@ -38,6 +38,10 @@ task:
   ik_guess: [0.0, 0.0, 0.0, -1.57079, 0.0, 1.57079, -0.7853]  # FR3 home 位形
   stroke: [0.0, 0.0, 0.0]  # 跟踪场景不用 stroke（轨迹由 tracking 规划器定义，target_pos=init_pos）
 
+# 摩擦前馈显式用 velocity：快速跟踪工况速度前馈已饱和，门禁基线在该模式下校准 /
+# explicit velocity mode: the tracking gate baseline is calibrated under it
+friction_comp: velocity
+
 trajectory:                               # 圆+8字跟踪测试（其余参数走 TrajectorySpec 默认值）
   type: tracking
 

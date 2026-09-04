@@ -34,7 +34,7 @@ class TaskSpaceController:
                  frictionloss: np.ndarray | None = None,
                  damping: np.ndarray | None = None,
                  friction_integral_gain: float | None = None,
-                 friction_mode: str = "velocity",
+                 friction_mode: str = "torque",
                  friction_tau_scale: float = 2.0):
         """
         初始化控制器：设定 Pinocchio 模型、步长与阻抗参数 /
@@ -50,8 +50,8 @@ class TaskSpaceController:
                 historical name of the iiwa combined URDF)
             frictionloss: 关节摩擦损耗幅值 [N·m]（nq 维；None 时取零向量）。
                 Pinocchio 的 MJCF/URDF 导入不保留 frictionloss，需由调用方
-                从组装 MjModel 的 dof_frictionloss 传入；控制器以前馈
-                τ_ff = frictionloss·tanh(q̇/v₀) 补偿（v₀=0.01 rad/s 平滑化） /
+                从组装 MjModel 的 dof_frictionloss 传入；控制器以前馈补偿，
+                模式由 friction_mode 选择（默认 "torque"，见下） /
                 joint friction-loss magnitudes for feedforward compensation
             friction_integral_gain: 任务空间积分增益 [N/(m·s)]，用于克服
                 静摩擦死区（前馈在零速时消失）。None 时自动：摩擦非零取

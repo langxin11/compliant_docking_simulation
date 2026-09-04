@@ -52,7 +52,7 @@ class HQPAdaptiveController:
                  frictionloss: np.ndarray | None = None,
                  damping: np.ndarray | None = None,
                  impedance: ImpedanceConfig | None = None,
-                 friction_mode: str = "velocity",
+                 friction_mode: str = "torque",
                  friction_tau_scale: float = 2.0):
         """初始化控制器：预解析限位并预建两个 ProxQP 实例（主任务/零空间）。
 
@@ -66,8 +66,8 @@ class HQPAdaptiveController:
                 的 initial_orientation 同口径）
             frictionloss: 关节摩擦损耗幅值 [N·m]（nv 维；None 时取零向量）。
                 Pinocchio 导入器不保留 MJCF frictionloss，需由调用方从组装
-                MjModel 的 dof_frictionloss 传入；以前馈 τ_ff = frictionloss·
-                tanh(q̇/v₀) 并入 ĥ（同时进入力矩硬约束与输出力矩）
+                MjModel 的 dof_frictionloss 传入；以前馈并入 ĥ（同时进入力矩
+                硬约束与输出力矩），模式由 friction_mode 选择（默认 "torque"）
 
         QP 实例复用策略：proxsuite 支持 ``qp.update(...)`` 原地更新 H/g/C/u，
         两个实例在 __init__ 各建一次，之后每个控制步只 update+solve，

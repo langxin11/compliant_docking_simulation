@@ -31,20 +31,22 @@ def test_zero_friction_is_noop(pin_model):
 
 
 def test_friction_feedforward_matches_tanh_model(pin_model):
-    """前馈力矩差值应等于 frictionloss·tanh(q̇/0.01)（关闭 I 项以隔离前馈）。"""
+    """velocity 模式：前馈力矩差值应等于 frictionloss·tanh(q̇/0.01)（关闭 I 项以隔离前馈）。"""
     q = np.array([0.1, 0.3, -0.4, 0.2, 0.5, -0.3, 0.2])
     v = np.array([0.05, -0.02, 0.03, 0.01, -0.04, 0.02, 0.01])
     fl = np.array([1.137, 1.137, 1.137, 1.137, 0.763, 0.44, 0.248])
-    tau_base = _run(TaskSpaceController(pin_model, 0.001, ImpedanceConfig(), friction_integral_gain=0.0), q, v)
+    tau_base = _run(TaskSpaceController(pin_model, 0.001, ImpedanceConfig(),
+                                        friction_integral_gain=0.0, friction_mode="velocity"), q, v)
     tau_ff = _run(TaskSpaceController(pin_model, 0.001, ImpedanceConfig(), frictionloss=fl,
-                                      friction_integral_gain=0.0), q, v)
+                                      friction_integral_gain=0.0, friction_mode="velocity"), q, v)
     expected = fl * np.tanh(v / 0.01)
     np.testing.assert_allclose(tau_ff - tau_base, expected, atol=1e-10)
     # 大速度下（同一状态对比）前馈趋近库仑摩擦幅值 tanh(50)≈1
     v_fast = np.full(7, 0.5)
-    tau_base_fast = _run(TaskSpaceController(pin_model, 0.001, ImpedanceConfig(), friction_integral_gain=0.0), q, v_fast)
+    tau_base_fast = _run(TaskSpaceController(pin_model, 0.001, ImpedanceConfig(),
+                                             friction_integral_gain=0.0, friction_mode="velocity"), q, v_fast)
     tau_ff_fast = _run(TaskSpaceController(pin_model, 0.001, ImpedanceConfig(), frictionloss=fl,
-                                           friction_integral_gain=0.0), q, v_fast)
+                                           friction_integral_gain=0.0, friction_mode="velocity"), q, v_fast)
     np.testing.assert_allclose(tau_ff_fast - tau_base_fast, fl, atol=1e-3)
 
 
@@ -80,11 +82,12 @@ def test_integral_gain_auto_gating(pin_model):
     assert ctrl_ff._ki == 150.0
     ctrl_zero = TaskSpaceController(pin_model, 0.001, ImpedanceConfig())
     assert ctrl_zero._ki == 0.0
-    # 零增益（I 项关闭）+ 摩擦参数：与无摩擦输出之差恰为 tanh 前馈
+    # 零增益（I 项关闭）+ 摩擦参数：与无摩擦输出之差恰为 tanh 前馈（velocity 模式）
     v_moving = np.full(7, 0.05)
     t0 = _run(ctrl_zero, q, v_moving)
     ctrl_ff0 = TaskSpaceController(pin_model, 0.001, ImpedanceConfig(),
-                                   frictionloss=np.full(7, 1.137), friction_integral_gain=0.0)
+                                   frictionloss=np.full(7, 1.137), friction_integral_gain=0.0,
+                                   friction_mode="velocity")
     np.testing.assert_allclose(_run(ctrl_ff0, q, v_moving) - t0,
                                np.full(7, 1.137) * np.tanh(0.05 / 0.01), atol=1e-10)
 
