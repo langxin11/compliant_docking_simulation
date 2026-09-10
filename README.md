@@ -181,6 +181,17 @@ uv run docking --scene scenes/fr3_docking.yaml --quick      # FR3 对接
 
 场景级开关 `friction_comp:` 可切回 **`velocity` 模式**（`τ_ff = f·tanh(q̇/0.01)`，运动中补偿精确）：快速自由空间跟踪属于这种工况，`fr3_tracking` 场景显式钉在该模式——其 5 mm 门禁基线在 velocity 下校准。
 
+### 无传感器 HQP-AC 与接触预紧
+
+`hqp:` 场景段可切换外力来源与预紧：`force_source: observer` 用 PI 动量观测器
+（Ren & Shan 2026 Eq.23-25，残差扣除已知耗散模型后的纯接触估计）替代 F/T 传感器；
+`preload_force` 在检测到接触后沿 stroke 方向斜坡保持期望接触力（解决纯阻抗
+"轻触即停"无预紧）。`contact_deadband` 需高于静摩擦导致的估计地板（FR3 取 8 N）。
+
+实测（FR3 对接）：观测器模式与传感器模式行为一致（首触 17.1s/峰值 5.25 N/终态 21.0 mm）；
+观测器+5N 预紧实现稳态接触力 5.22 N（目标 5.0）、插入深度恢复到 14.9 mm。
+场景样例：`scenes/fr3_docking_sensorless.yaml`。
+
 ## 框架对比研究
 
 复现 Ren & Shan 2026 §4.2.3 的对比设计（2×2 配置矩阵：{单段五次, 两段式} × {CIC 阻抗, HQP-AC}，Table 10 三层指标）：

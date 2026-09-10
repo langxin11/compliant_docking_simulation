@@ -1,0 +1,59 @@
+# 对接场景：FR3 + 公头锥 + 母头锥。机械臂资产由 mujoco_menagerie franka_fr3
+# 派生（assets/fr3/fr3_arm.xml：力矩执行器变体，Pinocchio 经 MJCF 直读）。
+# 接口与 iiwa14 场景同款（花冠公头 male_cone + 花冠母头 female_socket）。
+# FR3 保留上游真实减速器摩擦（fr3_arm.xml：joints1-4 1.137 N·m 等），
+# 控制器由 run_docking 传入组装模型 dof_frictionloss 做前馈补偿
+# （velocity 模式 τ_ff = frictionloss·tanh(q̇/0.01)；本场景启用 torque 模式：
+# τ_ff = frictionloss·tanh(τ_pre/(f/2))，以补偿前力矩方向决定摩擦方向，治零速死区粘滑），无补偿时摩擦会产生 ~16cm
+# 跟踪滞后导致无法入扣。
+scene:
+  name: fr3_docking_sensorless
+
+robot:
+  mjcf: assets/fr3/fr3_arm.xml
+  pin_model: assets/fr3/fr3_arm.xml      # MJCF 直读（load_pin_model 按后缀分发）
+  ee_site: attachment_site
+  ee_frame: attachment_site
+
+tool:
+  mjcf: assets/interfaces/male_cone.xml         # 花冠公头（与 iiwa14 场景同款接口片段）
+  prefix: tool_
+  pose: {pos: [0.0, 0.0, 0.015], quat: [1.0, 0.0, 0.0, 0.0]}
+  # Pinocchio 的 FR3 基模型不含运行时 attach 的工具；数值与 male_cone.xml 完全一致。
+  pin_inertia: {mass: 1.0, com: [0.0, 0.0, 0.0], diaginertia: [0.1, 0.1, 0.1]}
+
+target:
+  mjcf: assets/interfaces/female_socket.xml     # 花冠母头（与 iiwa14 场景同款接口片段）
+  prefix: target_
+  pos: [0.0, 0.5, 0.35]
+  quat: [1.0, 0.0, 0.0, 0.0]
+
+physics:
+  timestep: 0.001
+  gravity: [0.0, 0.0, 0.0]
+  integrator: implicitfast
+  cone: elliptic
+  sdf_iterations: 10
+  sdf_initpoints: 40
+
+# 摩擦前馈模式：torque = 用补偿前力矩方向决定摩擦方向（零速死区补偿）/
+# torque = direction-of-commanded-torque friction feedforward (stiction deadzone)
+friction_comp: torque
+
+# 无传感器 HQP-AC：PI 动量观测器估计接触力（残差扣除已知耗散模型），
+# 8N 检测死区高于静摩擦估计地板；5N 预紧沿 stroke 方向斜坡保持
+hqp:
+  force_source: observer
+  contact_deadband: 8.0
+  preload_force: 5.0
+  preload_ramp_s: 1.5
+
+impedance:                                # FR3 真实摩擦下的刚度覆盖（静摩擦死区 ∝ 1/k）
+  k: 300.0
+  d: 100.0
+
+task:
+  init_pos: [0.0, 0.5, 0.5]
+  init_ori: [[1, 0, 0], [0, -1, 0], [0, 0, -1]]
+  ik_guess: [0.0, 0.0, 0.0, -1.57079, 0.0, 1.57079, -0.7853]  # FR3 home 位形
+  stroke: [0.0, 0.0, -0.10]  # 期望终点略越过接触点（root≈0.398），预紧主要由摩擦 I 项提供（约 5-8N）
