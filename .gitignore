@@ -26,3 +26,4 @@ runs/
 
 # --- MuJoCo 运行副产物 ---
 MUJOCO_LOG.TXT
+site/

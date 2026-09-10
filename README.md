@@ -244,6 +244,16 @@ MUJOCO_GL=egl uv run python experiments/compare_frameworks.py --scene scenes/fr3
 └── demo/                           # 演示视频与结果图
 ```
 
+## 文档
+
+完整文档（架构总览、论文-代码对照表、理论推导、实验复现手册、自动生成 API 参考）基于
+MkDocs（Material 主题 + mkdocstrings）构建，源文件在 `docs/`：
+
+```bash
+uv run mkdocs serve   # 本地预览 http://127.0.0.1:8000
+uv run mkdocs build   # 静态站点输出 site/
+```
+
 ## 延伸阅读
 
 - [docs/main_simulation_theory_and_flow.md](docs/main_simulation_theory_and_flow.md) —— 控制理论基础与端到端数据流梳理，附关键代码锚点
