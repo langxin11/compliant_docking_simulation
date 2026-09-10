@@ -192,6 +192,15 @@ uv run docking --scene scenes/fr3_docking.yaml --quick      # FR3 对接
 观测器+5N 预紧实现稳态接触力 5.22 N（目标 5.0）、插入深度恢复到 14.9 mm。
 场景样例：`scenes/fr3_docking_sensorless.yaml`。
 
+### SE(3)-TOPP 规划器
+
+`trajectory: {type: se3topp}` 启用 Ren & Shan 2026 §3.1 的 SE(3) 分段测地线 +
+时间最优参数化轨迹（Theorem 1 的体坐标线性映射 + 解析梯形/三角形剖面，
+角速度/角加速度限幅经 `omega_max_*` / `alpha_max_*` 字段配置）。与两段式
+五次曲线同限速下时间更优：iiwa14 对接场景总时长 10.9→6.7 s（-39%），接触
+峰值力不变（7.83→7.92 N）。姿态路径与角速度限幅已实现并有测试；按步姿态
+参考跟踪（时变 r_des）待控制接口扩展。
+
 ## 框架对比研究
 
 复现 Ren & Shan 2026 §4.2.3 的对比设计（2×2 配置矩阵：{单段五次, 两段式} × {CIC 阻抗, HQP-AC}，Table 10 三层指标）：
