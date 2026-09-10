@@ -190,7 +190,7 @@ MUJOCO_GL=egl uv run python experiments/compare_frameworks.py            # 默�
 MUJOCO_GL=egl uv run python experiments/compare_frameworks.py --scene scenes/fr3_docking.yaml
 ```
 
-结果打印对比表并写入 `results/framework_comparison_<场景>.md`。
+结果打印对比表并写入 `results/framework_comparison_<场景>.md`，同时生成接触力时序与接触指标柱状图到 `figure/framework_comparison/`。
 
 ## 绘图风格
 

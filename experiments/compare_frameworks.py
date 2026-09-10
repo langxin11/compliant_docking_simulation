@@ -25,10 +25,21 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from compliant_docking.metrics import DockingMetrics, compute_metrics  # noqa: E402
 from compliant_docking.models import load_pin_model  # noqa: E402
 from compliant_docking.scene import Scene, TrajectorySpec, load_scene  # noqa: E402
+from compliant_docking.telemetry import Log  # noqa: E402
 from experiments.run_docking import main  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[1]
 RESULTS = REPO / "results"
+_FIG_WIDTH = 3.5  # IEEE 单栏图宽（英寸）
+
+# 四配置的绘图样式（线图颜色/线型，柱图颜色同源）
+_CONFIG_STYLES = [
+    {"color": "0.35"},                      # 基线：灰
+    {"color": "#1f77b4"},                   # 中间：蓝
+    {"color": "#ff7f0e", "ls": "--"},       # 规划：橙虚线
+    {"color": "#d62728"},                   # 完整：红
+]
+_CONFIG_SHORT = ["基线", "中间", "规划", "完整"]
 
 # 指标呈现顺序与论文 Table 10 三层一致：(标签, 字段名, 格式)
 _ROWS = [
@@ -74,15 +85,15 @@ def _pin_model_for(scene: Scene):
     return load_pin_model(scene.robot.pin_model, **kwargs)
 
 
-def run_config(scene: Scene, controller: str) -> tuple[DockingMetrics, float]:
-    """跑一个配置并返回（Table10 指标, 仿真终态误差 mm）。"""
+def run_config(scene: Scene, controller: str) -> tuple[DockingMetrics, float, Log]:
+    """跑一个配置并返回（Table10 指标, 仿真终态误差 mm, 日志）。"""
     with contextlib.redirect_stdout(io.StringIO()):
         log = main(render=False, record=False, plot=False, scene=scene,
                    controller=controller)
     pin_model = _pin_model_for(scene)
     axis = scene.task.stroke / np.linalg.norm(scene.task.stroke)
     metrics = compute_metrics(log, pin_model, axis=axis, ee_frame=scene.robot.ee_frame)
-    return metrics, float(log.error[-1]) * 1000.0
+    return metrics, float(log.error[-1]) * 1000.0, log
 
 
 def format_table(title: str, results: dict[str, DockingMetrics],
@@ -105,6 +116,61 @@ def format_table(title: str, results: dict[str, DockingMetrics],
     return "\n".join(lines)
 
 
+def plot_comparison(scene: Scene, logs: dict[str, Log],
+                    results: dict[str, DockingMetrics]) -> list[Path]:
+    """四配置对比图：接触力时序（轴向分量 + 合力范数）与关键指标柱状。"""
+    import matplotlib
+    matplotlib.use("Agg")  # 无显示环境出图，必须在 import pyplot 之前
+    import matplotlib.pyplot as plt
+
+    from compliant_docking.plotting import apply_style
+
+    apply_style()
+    out = REPO / "figure" / "framework_comparison"
+    out.mkdir(parents=True, exist_ok=True)
+    saved: list[Path] = []
+
+    def _save(fig, stem: str) -> None:
+        for suffix in (".png", ".pdf"):
+            path = out / f"{scene.name}_{stem}{suffix}"
+            fig.savefig(path, dpi=600)
+            saved.append(path)
+        plt.close(fig)
+
+    axis_idx = int(np.argmax(np.abs(scene.task.stroke)))
+
+    # 1) 接触力时序：四配置叠加（轴向分量 / 合力范数）
+    fig, axes = plt.subplots(2, 1, sharex=True,
+                             figsize=(_FIG_WIDTH, 3.8), constrained_layout=True)
+    for (name, _, _), style, short in zip(CONFIGS, _CONFIG_STYLES, _CONFIG_SHORT, strict=True):
+        log = logs[name]
+        t = np.asarray(log.t_list, dtype=float)
+        f = np.asarray(log.force_externals, dtype=float).reshape(-1, 3)
+        axes[0].plot(t, f[:, axis_idx], label=short, **style)
+        axes[1].plot(t, np.linalg.norm(f, axis=1), label=short, **style)
+    axes[0].set_ylabel("对接轴向力 [N]")
+    axes[1].set_ylabel("接触力范数 [N]")
+    axes[1].set_xlabel("时间 [s]")
+    axes[0].legend(ncols=4, framealpha=0.9, fontsize=6,
+                   columnspacing=1.0, handlelength=1.6)
+    _save(fig, "contact_force")
+
+    # 2) 关键接触指标柱状（三层指标中的接触安全层）
+    bars = [("峰值轴向力 [N]", "peak_axial_force_N"),
+            ("|稳态轴向力| [N]", "steady_axial_force_N"),
+            ("峰值广义力范数 [N]", "peak_wrench_norm_N")]
+    fig, axes = plt.subplots(1, 3, figsize=(_FIG_WIDTH, 2.4), constrained_layout=True)
+    colors = [s["color"] for s in _CONFIG_STYLES]
+    for ax, (label, field) in zip(axes, bars, strict=True):
+        vals = [abs(getattr(results[n], field) or 0.0) for n in results]
+        ax.bar(range(len(vals)), vals, color=colors)
+        ax.set_xticks(range(len(vals)))
+        ax.set_xticklabels(_CONFIG_SHORT, fontsize=6)
+        ax.set_ylabel(label)
+    _save(fig, "contact_metrics")
+    return saved
+
+
 def main_script() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--scene", action="append", default=[
@@ -121,11 +187,11 @@ def main_script() -> int:
         twophase = replace(base, trajectory=TrajectorySpec(standoff=standoff))
         variants = {"single": base, "twophase": twophase}
 
-        results, finals, names = {}, {}, []
+        results, finals, names, logs = {}, {}, [], {}
         for name, planner, controller in CONFIGS:
             print(f"[{base.name}] 运行 {name} ...", flush=True)
-            metrics, final_mm = run_config(variants[planner], controller)
-            results[name], finals[name] = metrics, final_mm
+            metrics, final_mm, log = run_config(variants[planner], controller)
+            results[name], finals[name], logs[name] = metrics, final_mm, log
             names.append(name)
 
         table = format_table(f"{base.name} 框架对比（2×2 配置矩阵）",
@@ -134,6 +200,8 @@ def main_script() -> int:
         out.write_text(f"# 框架对比研究：{base.name}\n\n"
                        f"配置：{CONFIGS}\n\n{table}\n", encoding="utf-8")
         print(table, "\n", flush=True)
+        figures = plot_comparison(base, logs, results)
+        print("图件：", ", ".join(str(p.relative_to(REPO)) for p in figures), flush=True)
         print(f"已写入 {out}", flush=True)
     return 0
 
