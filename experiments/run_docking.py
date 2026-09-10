@@ -61,7 +61,8 @@ def run_simulation(muj_robot:MujRobot,
                    cfg:DockingConfig,
                    q_init:np.ndarray,
                    scene:Scene | None = None,
-                   r_des:np.ndarray | None = None):
+                   r_des:np.ndarray | None = None,
+                   plot:bool = True):
     """
     执行主仿真循环：读取轨迹 → 计算任务空间阻抗控制力矩 → MuJoCo 步进 → 记录/绘图 /
     Run the main simulation loop: sample trajectory → compute task-space impedance torque → MuJoCo step → log/plot
@@ -180,8 +181,9 @@ def run_simulation(muj_robot:MujRobot,
             contact_count=muj_robot.data.ncon)
 
 
-    log.plot_results(save_path="figure/",
-                     scene_name=scene.name if scene is not None else None)
+    if plot:
+        log.plot_results(save_path="figure/",
+                         scene_name=scene.name if scene is not None else None)
 
     if muj_robot.record:
         # 创建绝对路径以确保视频保存在正确位置（仓库根目录 video/，与迁移前一致）/
@@ -203,7 +205,8 @@ def run_simulation(muj_robot:MujRobot,
 
 
 def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
-         scene_path: str | Path = DEFAULT_SCENE_PATH, controller: str = "impedance"):
+         scene_path: str | Path = DEFAULT_SCENE_PATH, controller: str = "impedance",
+         scene: Scene | None = None, plot: bool = True):
     """
     Main function that sets up and runs the robot control simulation.
 
@@ -222,9 +225,11 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
     Returns:
         Log: 记录了完整仿真时序数据的日志对象 / populated telemetry log
     """
-    # 加载场景：机械臂/工具/目标/物理参数与任务初始条件全部来自场景 YAML /
-    # Load scene: robot/tool/target/physics and task init conditions all come from the scene YAML
-    scene = load_scene(scene_path)
+    # 加载场景：机械臂/工具/目标/物理参数与任务初始条件来自场景 YAML；
+    # 允许直接注入 Scene 对象（批量实验用 dataclasses.replace 做配置变体）/
+    # Load scene from YAML, or accept a pre-built Scene (batch experiments
+    # build config variants via dataclasses.replace)
+    scene = scene if scene is not None else load_scene(scene_path)
 
     # 参数集中管理：函数入参覆盖 DockingConfig 默认值 /
     # Centralized params: function args override DockingConfig defaults
@@ -399,6 +404,7 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
         q_init=q_init,
         scene=scene,
         r_des=init_ori,
+        plot=plot,
     )
 
     # 4) 性能指标输出：
