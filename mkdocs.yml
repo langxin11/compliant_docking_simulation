@@ -1,0 +1,50 @@
+site_name: 柔顺对接仿真文档
+site_description: KUKA iiwa14 / FR3 柔顺对接仿真（MuJoCo × Pinocchio）——Ren & Shan 2026 复现与扩展
+repo_url: https://github.com/langxin11/compliant_docking_simulation
+
+theme:
+  name: material
+  language: zh
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+  palette:
+    scheme: default
+
+markdown_extensions:
+  - admonition
+  - tables
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.highlight
+  - pymdownx.superfences
+
+extra_javascript:
+  - javascripts/mathjax.js
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]
+          options:
+            docstring_style: google
+            show_source: true
+            heading_level: 2
+
+nav:
+  - 首页: index.md
+  - 架构总览: architecture.md
+  - 论文-代码对照: paper_mapping.md
+  - 理论:
+      - 阻抗控制基础: theory/impedance_control.md
+      - 主仿真理论与数据流: theory/simulation_flow.md
+  - 实验复现手册: experiments.md
+  - API 参考:
+      - control: api/control.md
+      - planning: api/planning.md
+      - 核心模块: api/core.md
