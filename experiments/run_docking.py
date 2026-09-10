@@ -100,6 +100,9 @@ def run_simulation(muj_robot:MujRobot,
     force_external = np.zeros(3)
     torque_external = np.zeros(3)
     is_tracking = scene is not None and scene.trajectory is not None and scene.trajectory.type == "tracking"
+    # PI 动量观测器随步更新（HQP force_source=observer 时非 no-op）/
+    # Per-step PI momentum-observer update (no-op unless HQP observer mode)
+    update_observer = getattr(task_dynamics, "update_momentum_observer", None)
 
 
     while muj_robot.data.time < cfg.duration:
@@ -129,6 +132,9 @@ def run_simulation(muj_robot:MujRobot,
             print(f"Torques: {tau}")
             print(f"Joint positions: {q}")
             raise RuntimeError(f"仿真在 t={t:.3f}s 异常终止") from e
+        # 观测器以（步进后状态, 实际施加力矩）推进
+        if update_observer is not None:
+            update_observer(q, v, tau)
         #print(f"Current time: {t}, End-effector position: {q},tau: {v}",)
 
         # 4) 使用 Pinocchio 更新当前末端状态（位置/速度/姿态） /
@@ -287,10 +293,21 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
                                             frictionloss=frictionloss, damping=damping,
                                             friction_mode=scene.friction_comp)
     elif controller == "hqp":
+        hqp_ov = scene.hqp
+        preload_axis = None
+        if hqp_ov is not None and hqp_ov.preload_force:
+            stroke_norm = np.linalg.norm(scene.task.stroke)
+            preload_axis = scene.task.stroke / stroke_norm if stroke_norm > 0 else None
         task_dynamics = HQPAdaptiveController(
             pin_model, cfg.dt, HQPConfig(torque_limit=cfg.max_torque),
             ee_frame=scene.robot.ee_frame, r_des=init_ori, frictionloss=frictionloss,
-            damping=damping, impedance=imp_cfg, friction_mode=scene.friction_comp)
+            damping=damping, impedance=imp_cfg, friction_mode=scene.friction_comp,
+            **(dict(force_source=hqp_ov.force_source,
+                    observer_kp=hqp_ov.observer_kp, observer_ki=hqp_ov.observer_ki,
+                    preload_force=hqp_ov.preload_force,
+                    preload_ramp_s=hqp_ov.preload_ramp_s,
+                    preload_axis=preload_axis,
+                    contact_deadband=hqp_ov.contact_deadband) if hqp_ov is not None else {}))
         print(f"控制器: HQP-AC（Ren & Shan 2026 §3.2，关节位置/速度/力矩 QP 硬约束 + "
               f"接触力自适应刚度；力矩约束 ±{cfg.max_torque} N·m）")
     else:

@@ -27,6 +27,7 @@ import pinocchio as pin
 import proxsuite
 
 from ..config import HQPConfig, ImpedanceConfig
+from .momentum_observer import MomentumObserver
 
 # ProxQP 稠密 QP 与求解状态枚举（proxsuite 0.7.x 需经属性访问导入）
 _DenseQP = proxsuite.proxqp.dense.QP
@@ -53,7 +54,14 @@ class HQPAdaptiveController:
                  damping: np.ndarray | None = None,
                  impedance: ImpedanceConfig | None = None,
                  friction_mode: str = "torque",
-                 friction_tau_scale: float = 2.0):
+                 friction_tau_scale: float = 2.0,
+                 force_source: str = "sensor",
+                 observer_kp: float = 20.0,
+                 observer_ki: float = 40.0,
+                 preload_force: float = 0.0,
+                 preload_ramp_s: float = 1.5,
+                 preload_axis: np.ndarray | None = None,
+                 contact_deadband: float = 0.0):
         """初始化控制器：预解析限位并预建两个 ProxQP 实例（主任务/零空间）。
 
         参数 / Args:
@@ -106,6 +114,30 @@ class HQPAdaptiveController:
             raise ValueError(f"friction_mode 不支持 {friction_mode!r}，可选 'velocity' 或 'torque'")
         self.friction_mode = friction_mode
         self.friction_tau_scale = float(friction_tau_scale)
+
+        # 外力来源："sensor"（run 循环传入的 F/T 读数）或 "observer"
+        # （PI 动量观测器估计，无传感器方案，Ren & Shan 2026 Eq.23-25）
+        if force_source not in ("sensor", "observer"):
+            raise ValueError(f"force_source 不支持 {force_source!r}，可选 'sensor' 或 'observer'")
+        self.force_source = force_source
+        self._observer: MomentumObserver | None = None
+        if force_source == "observer":
+            self._observer = MomentumObserver(
+                robot_model, ee_frame, self.dt, kp=observer_kp, ki=observer_ki,
+                frictionloss=self.frictionloss, damping=self.damping)
+
+        # 接触预紧力跟踪（世界系）：检测到接触后按斜坡施加 preload_force·
+        # preload_axis 的任务力（论文 Eq.26 中以期望接触力替代 F̂_ext 的推论），
+        # 解决纯阻抗"轻触即停"无预紧的问题
+        self.preload_force = float(preload_force)
+        self.preload_ramp_s = max(float(preload_ramp_s), 1e-3)
+        self.preload_axis = (np.zeros(3) if preload_axis is None else
+                             np.asarray(preload_axis, dtype=float).reshape(3))
+        self._preload_val = 0.0
+        # 接触检测死区 [N]：|F| 低于该值不作接触/软化（观测器残差含模型
+        # 失配噪声，deadband 防止自由空间误软化；传感器模式噪声 mN 级，
+        # 默认 0 行为不变）
+        self.contact_deadband = float(contact_deadband)
 
         # 期望姿态（世界系 3×3）
         if r_des is None:
@@ -284,6 +316,13 @@ class HQPAdaptiveController:
         force_ext = np.array(force_ext, dtype=float).reshape(3)
         torque_ext = np.array(torque_ext, dtype=float).reshape(3)
 
+        # 外力源切换：observer 模式下用 PI 动量观测器的"纯接触"估计
+        # （残差扣除已知耗散模型）替代 F/T 传感器（论文 §3.2.1 无传感器方案）；
+        # 观测器由 run 循环按步调用 update。摩擦不经此通道——它已在 ĥ 中前馈
+        if self._observer is not None:
+            force_ext = self._observer.force_contact
+            torque_ext = self._observer.wrench_contact[3:]
+
         # Eq.(41) 的 q_col：首次调用捕获关节位姿
         if self.q_col is None:
             self.q_col = q.copy()
@@ -332,7 +371,8 @@ class HQPAdaptiveController:
         delta_nu = np.concatenate([current_vel - vel_des, J_rot @ v])  # 期望角速度为 0
         e_p = np.concatenate([e_pos, e_ori])
         F_contact = float(np.linalg.norm(np.concatenate([force_ext, torque_ext])))
-        K_r = self._adaptive_stiffness(F_contact)
+        F_contact_eff = max(F_contact - self.contact_deadband, 0.0)
+        K_r = self._adaptive_stiffness(F_contact_eff)
         self.last_K_r = K_r
 
         # 4) 参考阻尼与广义力：Eq.(29)
@@ -340,8 +380,20 @@ class HQPAdaptiveController:
         F_r = -D_r @ delta_nu - K_r * e_p
 
         # 5) 主任务 QP（Eq.31）：min ‖Jq̈ + J̇q̇ - target‖²，target = ν̇_r + Λ⁻¹F_r
+        #    接触预紧项：检测到接触（|F|>1N）后按斜坡施加 preload_force·axis
+        #    的任务力（推入对接方向），脱离接触则回落，力目标
+        #    F_pre = preload · ramp 加入期望操作空间广义力
+        if self.preload_force > 0.0:
+            in_contact = F_contact > 1.0
+            rate = self.preload_force / self.preload_ramp_s * self.dt
+            if in_contact:
+                self._preload_val = min(self.preload_force, self._preload_val + rate)
+            else:
+                self._preload_val = max(0.0, self._preload_val - rate)
+        F_pre6 = np.concatenate([self._preload_val * self.preload_axis,
+                                 np.zeros(3)])
         nu_dot_r = np.concatenate([acc_des, np.zeros(3)])
-        target = nu_dot_r + A_task @ F_r
+        target = nu_dot_r + A_task @ (F_r + F_pre6)
         H_main = 2.0 * (J.T @ J) + _H_REG * np.eye(self.n)
         g_main = 2.0 * (J.T @ (J_dot @ v - target))
 
@@ -393,3 +445,18 @@ class HQPAdaptiveController:
         # 8) 合成：q̈_c = q̈*_m + N·q̈*_null，τ = M·q̈_c + ĥ
         q_ddot_c = q_ddot_m + N @ q_ddot_n
         return M @ q_ddot_c + h
+
+    def update_momentum_observer(self, q: np.ndarray, v: np.ndarray,
+                                 tau_applied: np.ndarray) -> None:
+        """以步进后的关节状态与实际施加力矩推进一步动量观测器。
+
+        仅 force_source == "observer" 时有效（其余为 no-op）；
+        τ_applied 应为限幅后的实际力矩（上一控制周期）。
+        """
+        if self._observer is not None:
+            self._observer.update(q, v, tau_applied)
+
+    @property
+    def observed_wrench(self) -> np.ndarray | None:
+        """观测器外力/外力矩估计（世界系 6 维）；未启用时为 None。"""
+        return None if self._observer is None else self._observer.wrench

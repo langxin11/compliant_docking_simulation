@@ -331,3 +331,21 @@ def test_scene_rejects_invalid_friction_comp(tmp_path):
     bad_path.write_text(base + "\nfriction_comp: greedy\n", encoding="utf-8")
     with pytest.raises(ValueError, match="friction_comp"):
         load_scene(bad_path)
+
+
+def test_scene_hqp_override_parse_and_validate(tmp_path):
+    """hqp 段：合法取值解析为 HQPOverride；force_source 非法值报错。"""
+    base = (REPO_ROOT / "scenes" / "fr3_docking.yaml").read_text(encoding="utf-8")
+    good = tmp_path / "good_hqp.yaml"
+    good.write_text(base + "\nhqp:\n  force_source: observer\n"
+                    "  preload_force: 5.0\n  preload_ramp_s: 1.5\n",
+                    encoding="utf-8")
+    scene = load_scene(good)
+    assert scene.hqp is not None
+    assert scene.hqp.force_source == "observer"
+    assert scene.hqp.preload_force == pytest.approx(5.0)
+
+    bad = tmp_path / "bad_hqp.yaml"
+    bad.write_text(base + "\nhqp:\n  force_source: telepathy\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="hqp.force_source"):
+        load_scene(bad)

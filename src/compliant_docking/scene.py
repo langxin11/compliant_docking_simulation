@@ -135,6 +135,28 @@ class ImpedanceOverride:
 
 
 @dataclass(frozen=True)
+class HQPOverride:
+    """HQP-AC 可选参数覆盖（场景 YAML 的可选 ``hqp`` 段，缺省走控制器默认）。
+
+    .. code-block:: yaml
+
+        hqp:
+          force_source: sensor      # "sensor"（F/T 传感器）| "observer"（PI 动量观测器，无传感器）
+          observer_kp: 20.0         # 观测器比例增益 [1/s]
+          observer_ki: 40.0         # 观测器积分增益 [1/s²]
+          preload_force: 0.0        # 接触预紧力目标 [N]（世界系沿 stroke 方向，0=关闭）
+          preload_ramp_s: 1.5       # 预紧力斜坡时间 [s]
+    """
+
+    force_source: str = "sensor"
+    observer_kp: float = 20.0
+    observer_ki: float = 40.0
+    preload_force: float = 0.0
+    preload_ramp_s: float = 1.5
+    contact_deadband: float = 0.0
+
+
+@dataclass(frozen=True)
 class TrajectorySpec:
     """轨迹段参数（可选）：两段式对接 或 圆+8字跟踪测试。
 
@@ -201,6 +223,7 @@ class Scene:
     tracking_thresholds: TrackingThresholds | None = None  # 跟踪门禁阈值（只在 type=tracking 时使用）
     impedance: ImpedanceOverride | None = None  # 可选阻抗增益覆盖（缺省走 ImpedanceConfig）
     friction_comp: str = "torque"  # 摩擦前馈模式："torque"（默认，力矩方向，治零速死区） | "velocity"
+    hqp: HQPOverride | None = None  # 可选 HQP-AC 参数覆盖（外力源/预紧力）
 
     # ---- 解析后的名称属性（下阶段接线时使用） ----
 
@@ -334,6 +357,10 @@ def load_scene(path: str | Path) -> Scene:
     task = raw["task"]
     target = raw.get("target")  # 跟踪测试场景无母头段（target=None）
     impedance = ImpedanceOverride(**raw["impedance"]) if "impedance" in raw else None
+    hqp = HQPOverride(**raw["hqp"]) if "hqp" in raw else None
+    if hqp is not None and hqp.force_source not in ("sensor", "observer"):
+        raise ValueError(
+            f"scene 配置 hqp.force_source 不支持 {hqp.force_source!r}，可选值: sensor, observer")
     friction_comp = str(raw.get("friction_comp", "torque"))
     if friction_comp not in ("velocity", "torque"):
         raise ValueError(
@@ -403,4 +430,5 @@ def load_scene(path: str | Path) -> Scene:
         tracking_thresholds=tracking_thresholds,
         impedance=impedance,
     friction_comp=friction_comp,
+    hqp=hqp,
     )
