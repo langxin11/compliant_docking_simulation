@@ -375,7 +375,26 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
     #    Three-way planner dispatch: "tracking" → circle + figure-8 tracking-test
     #    trajectory (cfg.traj_duration ignored); trajectory section (default
     #    twophase) → two-phase docking trajectory; else the legacy quintic
-    if is_tracking:
+    # SE(3)-TOPP 分发（置于最前；论文 §3.1 的实现）
+    if scene.trajectory is not None and scene.trajectory.type == "se3topp":
+        from compliant_docking.planning.se3_topp import SE3ToppTrajectory
+        traj_spec = scene.trajectory
+        final_ori = init_ori  # 对接场景姿态恒定（SE(3) 机制就绪，按步姿态参考接口待接入）
+        trajector_planner = SE3ToppTrajectory(
+            init_pos, init_ori, target_pos, final_ori,
+            standoff=traj_spec.standoff,
+            v_max_approach=traj_spec.v_max_approach,
+            a_max_approach=traj_spec.a_max_approach,
+            omega_max_approach=traj_spec.omega_max_approach,
+            alpha_max_approach=traj_spec.alpha_max_approach,
+            v_max_docking=traj_spec.v_max_docking,
+            a_max_docking=traj_spec.a_max_docking,
+            omega_max_docking=traj_spec.omega_max_docking,
+            alpha_max_docking=traj_spec.alpha_max_docking)
+        t1, t2 = trajector_planner.durations
+        print(f"轨迹: SE(3)-TOPP（接近 {t1:.3f}s + 对接 {t2:.3f}s，总时长 "
+              f"{trajector_planner.total_duration:.3f}s，时间最优剖面）")
+    elif is_tracking:
         traj_spec = scene.trajectory
         trajector_planner = CircleFigure8Trajectory(
             init_pos,

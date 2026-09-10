@@ -42,7 +42,7 @@ _CONES = {
 }
 
 # trajectory.type 的 YAML 合法取值（两段式对接 / 圆+8字跟踪测试）
-_TRAJECTORY_TYPES = {"twophase", "tracking"}
+_TRAJECTORY_TYPES = {"twophase", "tracking", "se3topp"}
 
 
 def _enum_value(table: dict[str, int], kind: str, value: str) -> int:
@@ -196,7 +196,12 @@ class TrajectorySpec:
     a_max_docking: float = 0.05
 
     # ---- 类型开关 + 圆+8字跟踪测试 ----
-    type: str = "twophase"  # "twophase" | "tracking"（load_scene 校验取值）
+    type: str = "twophase"  # "twophase" | "tracking" | "se3topp"（load_scene 校验取值）
+    # ---- se3topp 专用（角速度/角加速度限幅，论文 Table 8） ----
+    omega_max_approach: float = 0.20  # 接近段角速度上限 [rad/s]
+    omega_max_docking: float = 0.05   # 对接段角速度上限 [rad/s]
+    alpha_max_approach: float = 0.20  # 接近段角加速度上限 [rad/s^2]
+    alpha_max_docking: float = 0.05   # 对接段角加速度上限 [rad/s^2]
     transition_duration: float = 1.5
     circle_duration: float = 5.0
     circle_radius: float = 0.10
