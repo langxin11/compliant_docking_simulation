@@ -181,6 +181,17 @@ uv run docking --scene scenes/fr3_docking.yaml --quick      # FR3 对接
 
 场景级开关 `friction_comp:` 可切回 **`velocity` 模式**（`τ_ff = f·tanh(q̇/0.01)`，运动中补偿精确）：快速自由空间跟踪属于这种工况，`fr3_tracking` 场景显式钉在该模式——其 5 mm 门禁基线在 velocity 下校准。
 
+## 框架对比研究
+
+复现 Ren & Shan 2026 §4.2.3 的对比设计（2×2 配置矩阵：{单段五次, 两段式} × {CIC 阻抗, HQP-AC}，Table 10 三层指标）：
+
+```bash
+MUJOCO_GL=egl uv run python experiments/compare_frameworks.py            # 默认两个对接场景
+MUJOCO_GL=egl uv run python experiments/compare_frameworks.py --scene scenes/fr3_docking.yaml
+```
+
+结果打印对比表并写入 `results/framework_comparison_<场景>.md`。
+
 ## 绘图风格
 
 项目绘图统一走 [SciencePlots](https://github.com/garrettj403/SciencePlots) 的 `["science", "ieee", "no-latex"]` 风格（IEEE 单栏、不依赖 LaTeX），并叠加 Noto CJK 中文字体回退与 `axes.unicode_minus=False`（规避中文字体缺 U+2212 负号的问题）。入口：`compliant_docking.plotting.apply_style()` 与 `plot_docking_log(log, out_dir, scene_name=...)`，每张图同时输出 PNG + PDF。运行 `docking --scene ...` 完成后图件按场景归档在 `figure/<场景名>/`（如 `figure/iiwa14_docking/`），文件名带场景前缀。
