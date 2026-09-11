@@ -1,0 +1,36 @@
+/* API 参考美化（mkdocstrings + Material） */
+
+/* 签名：独立代码块，去掉行内底色的突兀感 */
+.doc-signature,
+.doc-heading code {
+  background: transparent;
+  padding: 0;
+}
+
+.doc-signature pre {
+  font-size: 0.72rem;
+  line-height: 1.5;
+}
+
+/* 内容区：左侧细线 + 留白，形成经典 API 文档的层级感 */
+.doc-contents {
+  margin: 0.4em 0 1.8em;
+  padding-left: 0.8rem;
+  border-left: 2px solid var(--md-default-fg-color--lightest);
+}
+
+/* 类/函数对象之间留出呼吸空间 */
+.doc.doc-object {
+  margin-top: 1.6em;
+}
+
+/* 分类标题（方法/属性）小写灰字弱化 */
+.doc-category {
+  font-weight: 500;
+  color: var(--md-default-fg-color--light);
+}
+
+/* 参数名加粗，便于扫读 */
+.doc-contents dt {
+  font-weight: 600;
+}
