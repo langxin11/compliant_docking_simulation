@@ -54,12 +54,14 @@ class DecoupledQuinticTrajectory:
         """
         Initialize the trajectory planner with decoupled planning for each axis
 
-        Parameters / 参数:
-        - start_pos: 初始位置 (x0, y0, z0) / Initial position
-        - target_pos: 目标位置 (xf, yf, zf) / Target position
-        - duration: 轨迹持续时间（秒） / Trajectory duration (s)
-        说明：三轴各自满足端点速度/加速度为零，生成 C2 连续的平滑轨迹 /
-        Note: Each axis satisfies zero vel/acc at endpoints (C2 continuity)
+        Args:
+            start_pos: 初始位置 (x0, y0, z0) / Initial position
+            target_pos: 目标位置 (xf, yf, zf) / Target position
+            duration: 轨迹持续时间（秒） / Trajectory duration (s)
+
+        Note:
+            三轴各自满足端点速度/加速度为零，生成 C2 连续的平滑轨迹 /
+            Each axis satisfies zero vel/acc at endpoints (C2 continuity)
         """
         assert start_pos.shape == (3,), "Start position must be 3D vector"
         assert target_pos.shape == (3,), "Target position must be 3D vector"
@@ -102,10 +104,10 @@ class DecoupledQuinticTrajectory:
         获取时刻 t 的位置/速度/加速度；三轴独立计算 /
         Get position, velocity and acceleration at time t; axes computed independently
 
-        参数 / Parameters:
+        Args:
             t: 当前时间（秒） / Current time (s)
 
-        返回 / Returns:
+        Returns:
             (pos, vel, acc) 三个 3D 向量 / 3D numpy arrays
         """
         t = np.clip(t, 0, self.T)
@@ -130,10 +132,10 @@ class DecoupledQuinticTrajectory:
         验证边界条件（起止位置、速度=0、加速度=0）是否满足 /
         Verify that endpoint position/velocity/acceleration constraints hold
 
-        参数 / Parameters:
+        Args:
             tol: 浮点比较容差 / Tolerance for comparisons
 
-        返回 / Returns:
+        Returns:
             是否全部满足 / True if all constraints satisfied
         """
         pos_start, vel_start, acc_start = self.get_state(0)
@@ -184,12 +186,14 @@ class TwoPhaseDockingTrajectory:
         """
         Initialize the two-phase docking trajectory
 
-        参数 / Parameters:
-        - start_pos: 初始位置 (3D) / Initial position
-        - final_pos: 最终对接目标位置 (3D) / Final docking target position
-        - standoff: 预对接点沿接近轴的后撤距离 [m] / stand-off retreat distance [m]
-        - v_max_approach / a_max_approach: 接近段线速度/加速度上限 / approach phase limits
-        - v_max_docking / a_max_docking: 对接段线速度/加速度上限 / docking phase limits
+        Args:
+            start_pos: 初始位置 (3D) / Initial position
+            final_pos: 最终对接目标位置 (3D) / Final docking target position
+            standoff: 预对接点沿接近轴的后撤距离 [m] / stand-off retreat distance [m]
+            v_max_approach: 接近段线速度上限 / approach phase limits
+            a_max_approach: 接近段线加速度上限 / approach phase limits
+            v_max_docking: 对接段线速度上限 / docking phase limits
+            a_max_docking: 对接段线加速度上限 / docking phase limits
         """
         assert start_pos.shape == (3,), "Start position must be 3D vector"
         assert final_pos.shape == (3,), "Final position must be 3D vector"
@@ -243,10 +247,10 @@ class TwoPhaseDockingTrajectory:
         - t ∈ [t1, t1+t2)：对接段（段内局部时间采样）；
         - t ≥ t1+t2：停在 final_pos，速度/加速度为 0。
 
-        参数 / Parameters:
+        Args:
             t: 当前时间（秒） / Current time (s)
 
-        返回 / Returns:
+        Returns:
             (pos, vel, acc) 三个 3D 向量 / 3D numpy arrays
         """
         if t < 0.0:
@@ -298,17 +302,18 @@ class CircleFigure8Trajectory:
         """
         Initialize the circle + figure-8 tracking-test trajectory
 
-        参数 / Parameters:
-        - start_pos: 轨迹出发点 (3D) / Start position (3D)
-        - transition_duration: 过渡段时长 T_tr [s] / Transition segment duration
-        - circle_duration: 圆周段时长 T_c [s] / Circle segment duration
-        - circle_radius: 圆周半径 r [m] / Circle radius
-        - circle_frequency: 圆周频率 f_c [Hz] / Circle frequency
-        - circle_center_offset: 圆心相对 start_pos 的 z 偏移 [m]（可正可负） /
-            Circle center offset below/above the start position
-        - figure8_duration: 8 字段时长 T_8 [s] / Figure-8 segment duration
-        - figure8_radius_x / figure8_radius_y: 8 字 x/y 半幅值 [m] / Figure-8 radii
-        - figure8_frequency: 8 字频率 f_8 [Hz] / Figure-8 frequency
+        Args:
+            start_pos: 轨迹出发点 (3D) / Start position (3D)
+            transition_duration: 过渡段时长 T_tr [s] / Transition segment duration
+            circle_duration: 圆周段时长 T_c [s] / Circle segment duration
+            circle_radius: 圆周半径 r [m] / Circle radius
+            circle_frequency: 圆周频率 f_c [Hz] / Circle frequency
+            circle_center_offset: 圆心相对 start_pos 的 z 偏移 [m]（可正可负） /
+                Circle center offset below/above the start position
+            figure8_duration: 8 字段时长 T_8 [s] / Figure-8 segment duration
+            figure8_radius_x: 8 字 x 半幅值 [m] / Figure-8 radius
+            figure8_radius_y: 8 字 y 半幅值 [m] / Figure-8 radius
+            figure8_frequency: 8 字频率 f_8 [Hz] / Figure-8 frequency
         """
         assert start_pos.shape == (3,), "Start position must be 3D vector"
         assert transition_duration > 0, "Transition duration must be positive"
@@ -414,10 +419,10 @@ class CircleFigure8Trajectory:
         - t ∈ [2·T_tr+T_c, total)：8 字段（水平，x-y 平面）；
         - t ≥ total：保持在 8 字结束点，速度/加速度为 0。
 
-        参数 / Parameters:
+        Args:
             t: 当前时间（秒） / Current time (s)
 
-        返回 / Returns:
+        Returns:
             (pos, vel, acc) 三个 3D 向量 / 3D numpy arrays
         """
         if t < 0.0:

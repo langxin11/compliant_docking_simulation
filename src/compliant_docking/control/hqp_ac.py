@@ -64,7 +64,7 @@ class HQPAdaptiveController:
                  contact_deadband: float = 0.0):
         """初始化控制器：预解析限位并预建两个 ProxQP 实例（主任务/零空间）。
 
-        参数 / Args:
+        Args:
             robot_model: Pinocchio 模型（重力置零由 load_pin_model 负责）
             dt: 控制步长 [s]
             config: HQPConfig 参数（None 时取默认值）
@@ -77,9 +77,10 @@ class HQPAdaptiveController:
                 MjModel 的 dof_frictionloss 传入；以前馈并入 ĥ（同时进入力矩
                 硬约束与输出力矩），模式由 friction_mode 选择（默认 "torque"）
 
-        QP 实例复用策略：proxsuite 支持 ``qp.update(...)`` 原地更新 H/g/C/u，
-        两个实例在 __init__ 各建一次，之后每个控制步只 update+solve，
-        不再重新构造。
+        Note:
+            QP 实例复用策略：proxsuite 支持 ``qp.update(...)`` 原地更新 H/g/C/u，
+            两个实例在 __init__ 各建一次，之后每个控制步只 update+solve，
+            不再重新构造。
         """
         self.model = robot_model
         self.data = self.model.createData()
@@ -292,19 +293,31 @@ class HQPAdaptiveController:
             force_ext: np.ndarray, torque_ext: np.ndarray) -> np.ndarray:
         """HQP-AC 控制律：返回关节力矩 τ = M·q̈_c + ĥ。
 
-        参数 / Args: 与 TaskSpaceController 同名方法完全一致——
-            q, v 关节状态；pos/vel/acc_des 期望任务位置/速度/加速度；
-            current_pos/vel 实际末端位置/线速度；
-            force_ext/torque_ext 世界系末端外力/外力矩（3 维各）。
-        返回 / Returns: 关节力矩 τ（n 维）。
+        参数与 TaskSpaceController 同名方法完全一致 / Same signature as the
+        TaskSpaceController method of the same name.
 
-        回退语义 / Fallback:
-            主 QP 非 solved → 该步主任务分量回退为无约束最小二乘解
-            （min‖Jq̈-(target-J̇q̇)‖²），并跳过零空间 QP；
+        Args:
+            q: 关节状态
+            v: 关节状态
+            pos_des: 期望任务位置
+            vel_des: 期望任务速度
+            acc_des: 期望任务加速度
+            current_pos: 实际末端位置
+            current_vel: 实际末端线速度
+            force_ext: 世界系末端外力（3 维）
+            torque_ext: 世界系末端外力矩（3 维）
+
+        Returns:
+            关节力矩 τ（n 维）
+
+        Note:
+            回退语义 / Fallback: 主 QP 非 solved → 该步主任务分量回退为
+            无约束最小二乘解（min‖Jq̈-(target-J̇q̇)‖²），并跳过零空间 QP；
             零空间 QP 非 solved → 零空间分量取 0。
             每次失败 ``n_solver_failures`` 自增 1。
 
-        说明：直接使用 F/T 传感器输入（无传感器动量观测器留作后续）。
+        Note:
+            直接使用 F/T 传感器输入（无传感器动量观测器留作后续）。
         """
         q = np.array(q, dtype=float).reshape(self.n)
         v = np.array(v, dtype=float).reshape(self.n)

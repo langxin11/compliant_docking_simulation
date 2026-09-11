@@ -40,7 +40,7 @@ class TaskSpaceController:
         初始化控制器：设定 Pinocchio 模型、步长与阻抗参数 /
         Initialize controller: set Pinocchio model, time step and impedance params
 
-        参数 / Args:
+        Args:
             robot_model: Pinocchio 模型 / Pinocchio model
             dt: 控制步长 [s] / control time step
             impedance: 阻抗参数（None 时取 ImpedanceConfig 默认值） / impedance params
@@ -57,11 +57,13 @@ class TaskSpaceController:
                 静摩擦死区（前馈在零速时消失）。None 时自动：摩擦非零取
                 150.0，否则 0（iiwa14 零摩擦路径行为不变）
 
-        注意：重力置零由 compliant_docking.models.load_pin_model 负责（加载时统一处理）/
-        Note: gravity zeroing is owned by compliant_docking.models.load_pin_model
+        Note:
+            重力置零由 compliant_docking.models.load_pin_model 负责（加载时统一处理）/
+            gravity zeroing is owned by compliant_docking.models.load_pin_model
 
-        注意：末端 frame 由 ee_frame 决定，方法内所有矩阵/向量维数均按
-        ``model.nq`` 泛化（iiwa14 nq=7 时与历史实现数值逐位一致）。
+        Note:
+            末端 frame 由 ee_frame 决定，方法内所有矩阵/向量维数均按
+            ``model.nq`` 泛化（iiwa14 nq=7 时与历史实现数值逐位一致）。
         """
         self.model = robot_model
         self.data = self.model.createData()
@@ -164,9 +166,19 @@ class TaskSpaceController:
         任务空间控制（含姿态 + 阻抗 + 外力补偿）：输出关节力矩 /
         Task-space control (orientation + impedance + external force): output joint torques
 
-        参数 / Args: q, v 当前关节状态 / current joints; pos/vel/acc_des 期望项 / desired;
-        current_pos/vel 实际项 / current; force/torque_ext 外力 / external
-        返回 / Returns: tau 关节力矩 / joint torques
+        Args:
+            q: 当前关节状态 / current joints
+            v: 当前关节状态 / current joints
+            pos_des: 期望项 / desired
+            vel_des: 期望项 / desired
+            acc_des: 期望项 / desired
+            current_pos: 实际项 / current
+            current_vel: 实际项 / current
+            force_ext: 外力 / external
+            torque_ext: 外力 / external
+
+        Returns:
+            tau: 关节力矩 / joint torques
         """
         # 1) 获取任务空间状态：当前位置、姿态误差（log 映射）、线/角速度
         pos_cur, vel_pos_cur, ori_err, vel_rot_cur = self.get_task_space_state_with_orientation(q, v)

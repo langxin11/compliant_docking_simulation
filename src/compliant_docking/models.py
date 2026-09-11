@@ -62,8 +62,22 @@ def load_pin_model(urdf_path=PIN_URDF, gravity: bool = False, *,
                    tool_diaginertia: np.ndarray | None = None):
     """加载 Pinocchio 模型；gravity=False 时置零重力（与 MuJoCo 模型保持一致）。
 
-    按文件后缀分发解析器：``.urdf`` 走 URDF 解析，``.xml``（MJCF，如 FR3 的
-    Menagerie 模型变体）走 buildModelFromMJCF。两条路线同样置零重力。
+    Args:
+        urdf_path (str | Path): 模型文件路径（``.urdf`` 或 ``.xml``；默认取 PIN_URDF）
+        gravity: True 时保留模型自带重力；False（默认）时把重力线性分量置零
+        tool_frame: 附加固定工具惯量的末端 frame 名（tool_* 参数须成组提供）
+        tool_mount_pos: 工具挂载平移（相对 tool_frame）
+        tool_mount_quat: 工具挂载四元数（``wxyz``）
+        tool_mass: 工具质量（须为正）
+        tool_com: 工具质心位置
+        tool_diaginertia: 工具转动惯量对角项（逐轴为正）
+
+    Returns:
+        (pin.Model): 加载（并按需附加工具惯量）后的 Pinocchio 模型
+
+    Note:
+        按文件后缀分发解析器：``.urdf`` 走 URDF 解析，``.xml``（MJCF，如 FR3 的
+        Menagerie 模型变体）走 buildModelFromMJCF。两条路线同样置零重力。
     """
     if Path(urdf_path).suffix.lower() == ".xml":
         model = pin.buildModelFromMJCF(str(urdf_path))

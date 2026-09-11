@@ -38,10 +38,15 @@ class MomentumObserver:
                  damping: np.ndarray | None = None,
                  friction_v0: float = 0.01):
         """
-        参数 / Args:
-            kp/ki: 观测器比例/积分增益 [s⁻¹]（K_p 量纲 1/s，K_i 1/s²）
+        Args:
+            kp: 观测器比例增益 [s⁻¹]（K_p 量纲 1/s）
+            ki: 观测器积分增益 [s⁻¹]（K_i 1/s²）
             integral_limit: 积分项 ∫Δp 的逐关节限幅 [N·m·s]，防饱和
-            frictionloss/damping: 已知关节耗散模型（与仿真同源）。提供后
+            frictionloss: 已知关节耗散模型（与仿真同源）。提供后
+                ``force_contact`` 从残差中扣除耗散项，得到不含摩擦污染的
+                纯接触力估计——控制器的前馈已补偿同一模型，残差中的耗散
+                分量对力控而言是可减去的已知项
+            damping: 已知关节耗散模型（与仿真同源）。提供后
                 ``force_contact`` 从残差中扣除耗散项，得到不含摩擦污染的
                 纯接触力估计——控制器的前馈已补偿同一模型，残差中的耗散
                 分量对力控而言是可减去的已知项
@@ -99,8 +104,9 @@ class MomentumObserver:
     def update(self, q: np.ndarray, v: np.ndarray, tau_applied: np.ndarray) -> np.ndarray:
         """推进一步观测器，返回关节外力矩估计 τ̃_ext（n 维）。
 
-        参数 / Args:
-            q, v: 当前关节状态（步进后）
+        Args:
+            q: 当前关节状态（步进后）
+            v: 当前关节状态（步进后）
             tau_applied: 上一控制周期实际施加的关节力矩（限幅后）
         """
         q = np.asarray(q, dtype=float).reshape(-1)

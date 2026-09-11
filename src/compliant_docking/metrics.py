@@ -160,7 +160,7 @@ def compute_metrics(log: Log, pin_model: pin.Model, *, axis: np.ndarray,
                     ee_frame: str, steady_window: float = 2.0) -> DockingMetrics:
     """从仿真 Log 后处理计算对接性能指标（不进热循环）。
 
-    参数 / Args:
+    Args:
         log: 仿真日志（store_data 产出；可选含 orientation_errors 姿态误差序列）
         pin_model: Pinocchio 模型（提供关节限值/速度上限/雅可比）
         axis: 对接轴方向（世界系；内部归一化，非单位向量也可）
@@ -306,7 +306,7 @@ def tracking_summary(log: Log, segments: Sequence[tuple[str, float, float]]) -> 
     计算每段 RMS 与峰值并换算为 mm；再加总全时程（全部采样点，含段外保持段）的
     RMS/峰值。输出多行中文文本，打印风格与 format_metrics 对齐。
 
-    参数 / Args:
+    Args:
         log: 仿真日志（t_list 与 error 逐 step 对齐）
         segments: [(名称, t_start, t_end), ...]，与
             CircleFigure8Trajectory.segments 同构

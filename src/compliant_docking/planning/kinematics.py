@@ -24,21 +24,21 @@ def compute_ik(pin_model, pin_data, target_pose, initial_q=_DEFAULT_INITIAL_Q, m
     使用 Pinocchio 进行逆运动学（阻尼最小二乘）：返回关节角与是否收敛 /
     Compute inverse kinematics (damped least squares) using Pinocchio
 
-    参数 / Args:
-        pin_model: Pinocchio 模型 / Pinocchio model
-        pin_data: Pinocchio 数据 / Pinocchio data
-        target_pose: 目标末端位姿 pin.SE3 / target end-effector pose
-        initial_q: 初始关节角，None 则取 neutral / initial joint config
-        max_iters: 最大迭代步数 / maximum iterations
-        eps: 收敛阈值 / convergence threshold
+    Args:
+        pin_model (pin.Model): Pinocchio 模型 / Pinocchio model
+        pin_data (pin.Data): Pinocchio 数据 / Pinocchio data
+        target_pose (pin.SE3): 目标末端位姿 pin.SE3 / target end-effector pose
+        initial_q (np.ndarray | None): 初始关节角，None 则取 neutral / initial joint config
+        max_iters (int): 最大迭代步数 / maximum iterations
+        eps (float): 收敛阈值 / convergence threshold
         ee_frame: 末端 frame 名（由模型/场景决定；默认值为组合 URDF 的
             ``cylinder_link``，即 iiwa14 + 公头圆柱场景的历史名称） /
             end-effector frame name (decided by model/scene; default is the
             historical name of the iiwa14 combined URDF)
 
-    返回 / Returns:
-        q: 关节角解 / joint configuration
-        success: 是否收敛 / convergence flag
+    Returns:
+        q (np.ndarray): 关节角解 / joint configuration
+        success (bool): 是否收敛 / convergence flag
     """
     # 若未提供初始值，则使用模型的中性位姿作为初值
     if initial_q is None:

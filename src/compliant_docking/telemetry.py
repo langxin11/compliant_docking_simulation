@@ -66,15 +66,20 @@ class Log:
                    torque_saturated: bool = False, contact_count: int = 0):
         """
         存储数据（单步）：时间、关节状态、末端状态、期望轨迹、力矩及外力
+
         Args:
             t: 时间戳（秒）
             q: 当前关节角
             v: 当前关节角速度
-            pos_actual/vel_actual: 当前末端位置/速度
+            pos_actual: 当前末端位置
+            vel_actual: 当前末端速度
             error: 末端位置跟踪误差范数
-            pos_desired/vel_desired/acc_desired: 期望末端 pos/vel/acc
+            pos_desired: 期望末端位置
+            vel_desired: 期望末端速度
+            acc_desired: 期望末端加速度
             tau: 控制器计算的关节力矩
-            external_force/external_torque: 传感器外力/力矩（控制参考系）
+            external_force: 传感器外力（控制参考系）
+            external_torque: 传感器外力矩（控制参考系）
             orientation_error: 末端姿态误差向量（世界系，可选；None 时不记录）
             torque_saturated: 本步控制量是否触及软件力矩限幅（可选，默认 False）
             contact_count: 本步 MuJoCo 接触对数量（可选，默认 0）

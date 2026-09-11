@@ -69,16 +69,16 @@ def plot_docking_log(log: "Log", out_dir: str | Path, *,
     绘制对接仿真结果图（SciencePlots IEEE 中文风格，PNG + PDF 双格式）/
     Plot docking simulation results (SciencePlots IEEE style, PNG + PDF).
 
-    参数 / Args:
-    - log: 已灌入时序数据的 telemetry.Log（须先 reset_logs + store_data）/
-      Populated telemetry.Log (reset_logs + store_data first)
-    - out_dir: 图件输出目录（不存在则创建）/ Output directory (created if missing)
-    - scene_name: 文件名前缀；None 时用 "docking_" / Filename prefix; "docking_" if None
-    - docking_axis: 对接轴索引（默认 2 = 世界 Z）/ Docking axis index (default 2 = world Z)
-    - dpi: PNG 输出分辨率 / PNG resolution
+    Args:
+        log: 已灌入时序数据的 telemetry.Log（须先 reset_logs + store_data）/
+            Populated telemetry.Log (reset_logs + store_data first)
+        out_dir: 图件输出目录（不存在则创建）/ Output directory (created if missing)
+        scene_name: 文件名前缀；None 时用 "docking_" / Filename prefix; "docking_" if None
+        docking_axis: 对接轴索引（默认 2 = 世界 Z）/ Docking axis index (default 2 = world Z)
+        dpi: PNG 输出分辨率 / PNG resolution
 
-    返回 / Returns:
-    - 生成的全部文件路径列表 / List of all generated file paths
+    Returns:
+        生成的全部文件路径列表 / List of all generated file paths
     """
     apply_style()
 
