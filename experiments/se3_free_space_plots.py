@@ -54,6 +54,12 @@ def main():
     import matplotlib.pyplot as plt
     from compliant_docking.plotting import apply_style
     apply_style()
+    # 含 $...$ 的字符串走 mathtext 解析路径：其非数学段只取 font.family
+    # 首位字体，不建立逐字形回退链（首位 Times New Roman 无中文字形 →
+    # 豆腐块）。故把 CJK 字体提到首位——它自带拉丁字形，中文/西文/数学
+    # （STIX mathtext 不受影响）混排全部正常；纯文本路径的回退不受影响
+    plt.rcParams["font.family"] = ["Noto Serif CJK SC"] + [
+        f for f in plt.rcParams["font.family"] if f != "Noto Serif CJK SC"]
 
     fig, axes = plt.subplots(2, 2, figsize=(9.5, 7.0), constrained_layout=True)
 
