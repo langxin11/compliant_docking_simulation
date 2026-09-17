@@ -17,6 +17,7 @@ import pinocchio as pin
 from scipy.linalg import pinv
 
 from ..config import ImpedanceConfig
+from .friction import friction_feedforward, validate_friction_mode
 
 # 任务变量是末端 frame 原点的世界系位置、线速度和角速度。WORLD 的线速度块
 # 表示相对世界原点的空间运动，不适合这一语义；统一使用世界轴对齐的 frame 原点量。
@@ -84,8 +85,7 @@ class TaskSpaceController:
         # 摩擦前馈模式："velocity"（τ_ff=f·tanh(q̇/v₀)，零速时补偿消失，
         # 低速任务易发粘滑）或 "torque"（τ_ff=f·tanh(τ_pre/τ₀)，用补偿前
         # 力矩方向决定摩擦方向，力矩一出即被抬过静摩擦阈值；τ₀=f/scale）
-        if friction_mode not in ("velocity", "torque"):
-            raise ValueError(f"friction_mode 不支持 {friction_mode!r}，可选 'velocity' 或 'torque'")
+        validate_friction_mode(friction_mode)
         self.friction_mode = friction_mode
         self.friction_tau_scale = float(friction_tau_scale)
 
@@ -255,14 +255,11 @@ class TaskSpaceController:
         tau = J_full.T @ Lambda @ (u - J_dot @ v) + C + null_term2
 
         # 13) 关节摩擦前馈补偿（Pinocchio 模型不含 frictionloss，仿真侧有）：
-        #     velocity 模式用平滑 tanh 逼近库仑摩擦（零速时补偿消失）；
-        #     torque 模式用补偿前力矩 τ_pre 的方向决定摩擦方向（治零速死区）
-        if self.friction_mode == "torque":
-            tau = tau + self.frictionloss * np.tanh(
-                tau * self.friction_tau_scale / np.maximum(self.frictionloss, 1e-9))
-        else:
-            tau = tau + self.frictionloss * np.tanh(v / self._friction_v0)
-        tau = tau + self.damping * v
+        #     共享 helper（control/friction.py），SE(3) Lie 控制器同源复用
+        tau = friction_feedforward(tau, v, self.frictionloss, self.damping,
+                                   mode=self.friction_mode,
+                                   tau_scale=self.friction_tau_scale,
+                                   v0=self._friction_v0)
 
         return tau
 

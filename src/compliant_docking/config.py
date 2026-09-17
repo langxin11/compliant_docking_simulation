@@ -61,3 +61,33 @@ class HQPConfig:
     dt_p: float = 0.05
     torque_limit: float | None = None
     eps_abs: float = 1e-5
+
+
+@dataclass(frozen=True)
+class SE3ImpedanceConfig:
+    """SE(3) Lie 群阻抗参数（Kim et al. 2025 T-RO §III-A，Eq. 55-61）。
+
+    论文阻抗模型 ``A·V̇̃ + D·Ṽ + dexp⁻ᵀKλ = F̃`` 的期望惯量/阻尼/刚度。
+    默认对角向量由既有 ImpedanceConfig 基线数值映射而来
+    （m=10, d=80, k=50；m_rot=1, d_rot=10, k_rot=25），**仅作控制器间
+    公平对比的兼容性初值**，不声称是论文最优参数。控制器内部以一般
+    6×6 矩阵持有 A/D/K（对角配置只是特例）。
+
+    字段 / Fields:
+        A_diag: 期望惯量对角（平动质量 kg ×3，转动惯量 kg·m² ×3）
+        D_diag: 期望阻尼对角（N·s/m ×3，N·m·s/rad ×3）
+        K_diag: 期望刚度对角（N/m ×3，N·m/rad ×3）
+        null_damping: 冗余零空间速度阻尼 [N·m·s/rad]（仅稳定用，
+            不改变主任务；7-DoF 广义逆适配见控制器 Eq. 66 扩展）
+        condition_threshold: 任务空间矩阵 Λ=(J M⁻¹ Jᵀ)⁻¹ 的条件数告警
+            阈值；超过时降级为带阈值的阻尼 pinv 并记录诊断
+    """
+
+    A_diag: np.ndarray = field(
+        default_factory=lambda: np.array([10.0, 10.0, 10.0, 1.0, 1.0, 1.0]))
+    D_diag: np.ndarray = field(
+        default_factory=lambda: np.array([80.0, 80.0, 80.0, 10.0, 10.0, 10.0]))
+    K_diag: np.ndarray = field(
+        default_factory=lambda: np.array([50.0, 50.0, 50.0, 25.0, 25.0, 25.0]))
+    null_damping: float = 10.0
+    condition_threshold: float = 1e8
