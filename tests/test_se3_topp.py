@@ -3,7 +3,11 @@ import numpy as np
 import pinocchio as pin
 import pytest
 
-from compliant_docking.planning.se3_topp import SE3ToppTrajectory, _topp_duration
+from compliant_docking.planning.se3_topp import (
+    SE3ToppTrajectory,
+    _topp_duration,
+    _topp_profile_exact,
+)
 
 # 论文 Table 8 限速：接近 0.10 m/s / 0.20 rad/s / 0.20 m/s²；
 # 对接 0.02 m/s / 0.05 rad/s / 0.05 m/s²
@@ -126,3 +130,113 @@ def test_rotating_segment_geodesic_and_omega_limit():
     for t in ts:
         _, vel, _ = traj.get_state(t)
         assert np.linalg.norm(vel) <= 0.10 + 1e-9
+
+
+# ======================================================================
+# 有限差分审计（Stage B）：get_state 的速度/加速度必须与 get_pose 的
+# 位置中心差分一致；get_motion_state 的 T_d/V_d/Vdot_d 必须满足
+# Td⁻¹Ṫd = [V_d] 且 dV_d/dt = Vdot_d（body 量）
+# ======================================================================
+def _rotating_traj():
+    """平移+90° 旋转组合段轨迹（姿态变化段才能暴露加速度耦合项错误）。"""
+    R1 = np.array(pin.exp3(np.pi / 2 * np.array([0.0, 0.0, 1.0])))
+    start = np.array([0.0, 0.0, 0.5])
+    final = start + np.array([0.5, 0.0, 0.0])
+    return SE3ToppTrajectory(
+        start, np.eye(3), final, R1, standoff=1.0,
+        v_max_approach=0.10, a_max_approach=0.20,
+        omega_max_approach=0.25, alpha_max_approach=0.25,
+        v_max_docking=0.10, a_max_docking=0.20,
+        omega_max_docking=0.25, alpha_max_docking=0.25)
+
+
+def test_get_state_velocity_matches_pose_finite_difference():
+    """速度一致性：ṗ 的中心差分 == get_state 的 vel（旋转与纯平移段皆测）。"""
+    traj = _rotating_traj()
+    h = 1e-5
+    for t in np.linspace(0.05, traj.total_duration - 0.05, 37):
+        p_p = np.array(traj.get_pose(t + h).translation)
+        p_m = np.array(traj.get_pose(t - h).translation)
+        _, vel, _ = traj.get_state(t)
+        np.testing.assert_allclose((p_p - p_m) / (2 * h), vel,
+                                   atol=1e-6, err_msg=f"t={t}")
+
+
+def test_get_state_acceleration_matches_pose_finite_difference():
+    """加速度一致性：p̈ 的中心差分 == get_state 的 acc。
+
+    T(s)=Ta·Exp(ξs) 的世界线加速度应为
+    p̈ = R(ω×v)ṡ² + R·ξ_v·s̈，其中 ω=ξ_w ṡ、v=ξ_v ṡ（叉乘项已含 ṡ²，
+    不得再乘 ṡ²）。该测试在姿态变化段审计此公式。
+    """
+    traj = _rotating_traj()
+    h = 1e-4
+    for t in np.linspace(0.2, traj.total_duration - 0.2, 29):
+        p_pp = np.array(traj.get_pose(t + h).translation)
+        p_0 = np.array(traj.get_pose(t).translation)
+        p_mm = np.array(traj.get_pose(t - h).translation)
+        _, _, acc = traj.get_state(t)
+        np.testing.assert_allclose((p_pp - 2 * p_0 + p_mm) / h**2, acc,
+                                   atol=5e-4, err_msg=f"t={t}")
+
+
+def test_get_motion_state_body_twist_consistency():
+    """get_motion_state 的 V_d 必须是 body twist：vee(Td⁻¹Ṫd) == V_d。"""
+    traj = _rotating_traj()
+    h = 1e-6
+    for t in np.linspace(0.03, traj.total_duration - 0.03, 23):
+        T_d, V_d, Vdot_d = traj.get_motion_state(t)
+        T_p = traj.get_motion_state(t + h)[0]
+        T_m = traj.get_motion_state(t - h)[0]
+        Tdot = (np.array(T_p.homogeneous) - np.array(T_m.homogeneous)) / (2 * h)
+        Tinv = np.array(T_d.inverse().homogeneous)
+        # body twist：[V] = Td⁻¹·Ṫd（不是 Ṫd·Td⁻¹——那是 spatial twist）
+        Vb = Tinv @ Tdot
+        S = Vb[:3, :3]  # 反对称块，直接提取 ω（不得喂给 log3）
+        V_fd = np.concatenate([Vb[:3, 3], [S[2, 1], S[0, 2], S[1, 0]]])
+        np.testing.assert_allclose(V_fd, V_d, atol=1e-5, err_msg=f"t={t}")
+
+
+def test_get_motion_state_twist_derivative_consistency():
+    """get_motion_state 的 Vdot_d == d(V_d)/dt（body twist 向量的导数）。"""
+    traj = _rotating_traj()
+    h = 1e-6
+    for t in np.linspace(0.03, traj.total_duration - 0.03, 23):
+        _, _, Vdot_d = traj.get_motion_state(t)
+        V_p = traj.get_motion_state(t + h)[1]
+        V_m = traj.get_motion_state(t - h)[1]
+        np.testing.assert_allclose((V_p - V_m) / (2 * h), Vdot_d,
+                                   atol=1e-5, err_msg=f"t={t}")
+
+
+def test_get_motion_state_pose_matches_get_pose_and_rest_boundaries():
+    """get_motion_state 的 T_d 与 get_pose 一致；边界处 rest-to-rest。"""
+    traj = _rotating_traj()
+    for t in np.linspace(0.0, traj.total_duration + 0.5, 17):
+        T_d, V_d, Vdot_d = traj.get_motion_state(t)
+        T_ref = traj.get_pose(t)
+        np.testing.assert_allclose(np.array(T_d.homogeneous),
+                                   np.array(T_ref.homogeneous), atol=1e-12)
+    # 边界（段切换点）与超时点：速度为零。段内起点的 s̈=±a_max 是 TOPP
+    # bang-bang 剖面的合法行为，只有"停驻"（超时/负时刻）参考加速度才为零
+    for t in (0.0, traj.durations[0], traj.total_duration,
+              traj.total_duration + 1.0, -0.5):
+        _, V_d, _ = traj.get_motion_state(t)
+        assert np.linalg.norm(V_d) < 1e-12
+    for t in (traj.total_duration, traj.total_duration + 1.0, -0.5):
+        _, _, Vdot_d = traj.get_motion_state(t)
+        assert np.linalg.norm(Vdot_d) < 1e-12
+
+
+def test_get_motion_state_body_twist_analytic():
+    """段内常螺旋的解析关系：V_d = ξ·ṡ、Vdot_d = ξ·s̈（ξ 在段内为常量）。"""
+    traj = _rotating_traj()
+    segs = traj._segments
+    for seg_idx, t_local in ((0, 0.4 * segs[0][5]), (1, 0.5 * segs[1][5])):
+        T_a, _, xi, s_dot_max, s_ddot_max, T = segs[seg_idx]
+        s, s_dot, s_ddot = _topp_profile_exact(
+            t_local, s_dot_max, s_ddot_max, T)
+        t = (traj.durations[0] if seg_idx else 0.0) + t_local
+        _, V_d, Vdot_d = traj.get_motion_state(t)
+        np.testing.assert_allclose(V_d, xi * s_dot, atol=1e-12)
+        np.testing.assert_allclose(Vdot_d, xi * s_ddot, atol=1e-12)

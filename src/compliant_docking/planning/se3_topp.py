@@ -148,6 +148,37 @@ class SE3ToppTrajectory:
         s, _, _ = _topp_profile_exact(t - self._t1, s_dot_max, s_ddot_max, T)
         return T_a * pin.exp6(pin.Motion(xi * s))
 
+    def get_motion_state(self, t: float) -> tuple[pin.SE3, np.ndarray, np.ndarray]:
+        """t 时刻的期望运动参考 (T_d, V_d, Vdot_d)——**body（体坐标）量**。
+
+        每段为常螺旋测地线 Td(s) = Ta·Exp(ξ·s)，ξ 在段内为常量，严格有::
+
+            [V_d] = Td⁻¹·Ṫd = [ξ]·ṡ   →   V_d = ξ·ṡ
+            Vdot_d = d(V_d)/dt = ξ·s̈
+
+        （body twist 的向量导数，正是 SE(3) Lie 阻抗控制器 Eq. 62 需要的
+        V̇_d；不得从世界系 pos/vel/acc 反推。）t≥总时长停在终点，t<0 在起点。
+
+        供 control/se3_impedance.py（Kim et al. 2025 Eq. 44-66 控制器）与
+        planning/motion_reference.py 适配器使用。
+        """
+        t = float(t)
+        if t < 0.0:
+            return pin.SE3(self._R0, self._p0), np.zeros(6), np.zeros(6)
+        if t >= self.total_duration:
+            # 停驻在终点：速度/加速度参考为零（TOPP 剖面在 t=T 的
+            # s̈=-a_max 是减速段末端的 bang-bang 残留，参考已静止）
+            T_a, _, xi, _, _, _ = self._segments[1]
+            return T_a * pin.exp6(pin.Motion(xi)), np.zeros(6), np.zeros(6)
+        if t < self._t1:
+            seg_idx, t_local = 0, t
+        else:
+            seg_idx, t_local = 1, t - self._t1
+        T_a, _, xi, s_dot_max, s_ddot_max, T = self._segments[seg_idx]
+        s, s_dot, s_ddot = _topp_profile_exact(t_local, s_dot_max, s_ddot_max, T)
+        T_d = T_a * pin.exp6(pin.Motion(xi * s))
+        return T_d, xi * s_dot, xi * s_ddot
+
     def _segment_state(self, seg_idx: int, t_local: float) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         T_a, R_a, xi, s_dot_max, s_ddot_max, T = self._segments[seg_idx]
         s, s_dot, s_ddot = _topp_profile_exact(t_local, s_dot_max, s_ddot_max, T)
@@ -157,6 +188,7 @@ class SE3ToppTrajectory:
         M_s = T_a * pin.exp6(pin.Motion(xi * s))
         R_s = np.array(M_s.rotation)
         # 体坐标系螺旋映射到世界系：ṗ = R·v_b；
-        # p̈ = R·(ω_b×v_b)·ṡ² + R·v_b·s̈（后者在纯平移段即 R·v_b·s̈）
-        acc = R_s @ (np.cross(w_b, v_b) * s_dot**2 + xi[:3] * s_ddot)
+        # p̈ = R·(ω_b×v_b) + R·ξ_v·s̈（ω_b×v_b = (ξ_w×ξ_v)·ṡ² 已含 ṡ²，
+        # 不得再乘 ṡ²；有限差分审计见 tests/test_se3_topp.py）
+        acc = R_s @ (np.cross(w_b, v_b) + xi[:3] * s_ddot)
         return np.array(M_s.translation), R_s @ v_b, acc
