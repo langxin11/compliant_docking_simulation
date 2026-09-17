@@ -45,8 +45,9 @@ def build_parser() -> argparse.ArgumentParser:
                         help="是否离屏录帧并导出 MP4（默认 --no-record）")
     parser.add_argument("--quick", action="store_true",
                         help="快速冒烟测试：等价于 --duration 2.0")
-    parser.add_argument("--controller", choices=["impedance", "hqp"], default="impedance",
+    parser.add_argument("--controller", choices=["impedance", "se3_lie", "hqp"], default="impedance",
                         help="控制器：impedance=固定增益任务空间阻抗（默认）；"
+                             "se3_lie=SE(3) Lie 群阻抗（Kim et al. 2025 T-RO，指数坐标+dexp 全链路）；"
                              "hqp=HQP-AC 约束自适应控制（Ren & Shan 2026 §3.2）")
     return parser
 

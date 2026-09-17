@@ -26,11 +26,13 @@ if "DISPLAY" not in os.environ or not os.environ["DISPLAY"]:
     os.environ["MUJOCO_GL"] = "egl"  # 试试 osmesa，也可以改成 egl
 
 
+import mujoco
 import numpy as np
 import pinocchio as pin
 
-from compliant_docking.config import DockingConfig, HQPConfig, ImpedanceConfig
+from compliant_docking.config import DockingConfig, HQPConfig, ImpedanceConfig, SE3ImpedanceConfig
 from compliant_docking.control.hqp_ac import HQPAdaptiveController
+from compliant_docking.control.se3_impedance import SE3LieImpedanceController
 from compliant_docking.control.task_space import TaskSpaceController
 from compliant_docking.metrics import (
     TrackingThresholds,
@@ -42,6 +44,7 @@ from compliant_docking.metrics import (
 )
 from compliant_docking.models import load_pin_model
 from compliant_docking.planning.kinematics import compute_ik
+from compliant_docking.planning.motion_reference import get_motion_reference
 from compliant_docking.planning.trajectory import (
     CircleFigure8Trajectory,
     DecoupledQuinticTrajectory,
@@ -50,10 +53,11 @@ from compliant_docking.planning.trajectory import (
 from compliant_docking.scene import DEFAULT_SCENE_PATH, Scene, load_scene
 from compliant_docking.simulation.mujoco_env import MujRobot
 from compliant_docking.telemetry import Log
+from compliant_docking.wrench import wrench_to_body
 
 
 def run_simulation(muj_robot:MujRobot,
-                   task_dynamics:TaskSpaceController | HQPAdaptiveController,
+                   task_dynamics:TaskSpaceController | HQPAdaptiveController | SE3LieImpedanceController,
                    trajector_planner: DecoupledQuinticTrajectory
                    | TwoPhaseDockingTrajectory
                    | CircleFigure8Trajectory,
@@ -104,6 +108,21 @@ def run_simulation(muj_robot:MujRobot,
     # Per-step PI momentum-observer update (no-op unless HQP observer mode)
     update_observer = getattr(task_dynamics, "update_momentum_observer", None)
 
+    # SE(3) Lie 控制器专用通道：期望 body 运动参考 + F/T body wrench。
+    # 旧控制器（impedance/hqp）保持原调用方式不受影响；wrench 变换为
+    # sensor site 系 → EE body 系（含参考点平移矩），与 body Jacobian 配对。
+    use_se3 = isinstance(task_dynamics, SE3LieImpedanceController)
+    sensor_site_id = -1
+    F_body = np.zeros(6)
+    if use_se3:
+        if scene is None:
+            raise ValueError("se3_lie 控制器需要 scene（提供 sensor_site 名）")
+        if r_des is None:
+            raise ValueError("se3_lie 控制器需要 r_des（固定期望姿态）")
+        sensor_site_id = mujoco.mj_name2id(
+            muj_robot.model, mujoco.mjtObj.mjOBJ_SITE, scene.sensor_site)
+        if sensor_site_id < 0:
+            raise ValueError(f"组装模型缺少 F/T 传感器 site: {scene.sensor_site!r}")
 
     while muj_robot.data.time < cfg.duration:
         # while True:
@@ -111,12 +130,18 @@ def run_simulation(muj_robot:MujRobot,
         # 1) 根据当前仿真时间采样期望的末端位置/速度/加速度 /
         # 1) Sample desired end-effector pos/vel/acc at current sim time
         pos_des, vel_des, acc_des = trajector_planner.get_state(t)
-        #print(f"Current time: {t}, Desired position: {pos_des}, Desired velocity: {vel_des}, Desired acceleration: {acc_des}")
+        #print(f"Current time: {t}, Desired position: {pos_des}, Desired position: {pos_des}, Desired velocity: {vel_des}, Desired acceleration: {acc_des}")
 
         # 2) 任务空间控制（含平动/姿态阻抗与外力补偿）→ 得到关节力矩 tau /
         # 2) Task-space control (translation/rotation impedance + external force) → joint torques tau
-        tau_unclipped = task_dynamics.compute_control_task_space_with_orientation_and_imp(
-            q, v, pos_des, vel_des, acc_des, current_pos, current_vel, force_external, torque_external)
+        if use_se3:
+            # SE(3) Lie 阻抗（Kim et al. 2025）：期望 body 运动参考 + body wrench
+            T_d, V_d, Vdot_d = get_motion_reference(trajector_planner, t, r_des)
+            tau_unclipped = task_dynamics.compute_control(
+                q, v, T_d, V_d, Vdot_d, F_body)
+        else:
+            tau_unclipped = task_dynamics.compute_control_task_space_with_orientation_and_imp(
+                q, v, pos_des, vel_des, acc_des, current_pos, current_vel, force_external, torque_external)
 
         # 力矩限幅以防止过大的控制输入导致碰撞检测失败 /
         # Clamp torques to prevent excessive control inputs that cause collision detection failure
@@ -166,6 +191,18 @@ def run_simulation(muj_robot:MujRobot,
             force_external = measured_force
             torque_external = measured_torque
 
+        # SE(3) Lie 通道：F/T 读数（site 系，含既有负号约定）→ EE body
+        # wrench（与 body Jacobian 同 frame 同参考点；跟踪门禁下同样置零）
+        if use_se3:
+            if is_tracking:
+                F_body = np.zeros(6)
+            else:
+                F_body = wrench_to_body(
+                    force_sensor, torque_sensor,
+                    muj_robot.data.site_xpos[sensor_site_id],
+                    muj_robot.data.site_xmat[sensor_site_id].reshape(3, 3),
+                    pin.SE3(current_ori, np.asarray(current_pos)))
+
         #print('current:',current_pos,"current_ori:",current_ori)
 
         # print('far:',np.linalg.norm(eef_pos-current_pos))
@@ -185,6 +222,20 @@ def run_simulation(muj_robot:MujRobot,
             orientation_error=ori_err_vec,
             torque_saturated=torque_saturated,
             contact_count=muj_robot.data.ncon)
+        # SE(3) Lie 控制器诊断（标量子集；完整 latest_diagnostics 留在控制器内）
+        if use_se3:
+            d = task_dynamics.latest_diagnostics
+            log.se3_diagnostics.append({
+                "t": t,
+                "lam_translation_norm": d["lam_translation_norm"],
+                "lam_rotation_norm": d["lam_rotation_norm"],
+                "lam_dot_norm": d["lam_dot_norm"],
+                "cond_dexp": d["cond_dexp"],
+                "cond_task": d["cond_task"],
+                "F_body_norm": d["F_body_norm"],
+                "tau_norm": d["tau_norm"],
+                "torque_saturated": torque_saturated,
+            })
 
 
     if plot:
@@ -225,8 +276,10 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
         scene_path (str | Path): 场景 YAML 路径（默认 DEFAULT_SCENE_PATH，即 iiwa14 对接场景） /
             Scene YAML path (default: the built-in iiwa14 docking scene)
         controller (str): 控制器选择："impedance"（默认，固定增益任务空间阻抗 +
-            软限幅）或 "hqp"（HQP-AC 约束自适应控制，Ren & Shan 2026 §3.2，
-            关节位置/速度/力矩极限为 QP 硬约束，刚度按接触力自适应）
+            软限幅）、"se3_lie"（SE(3) Lie 群阻抗，Kim et al. 2025 T-RO §III-A，
+            T̃/λ/dexp/γ 全链路 + body wrench 反馈）或 "hqp"（HQP-AC 约束自适应
+            控制，Ren & Shan 2026 §3.2，关节位置/速度/力矩极限为 QP 硬约束，
+            刚度按接触力自适应）
 
     Returns:
         Log: 记录了完整仿真时序数据的日志对象 / populated telemetry log
@@ -292,6 +345,30 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
         task_dynamics = TaskSpaceController(pin_model, cfg.dt, imp_cfg, ee_frame=scene.robot.ee_frame,
                                             frictionloss=frictionloss, damping=damping,
                                             friction_mode=scene.friction_comp)
+    elif controller == "se3_lie":
+        # SE(3) Lie 群阻抗（Kim et al. 2025 T-RO §III-A）：场景可选
+        # se3_impedance 段覆盖 A/D/K 对角与零空间阻尼，缺省取基线映射值
+        se3_cfg = SE3ImpedanceConfig()
+        ov = scene.se3_impedance
+        if ov is not None:
+            se3_kwargs = {}
+            if ov.a_diag is not None:
+                se3_kwargs["A_diag"] = np.asarray(ov.a_diag, dtype=float)
+            if ov.d_diag is not None:
+                se3_kwargs["D_diag"] = np.asarray(ov.d_diag, dtype=float)
+            if ov.k_diag is not None:
+                se3_kwargs["K_diag"] = np.asarray(ov.k_diag, dtype=float)
+            if ov.null_damping is not None:
+                se3_kwargs["null_damping"] = float(ov.null_damping)
+            if se3_kwargs:
+                se3_cfg = replace(se3_cfg, **se3_kwargs)
+                print(f"SE(3) 阻抗覆盖: {se3_kwargs}")
+        task_dynamics = SE3LieImpedanceController(
+            pin_model, cfg.dt, se3_cfg, ee_frame=scene.robot.ee_frame,
+            frictionloss=frictionloss, damping=damping,
+            friction_mode=scene.friction_comp)
+        print("控制器: SE(3) Lie 群阻抗（Kim et al. 2025 T-RO，T̃/λ/dexp/γ 全链路；"
+              "未含论文 §III-B NRIC 鲁棒内环）")
     elif controller == "hqp":
         hqp_ov = scene.hqp
         preload_axis = None
@@ -311,7 +388,7 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
         print(f"控制器: HQP-AC（Ren & Shan 2026 §3.2，关节位置/速度/力矩 QP 硬约束 + "
               f"接触力自适应刚度；力矩约束 ±{cfg.max_torque} N·m）")
     else:
-        raise ValueError(f"未知控制器: {controller!r}（可选 'impedance' 或 'hqp'）")
+        raise ValueError(f"未知控制器: {controller!r}（可选 'impedance'、'se3_lie' 或 'hqp'）")
     if np.any(frictionloss > 0):
         print(f"摩擦前馈: frictionloss={np.round(frictionloss, 3)} N·m（取自组装模型 dof_frictionloss）")
     if np.any(damping > 0):

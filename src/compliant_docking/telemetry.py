@@ -54,6 +54,11 @@ class Log:
         # 列表长度可能短于其他列表（metrics 侧按非空判断）
         self.orientation_errors = []
 
+        # SE(3) Lie 控制器逐步诊断（仅 --controller se3_lie 时填充；每元素为
+        # 控制器 latest_diagnostics 的标量子集 + torque_saturated，见
+        # experiments/run_docking.py）。旧控制器路径不触碰该列表。
+        self.se3_diagnostics = []
+
 
 
     def store_data(self, t: float, q: np.ndarray,

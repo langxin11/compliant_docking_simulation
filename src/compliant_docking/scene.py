@@ -157,6 +157,28 @@ class HQPOverride:
 
 
 @dataclass(frozen=True)
+class SE3ImpedanceOverride:
+    """SE(3) Lie 阻抗可选参数覆盖（场景 YAML 的可选 ``se3_impedance`` 段）。
+
+    缺省字段沿用 SE3ImpedanceConfig 默认（ImpedanceConfig 基线映射值）。
+    字段为 None 表示不覆盖。所有 *_diag 为 6 维列表（平动 3 + 姿态 3）。
+
+    .. code-block:: yaml
+
+        se3_impedance:
+          a_diag: [10.0, 10.0, 10.0, 1.0, 1.0, 1.0]   # 期望惯量对角
+          d_diag: [80.0, 80.0, 80.0, 10.0, 10.0, 10.0]
+          k_diag: [50.0, 50.0, 50.0, 25.0, 25.0, 25.0]
+          null_damping: 10.0
+    """
+
+    a_diag: list[float] | None = None
+    d_diag: list[float] | None = None
+    k_diag: list[float] | None = None
+    null_damping: float | None = None
+
+
+@dataclass(frozen=True)
 class TrajectorySpec:
     """轨迹段参数（可选）：两段式对接 或 圆+8字跟踪测试。
 
@@ -229,6 +251,7 @@ class Scene:
     impedance: ImpedanceOverride | None = None  # 可选阻抗增益覆盖（缺省走 ImpedanceConfig）
     friction_comp: str = "torque"  # 摩擦前馈模式："torque"（默认，力矩方向，治零速死区） | "velocity"
     hqp: HQPOverride | None = None  # 可选 HQP-AC 参数覆盖（外力源/预紧力）
+    se3_impedance: SE3ImpedanceOverride | None = None  # 可选 SE(3) Lie 阻抗覆盖
 
     # ---- 解析后的名称属性（下阶段接线时使用） ----
 
@@ -363,6 +386,7 @@ def load_scene(path: str | Path) -> Scene:
     target = raw.get("target")  # 跟踪测试场景无母头段（target=None）
     impedance = ImpedanceOverride(**raw["impedance"]) if "impedance" in raw else None
     hqp = HQPOverride(**raw["hqp"]) if "hqp" in raw else None
+    se3_impedance = SE3ImpedanceOverride(**raw["se3_impedance"]) if "se3_impedance" in raw else None
     if hqp is not None and hqp.force_source not in ("sensor", "observer"):
         raise ValueError(
             f"scene 配置 hqp.force_source 不支持 {hqp.force_source!r}，可选值: sensor, observer")
@@ -436,4 +460,5 @@ def load_scene(path: str | Path) -> Scene:
         impedance=impedance,
     friction_comp=friction_comp,
     hqp=hqp,
+    se3_impedance=se3_impedance,
     )
