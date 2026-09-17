@@ -54,6 +54,7 @@ nav:
   - 论文-代码对照: paper_mapping.md
   - 理论:
       - 阻抗控制基础: theory/impedance_control.md
+      - SE(3) Lie 群阻抗控制器: theory/se3_lie_impedance.md
       - 主仿真理论与数据流: theory/simulation_flow.md
   - 实验复现手册: experiments.md
   - API 参考:

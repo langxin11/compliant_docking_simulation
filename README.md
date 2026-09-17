@@ -97,10 +97,20 @@ graph TB
 | `compute_control_task_space_with_orientation` | 纯操作空间 PD（无阻抗、无力前馈），作为对照 |
 | `compute_control_task_space` | 位置子空间控制 + 可操作度（manipulability）梯度零空间优化，作为对照 |
 
-此外提供独立的 `HQPAdaptiveController`（`control/hqp_ac.py`，与主控制器同签名可互换）：
-HQP-AC 约束自适应控制——把关节位置/速度/力矩极限作为 QP 硬约束（ZOH 短时域预测），
-刚度按接触力自适应，零空间做奇异性规避与关节位姿阻抗；CLI 以
-`docking --controller hqp` 启用。出处：Ren & Shan 2026, Acta Astronautica, §3.2。
+另有两个独立控制器（与主控制器在 CLI 层三选一互换）：
+
+- **`se3_lie`**（`control/se3_impedance.py`）：SE(3) Lie 群阻抗控制器
+  （Kim et al. 2025, *IEEE T-RO* Vol. 41, §III-A）。不是"位置阻抗 + log3 姿态
+  PD"——完整使用 `T̃=T⁻¹T_d`、六维指数坐标 `λ=log6(T̃)`、dexp 及其解析时间
+  导数（`control/lie_se3.py`）、body Jacobian（`ReferenceFrame.LOCAL`）与
+  body wrench（`wrench.py` 参考点平移变换）、等效有效 wrench 与惯量重塑
+  A/D/K。7-DoF 以动力学一致广义逆替代论文的 J⁻¹。**未实现论文 §III-B 的
+  NRIC 鲁棒内环**（留作后续）。`docking --controller se3_lie` 启用，
+  详见[文档](docs/theory/se3_lie_impedance.md)。
+- **`hqp`**（`control/hqp_ac.py`）：HQP-AC 约束自适应控制——把关节位置/速度/
+  力矩极限作为 QP 硬约束（ZOH 短时域预测），刚度按接触力自适应，零空间做
+  奇异性规避与关节位姿阻抗。`docking --controller hqp` 启用。
+  出处：Ren & Shan 2026, Acta Astronautica, §3.2。
 
 ## 快速开始
 
