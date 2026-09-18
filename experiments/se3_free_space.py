@@ -19,7 +19,6 @@ from __future__ import annotations
 
 import argparse
 import sys
-from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -27,7 +26,6 @@ import pinocchio as pin
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from compliant_docking.config import SE3ImpedanceConfig
 from compliant_docking.control.se3_impedance import SE3LieImpedanceController
 from compliant_docking.models import load_pin_model
 from compliant_docking.planning.kinematics import compute_ik
@@ -157,15 +155,16 @@ def exp_rotation_step(cfg_reports, quick=False):
         _, lam_r, _, tau_max, _ = _run(ctrl, muj, q_init, T_d, dur)
         results[A] = lam_r
         assert np.all(np.isfinite(lam_r)), f"A_rot={A} 出现 NaN"
-    final = {A: float(l[-1]) for A, l in results.items()}
+    final = {A: float(response[-1]) for A, response in results.items()}
     # 欠阻尼（A=25）应出现明显振荡（相邻极值差 > 5% θ），过阻尼（A=0.5）单调
-    def oscillation(l):
+    def oscillation(response):
         peaks = []
-        for i in range(1, len(l) - 1):
-            if l[i - 1] > l[i] < l[i + 1] or l[i - 1] < l[i] > l[i + 1]:
-                peaks.append(l[i])
+        for i in range(1, len(response) - 1):
+            if (response[i - 1] > response[i] < response[i + 1]
+                    or response[i - 1] < response[i] > response[i + 1]):
+                peaks.append(response[i])
         return float(np.ptp(peaks)) if len(peaks) >= 2 else 0.0
-    osc = {A: oscillation(l) for A, l in results.items()}
+    osc = {A: oscillation(response) for A, response in results.items()}
     ok = (final[0.5] < 0.02 and osc[25.0] > 0.30 and osc[0.5] < 0.05
           and np.isfinite(osc[2.5]))
     cfg_reports.append(("rot_step", ok, {

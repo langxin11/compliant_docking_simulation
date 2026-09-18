@@ -456,7 +456,9 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
     if scene.trajectory is not None and scene.trajectory.type == "se3topp":
         from compliant_docking.planning.se3_topp import SE3ToppTrajectory
         traj_spec = scene.trajectory
-        final_ori = init_ori  # 对接场景姿态恒定（SE(3) 机制就绪，按步姿态参考接口待接入）
+        # 当前内置对接场景姿态恒定；规划器仍按步输出完整 T_d/V_d/Vdot_d，
+        # 时变姿态接口已接入控制链路，尚缺的是专门的场景级验证基线。
+        final_ori = init_ori
         trajector_planner = SE3ToppTrajectory(
             init_pos, init_ori, target_pos, final_ori,
             standoff=traj_spec.standoff,

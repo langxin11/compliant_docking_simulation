@@ -9,12 +9,24 @@
         - Scene
         - RobotSpec
         - ToolSpec
+        - ToolInertiaSpec
         - TargetSpec
         - PhysicsSpec
         - TaskSpec
         - ImpedanceOverride
         - HQPOverride
+        - SE3ImpedanceOverride
         - TrajectorySpec
+
+## 控制配置
+
+::: compliant_docking.config
+    options:
+      members:
+        - ImpedanceConfig
+        - DockingConfig
+        - HQPConfig
+        - SE3ImpedanceConfig
 
 ## 指标与门禁
 

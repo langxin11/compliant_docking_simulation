@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "compliant-docking"
 version = "0.2.0"
-description = "KUKA iiwa14 柔顺对接仿真：MuJoCo 物理仿真 × Pinocchio 动力学联动"
+description = "七自由度机械臂柔顺对接仿真：MuJoCo 物理仿真 × Pinocchio 动力学与多控制器研究"
 requires-python = ">=3.10"
 dependencies = [
     "mujoco>=3.2",

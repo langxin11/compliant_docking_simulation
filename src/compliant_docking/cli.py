@@ -1,4 +1,4 @@
-"""docking 命令行入口：参数化运行 KUKA iiwa14 柔顺对接仿真实验。
+"""docking 命令行入口：参数化运行七自由度机械臂柔顺对接仿真实验。
 
 仅使用标准库 argparse；实验编排逻辑唯一来源于 experiments/run_docking.py
 （通过文件路径按 importlib 规范加载，避免复制粘贴第二份实现）。
@@ -29,7 +29,7 @@ def _load_run_docking():
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="docking",
-        description="KUKA iiwa14 柔顺对接仿真（MuJoCo × Pinocchio 任务空间阻抗控制）",
+        description="七自由度机械臂柔顺对接仿真（MuJoCo × Pinocchio，多控制器可切换）",
     )
     parser.add_argument("--duration", type=float, default=18.0,
                         help="总仿真时长（秒），默认 18.0")

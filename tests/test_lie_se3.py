@@ -23,12 +23,12 @@ from compliant_docking.control.lie_se3 import (
     ad6,
     adjoint,
     adjoint_wrench,
+    dexp_dot_se3,
+    dexp_dot_so3,
     dexp_inv_dot_se3,
     dexp_inv_dot_so3,
     dexp_inv_se3,
     dexp_inv_so3,
-    dexp_dot_se3,
-    dexp_dot_so3,
     dexp_se3,
     dexp_so3,
     hat4,
@@ -113,7 +113,7 @@ def test_right_trivialized_differential_so3(rng_seeded):
         lam = _rand_lam(rng, theta)
         xi, xi_dot = lam[3:], rng.normal(size=3)
 
-        def R_of(s):
+        def R_of(s, xi=xi, xi_dot=xi_dot):
             return np.array(pin.exp3(xi + s * xi_dot))
 
         h = _FD_H
@@ -276,9 +276,8 @@ def test_wrench_duality_power_invariance(rng_seeded):
         np.testing.assert_allclose(V2 @ F2, V @ F, rtol=1e-10, atol=1e-10)
 
 
-def test_wrench_transform_moment_shift(rng_seeded):
+def test_wrench_transform_moment_shift():
     """纯力 + 参考点平移：目标点矩 = 源点矩 + (p_S - p_T) × f_W。"""
-    rng = rng_seeded
     R_W = np.array(pin.exp3(0.3 * np.array([1.0, 2.0, -1.0]) / np.sqrt(6)))
     f_S = np.array([1.0, 0.5, -0.3])
     p_S, p_E = np.array([0.1, 0.2, 0.3]), np.array([-0.1, 0.0, 0.2])

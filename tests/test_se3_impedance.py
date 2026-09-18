@@ -16,7 +16,7 @@ import pinocchio as pin
 import pytest
 
 from compliant_docking.config import SE3ImpedanceConfig
-from compliant_docking.control.lie_se3 import adjoint, hat4, vee4
+from compliant_docking.control.lie_se3 import adjoint, vee4
 from compliant_docking.control.se3_impedance import SE3LieImpedanceController
 from compliant_docking.models import load_pin_model
 from compliant_docking.planning.kinematics import compute_ik

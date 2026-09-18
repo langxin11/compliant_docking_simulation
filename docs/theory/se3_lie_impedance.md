@@ -44,6 +44,21 @@
 A，平移阶跃超调 0%/0%/**48.6%**（A=0.5/5/100，理论值 48.6%）——动力学随期望
 惯量明显变化，证明不是简单 PD。
 
+## 主循环接线
+
+`experiments/run_docking.py` 在 `--controller se3_lie` 下使用独立的 SE(3) 通道：
+
+1. `planning.motion_reference.get_motion_reference` 采样 `(T_d,V_d,Vdot_d)`；
+2. `SE3ToppTrajectory.get_motion_state` 可直接给出常螺旋段的 body 运动量，其他
+   纯位置规划器则结合场景固定姿态完成适配；
+3. `wrench.wrench_to_body` 把 sensor-site F/T 读数变换到 EE body frame 和 EE
+   原点；
+4. 控制器输出经共享摩擦/阻尼前馈，再由主循环执行统一力矩限幅。
+
+因此按步姿态参考的接口已经接入，不再是待扩展项。需要注意：当前内置对接
+场景的起止姿态相同，现有端到端结果仍只验证恒定姿态；旋转对接场景与对应
+数值基线尚未加入。
+
 ## 坐标系约定（验收重点）
 
 - twist `V = [v; ω]`、wrench `F = [f; n]`（线量在前，与 Pinocchio `Motion` 一致）；

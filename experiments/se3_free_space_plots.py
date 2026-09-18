@@ -52,6 +52,7 @@ def main():
     args.out.mkdir(parents=True, exist_ok=True)
 
     import matplotlib.pyplot as plt
+
     from compliant_docking.plotting import apply_style
     apply_style()
     # 含 $...$ 的字符串走 mathtext 解析路径：其非数学段只取 font.family

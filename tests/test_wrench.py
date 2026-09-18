@@ -10,7 +10,6 @@ test_wrench.py — wrench 坐标系/参考点变换测试
 """
 import numpy as np
 import pinocchio as pin
-import pytest
 
 from compliant_docking.control.lie_se3 import adjoint, adjoint_wrench
 from compliant_docking.wrench import transform_wrench, wrench_to_body
