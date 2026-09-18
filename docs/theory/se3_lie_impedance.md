@@ -12,33 +12,33 @@
 
 | 控制器 | 性质 | 姿态误差表达 | 惯量重塑 | 出处 |
 |---|---|---|---|---|
-| `impedance` | 固定增益任务空间阻抗基线 | `log3` 姿态 PD（与世界系平动阻抗并联） | 平动通道有（m/d/k） | 本仓库历史基线 |
-| `se3_lie` | SE(3) Lie 群阻抗 | `log6(T̃)` 六维指数坐标（平移-旋转耦合） | 平动+转动全通道（A/D/K） | Kim et al. 2025 T-RO §III-A |
-| `hqp` | HQP-AC 约束自适应控制 | `log3` + QP 硬约束 | 无显式惯量重塑 | Ren & Shan 2026 §3.2 |
+| `impedance` | 固定增益任务空间阻抗基线 | \(\operatorname{log}_3\) 姿态 PD（与世界系平动阻抗并联） | 平动通道有（m/d/k） | 本仓库历史基线 |
+| `se3_lie` | SE(3) Lie 群阻抗 | \(\operatorname{log}_6(\tilde T)\) 六维指数坐标（平移-旋转耦合） | 平动+转动全通道（A/D/K） | Kim et al. 2025 T-RO §III-A |
+| `hqp` | HQP-AC 约束自适应控制 | \(\operatorname{log}_3\) + QP 硬约束 | 无显式惯量重塑 | Ren & Shan 2026 §3.2 |
 
 ## se3_lie 不是"位置阻抗 + log3 姿态 PD"
 
-它完整使用了论文的 SE(3) 群结构，而非把平移误差和 `log3` 姿态误差拼成 6 维向量：
+它完整使用了论文的 SE(3) 群结构，而非把平移误差和 \(\operatorname{log}_3\) 姿态误差拼成 6 维向量：
 
-- **相对位姿**：`T̃ = T⁻¹·T_d`（Eq. 44），误差在当前末端系 {b} 上表达；
-- **相对 twist（右平移版本，Eq. 45）**：`Ṽ = Ad_T̃·V_d − V`，对应 `[Ṽ] = Ṫ̃·T̃⁻¹`
+- **相对位姿**：\(\tilde T = T^{-1}T_d\)（Eq. 44），误差在当前末端系 \(\{b\}\) 上表达；
+- **相对 twist（右平移版本，Eq. 45）**：\(\tilde V = \operatorname{Ad}_{\tilde T}V_d - V\)，对应 \([\tilde V] = \dot{\tilde T}\tilde T^{-1}\)
   （有限差分测试验证该 convention，见 `tests/test_se3_impedance.py`）；
-- **六维指数坐标**：`λ = log6(T̃) = [η; ξ]`（η 平移在前），`λ̇ = dexp⁻¹_λ·Ṽ`（Eq. 48）。
-  注意此处 dexp 是**右平凡化**版本（`vee(ṪT⁻¹) = dexp(λ)λ̇`），不是 `dexp_{-λ}`；
+- **六维指数坐标**：\(\lambda = \operatorname{log}_6(\tilde T) = [\eta;\xi]\)（\(\eta\) 平移在前），\(\dot\lambda = \operatorname{dexp}^{-1}_{\lambda}\tilde V\)（Eq. 48）。
+  注意此处 \(\operatorname{dexp}\) 是**右平凡化**版本（\(\operatorname{vee}(\dot T T^{-1}) = \operatorname{dexp}(\lambda)\dot\lambda\)），不是 \(\operatorname{dexp}(-\lambda)\)；
 - **dexp 全家桶**（`control/lie_se3.py`，Eq. 26-43 闭式实现）：SO(3)/SE(3) 的
-  `dexp`、`dexp⁻¹` 及其**解析**时间导数。SE(3) dexp 的右上耦合块 `C_ξ(η)`/`D_ξ(η)`
-  保留旋转-平移耦合（不得近似为 `block_diag(dexp_ξ, dexp_ξ)`）；θ→0 全系数走
+  \(\operatorname{dexp}\)、\(\operatorname{dexp}^{-1}\) 及其**解析**时间导数。SE(3) dexp 的右上耦合块 \(C_{\xi}(\eta)\)/\(D_{\xi}(\eta)\)
+  保留旋转-平移耦合（不得近似为 \(\operatorname{block\_diag}(\operatorname{dexp}_{\xi}, \operatorname{dexp}_{\xi})\)）；\(\theta\to0\) 全系数走
   显式 Taylor 分支；
-- **等效有效 wrench**（Eq. 50/56）：`F̃ = Ad_T̃^{-T}·F_d − F`、`γ = dexp_λᵀ·F̃`，
-  满足虚功率不变 `λ̇ᵀγ = ṼᵀF̃`；
+- **等效有效 wrench**（Eq. 50/56）：\(\tilde F = \operatorname{Ad}_{\tilde T}^{-T}F_d - F\)、\(\gamma = \operatorname{dexp}_{\lambda}^{T}\tilde F\)，
+  满足虚功率不变 \(\dot\lambda^{T}\gamma = \tilde V^{T}\tilde F\)；
 - **惯量重塑**（Eq. 57-58）：阻抗在 SE(3) 上设计（A、D、K），经
-  `A_λ = dexpᵀAdexp`、`D_λ = dexpᵀ(D·dexp + A·d/dt dexp)` 转入 se(3)——
-  `D_λ` 一般不对称，这是设计在群上而非代数上的原因，本实现不强加对称化；
-- **参考加速度 + 逆动力学**（Eq. 60-65）：`λ̈_ref = −K_Vλ̇ − K_Pλ + K_Fγ`，
-  `V̇_ref = Ad_T̃V̇_d − dexp·λ̈_ref + ad_Ṽ·V − d/dt dexp·λ̇`，
-  `τ = M·q̈_ref + ĥ − Jᵀ·F_body`。
+  \(A_{\lambda} = \operatorname{dexp}^{T}A\operatorname{dexp}\)、\(D_{\lambda} = \operatorname{dexp}^{T}(D\operatorname{dexp} + A\,\mathrm d(\operatorname{dexp})/\mathrm dt)\) 转入 se(3)——
+  \(D_{\lambda}\) 一般不对称，这是设计在群上而非代数上的原因，本实现不强加对称化；
+- **参考加速度 + 逆动力学**（Eq. 60-65）：\(\ddot\lambda_{\mathrm{ref}} = -K_V\dot\lambda - K_P\lambda + K_F\gamma\)，
+  \(\dot V_{\mathrm{ref}} = \operatorname{Ad}_{\tilde T}\dot V_d - \operatorname{dexp}\,\ddot\lambda_{\mathrm{ref}} + \operatorname{ad}_{\tilde V}V - \dot{\operatorname{dexp}}\,\dot\lambda\)，
+  \(\tau = M\ddot q_{\mathrm{ref}} + \hat h - J^TF_{\mathrm{body}}\)。
 
-`impedance` 基线的姿态通道是 `log3(R_d R^T)` 的 PD——它没有 dexp 耦合、没有
+`impedance` 基线的姿态通道是 \(\operatorname{log}_3(R_dR^T)\) 的 PD——它没有 dexp 耦合、没有
 指数坐标下的惯量/阻尼一致转换、也不能通过 F/T 反馈重塑表观惯量。自由空间
 阶跃实验（`experiments/se3_free_space.py`）复现了论文 §IV-A：固定 D、K 改变
 A，平移阶跃超调 0%/0%/**48.6%**（A=0.5/5/100，理论值 48.6%）——动力学随期望
@@ -61,15 +61,15 @@ A，平移阶跃超调 0%/0%/**48.6%**（A=0.5/5/100，理论值 48.6%）——�
 
 ## 坐标系约定（验收重点）
 
-- twist `V = [v; ω]`、wrench `F = [f; n]`（线量在前，与 Pinocchio `Motion` 一致）；
+- twist \(V=[v;\omega]\)、wrench \(F=[f;n]\)（线量在前，与 Pinocchio `Motion` 一致）；
 - 主任务雅可比用 `pin.ReferenceFrame.LOCAL`（body Jacobian，**不是**基线用的
-  `LOCAL_WORLD_ALIGNED`），`V = J_body·q̇` 与 `vee(T⁻¹Ṫ)` 有限差分一致；
+  `LOCAL_WORLD_ALIGNED`），\(V=J_{\mathrm{body}}\dot q\) 与 \(\operatorname{vee}(T^{-1}\dot T)\) 有限差分一致；
 - F/T 传感器读数经 `wrench.wrench_to_body` 从 sensor site 系变换到 EE body 系
-  （含参考点平移矩 `(p_S − p_E) × f`）——与 `J_body` 严格同 frame、同参考点，
-  逆动力学 `−JᵀF_body` 项才自洽；沿用基线读取侧的负号约定；
-- 7-DoF 冗余适配：`J⁻¹`（论文 6-DoF 用）→ 动力学一致广义逆
-  `J̄ = M⁻¹JᵀΛ`、`Λ = (J M⁻¹Jᵀ)⁻¹`（条件数超阈值降级 pinv 并告警记录），
-  零空间 `N = I − J̄J` 只注入稳定阻尼，不改变主任务。
+  （含参考点平移矩 \((p_S-p_E)\times f\)）——与 `J_body` 严格同 frame、同参考点，
+  逆动力学 \(-J^TF_{\mathrm{body}}\) 项才自洽；沿用基线读取侧的负号约定；
+- 7-DoF 冗余适配：\(J^{-1}\)（论文 6-DoF 用）→ 动力学一致广义逆
+  \(\bar J=M^{-1}J^T\Lambda\)、\(\Lambda=(JM^{-1}J^T)^{-1}\)（条件数超阈值降级 pinv 并告警记录），
+  零空间 \(N=I-\bar JJ\) 只注入稳定阻尼，不改变主任务。
 
 ## 参数与配置
 
@@ -100,8 +100,8 @@ se3_impedance:
 
 ## 已知边界
 
-- 姿态主对数分支：‖ξ‖ < π（`log6` 内在性质）；π 附近连续但论文 EEC 扩展
+- 姿态主对数分支：\(\|\xi\|<\pi\)（`log6` 内在性质）；π 附近连续但论文 EEC 扩展
   （超越 injectivity radius）未实现；
-- dexp⁻¹ 定义域 ‖ξ‖ < 2π（实现里对越界显式抛异常，控制器不会触界）；
+- dexp⁻¹ 定义域 \(\|\xi\|<2\pi\)（实现里对越界显式抛异常，控制器不会触界）；
 - NRIC 未实现：模型失配/扰动下的鲁棒内环留作后续独立工作；
 - 真实机器人未验证（无 ROS 2 驱动，本任务明确不做）。

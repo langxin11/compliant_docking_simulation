@@ -8,11 +8,11 @@
 
 每个控制周期（1 ms）依次执行：
 
-1. **轨迹采样**：所有规划器输出世界系线量 `(pos_des, vel_des, acc_des)`；
-   `se3_lie` 路径额外经 `get_motion_reference` 得到 body 量 `(T_d, V_d, Vdot_d)`；
+1. **轨迹采样**：所有规划器输出世界系线量 \((x_d,\dot x_d,\ddot x_d)\)；
+   `se3_lie` 路径额外经 `get_motion_reference` 得到 body 量 \((T_d,V_d,\dot V_d)\)；
 2. **任务空间状态估计**：经典/HQP 路径使用 LOCAL_WORLD_ALIGNED 雅可比；
    `se3_lie` 使用 LOCAL body Jacobian 与 `Jdot`；
-3. **控制律**：所选控制器计算关节力矩 `τ`（统一在主循环限幅至 ±10 N·m）；
+3. **控制律**：所选控制器计算关节力矩 \(\tau\)（统一在主循环限幅至 ±10 N·m）；
 4. **物理步进**：MuJoCo `step(τ)` 返回 `(q, v, eef_pos)`；
 5. **传感**：F/T 传感器保留既有取负号约定；经典/HQP 路径旋转到世界轴，
    `se3_lie` 路径同时旋转并移矩到 EE body 原点；
@@ -48,7 +48,7 @@ $$
 - $u_{rot} = M_R^{-1}(K_R e_R + D_R e_\omega)$，参数 `m_rot=1, d_rot=10, k_rot=25`。
 
 这里的参考角速度为零是经典任务空间阻抗基线的约定。SE(3) Lie 路径不使用
-该方程，而是接收按步 `T_d`、body twist `V_d` 及其导数 `Vdot_d`；完整推导见
+该方程，而是接收按步 \(T_d\)、body twist \(V_d\) 及其导数 \(\dot V_d\)；完整推导见
 [SE(3) Lie 群阻抗控制器](se3_lie_impedance.md)。
 
 ### 4) 操作空间映射与力矩合成（Khatib 形式）
