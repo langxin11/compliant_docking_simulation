@@ -1,6 +1,8 @@
 site_name: 柔顺对接仿真文档
 site_description: MuJoCo × Pinocchio 柔顺对接研究平台——经典阻抗、SE(3) Lie 群阻抗、HQP-AC 与 SE(3)-TOPP
+site_url: https://langxin11.github.io/compliant_docking_simulation/
 repo_url: https://github.com/langxin11/compliant_docking_simulation
+repo_name: langxin11/compliant_docking_simulation
 
 theme:
   name: material
