@@ -31,10 +31,10 @@
 |---|---|---|
 | `scene` | YAML → 可仿真场景 | `load_scene(path) -> Scene`；`Scene.build_mjmodel()` 组装 MjSpec；`target` 可选；`impedance`、`hqp`、`se3_impedance` 与 `friction_comp` 提供控制配置覆盖 |
 | `planning.trajectory` | 位置轨迹 | 统一接口 `get_state(t) -> (pos, vel, acc)`，世界系线量；单段五次、两段式五次与圆+8字轨迹 |
-| `planning.se3_topp` | SE(3)-TOPP 规划器 | `get_state(t)` 保持通用兼容；`get_motion_state(t) -> (T_d, V_d, Vdot_d)` 输出完整 body 运动参考；测地线 + 解析梯形/三角形剖面 |
-| `planning.motion_reference` | 运动参考适配 | SE(3)-TOPP 直接透传 body 参考；纯位置轨迹结合固定 `r_des` 转为 `(T_d, V_d, Vdot_d)` |
-| `control.task_space` | 经典阻抗（CIC） | 雅可比 LOCAL_WORLD_ALIGNED；Khatib 操作空间映射 `τ = JᵀΛ(u−J̇v)+C`；摩擦/阻尼前馈 + I 项 |
-| `control.se3_impedance` | SE(3) Lie 群阻抗 | LOCAL body Jacobian；`T̃`/`log6`/`dexp`/有效 wrench/惯量重塑全链路；`compute_control(q, v, T_d, V_d, Vdot_d, F_body)` |
+| `planning.se3_topp` | SE(3)-TOPP 规划器 | `get_state(t)` 保持通用兼容；`get_motion_state(t)` 输出完整 body 运动参考 \((T_d,V_d,\dot V_d)\)；测地线 + 解析梯形/三角形剖面 |
+| `planning.motion_reference` | 运动参考适配 | SE(3)-TOPP 直接透传 body 参考；纯位置轨迹结合固定 \(r_d\) 转为 \((T_d,V_d,\dot V_d)\) |
+| `control.task_space` | 经典阻抗（CIC） | 雅可比 LOCAL_WORLD_ALIGNED；Khatib 操作空间映射 \(\tau=J^T\Lambda(u-\dot Jv)+C\)；摩擦/阻尼前馈 + I 项 |
+| `control.se3_impedance` | SE(3) Lie 群阻抗 | LOCAL body Jacobian；\(\tilde T\)/\(\operatorname{log}_6\)/\(\operatorname{dexp}\)/有效 wrench/惯量重塑全链路；`compute_control(q, v, T_d, V_d, Vdot_d, F_body)` |
 | `control.lie_se3` | Lie 群数学工具 | SO(3)/SE(3) 的 `dexp`、逆与解析时间导数，Adjoint、wrench Adjoint 和 `ad`；小角度 Taylor 稳定分支 |
 | `control.hqp_ac` | HQP-AC | 主 QP（关节 pos/vel/τ 硬约束 + 自适应刚度）+ 零空间 QP（奇异性规避 + 位姿阻抗）；`force_source` 切换传感器/观测器；`preload_force` 接触预紧 |
 | `control.friction` | 共享耗散前馈 | `torque` / `velocity` 两种摩擦方向模型 + 线性关节阻尼；CIC 与 SE(3) 控制器共享 helper，HQP 保持同等语义 |
