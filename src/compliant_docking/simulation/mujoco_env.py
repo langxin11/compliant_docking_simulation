@@ -77,6 +77,14 @@ class MujRobot:
         self.target_site_name = target_site
         self.camera_name = camera
 
+        # 轨迹可视化状态：规划路径（青）、实际轨迹（橙）和当前期望点（绿）。
+        # 自定义几何只参与 viewer/离屏渲染，不进入碰撞与动力学计算。
+        self.planned_path = np.empty((0, 3), dtype=float)
+        self.actual_path: list[np.ndarray] = []
+        self.desired_pos: np.ndarray | None = None
+        self._trail_stride_steps = max(1, int(round(0.1 / self.dt)))  # 10 Hz 轨迹尾迹
+        self._max_trail_points = 240
+
         # ---- MuJoCo 结构初始化 ----
         # 加载模型与数据结构；若路径错误会抛异常
         self.setup_mujoco()
@@ -172,10 +180,12 @@ class MujRobot:
             try:
                 # 创建 viewer 并设置有用的可视化选项
                 self.viewer = mujoco.viewer.launch_passive(self.model, self.data)
-                self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_PERTFORCE] = True
-                self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = True
-                self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = True
+                self.viewer.opt.flags[:] = False
+                self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_TEXTURE] = True
+                self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_STATIC] = True
+                self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_SKIN] = True
                 self.viewer.opt.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = True
+                self.viewer.opt.geomgroup[3] = False
             except Exception as e:
                 # viewer 可能因多种原因创建失败（GLFW 初始化失败、驱动/权限问题、
                 # 无显示环境等），此时降级为不渲染以避免崩溃。
@@ -191,10 +201,12 @@ class MujRobot:
         # 创建默认可视化选项，并打开一些调试标志
         render_options = mujoco.MjvOption()
         mujoco.mjv_defaultOption(render_options)
-        render_options.flags[mujoco.mjtVisFlag.mjVIS_PERTFORCE] = True
-        render_options.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = True
-        render_options.flags[mujoco.mjtVisFlag.mjVIS_CONTACTPOINT] = True
+        render_options.flags[:] = False
+        render_options.flags[mujoco.mjtVisFlag.mjVIS_TEXTURE] = True
+        render_options.flags[mujoco.mjtVisFlag.mjVIS_STATIC] = True
+        render_options.flags[mujoco.mjtVisFlag.mjVIS_SKIN] = True
         render_options.flags[mujoco.mjtVisFlag.mjVIS_CONTACTFORCE] = True
+        render_options.geomgroup[3] = False
 
         # 创建离屏 Renderer（在 headless 与非 headless 下都可以工作，
         # 后端由环境变量 MUJOCO_GL 选择：eg. egl/osmesa/glfw）。
@@ -203,6 +215,76 @@ class MujRobot:
             self.renderer = mujoco.Renderer(self.model, height=1080, width=1920)
 
         return render_options
+
+    def set_trajectory_visualization(self, planned_path: np.ndarray,
+                                     *, max_points: int = 160) -> None:
+        """设置视频/交互窗口中的完整规划路径，并清空实际轨迹尾迹。
+
+        Args:
+            planned_path: 世界系路径点，形状 ``(N, 3)``。
+            max_points: 最多保留的路径点数；超出时等距下采样，限制渲染开销。
+        """
+        points = np.asarray(planned_path, dtype=float)
+        if points.ndim != 2 or points.shape[1] != 3:
+            raise ValueError("planned_path 必须为形状 (N, 3) 的数组")
+        if not np.all(np.isfinite(points)):
+            raise ValueError("planned_path 包含非有限值")
+        if max_points < 2:
+            raise ValueError("max_points 必须至少为 2")
+        if len(points) > max_points:
+            indices = np.linspace(0, len(points) - 1, max_points, dtype=int)
+            points = points[indices]
+        self.planned_path = points.copy()
+        self.actual_path = []
+
+    def set_desired_position(self, position: np.ndarray) -> None:
+        """更新当前期望末端位置（世界系），用于绿色球形标记。"""
+        position = np.asarray(position, dtype=float).reshape(3)
+        if not np.all(np.isfinite(position)):
+            raise ValueError("期望位置包含非有限值")
+        self.desired_pos = position.copy()
+
+    @staticmethod
+    def _append_marker(scene: mujoco.MjvScene, point: np.ndarray,
+                       rgba: np.ndarray, radius: float) -> None:
+        """向 MjvScene 追加一个不参与物理的球形轨迹标记。"""
+        if scene.ngeom >= scene.maxgeom:
+            return
+        mujoco.mjv_initGeom(
+            scene.geoms[scene.ngeom],
+            mujoco.mjtGeom.mjGEOM_SPHERE,
+            np.full(3, radius),
+            point,
+            np.eye(3).reshape(-1),
+            np.asarray(rgba, dtype=np.float32),
+        )
+        scene.ngeom += 1
+
+    def _add_trajectory_overlays(self, scene: mujoco.MjvScene,
+                                 *, reset_scene: bool = False) -> None:
+        """绘制规划路径、实际尾迹和当前期望点。"""
+        if reset_scene:
+            scene.ngeom = 0
+
+        for point in self.planned_path:
+            self._append_marker(scene, point, [0.10, 0.85, 1.00, 0.95], 0.0025)
+        # 实际轨迹用 2 Hz 左右的橙色采样点表示，与较细的青色规划点列区分。
+        actual_markers = self.actual_path[::5]
+        if self.actual_path and (not actual_markers or actual_markers[-1] is not self.actual_path[-1]):
+            actual_markers = [*actual_markers, self.actual_path[-1]]
+        for point in actual_markers:
+            self._append_marker(scene, point, [1.00, 0.40, 0.05, 0.95], 0.004)
+
+        if self.desired_pos is not None and scene.ngeom < scene.maxgeom:
+            mujoco.mjv_initGeom(
+                scene.geoms[scene.ngeom],
+                mujoco.mjtGeom.mjGEOM_SPHERE,
+                np.full(3, 0.012),
+                self.desired_pos,
+                np.eye(3).reshape(-1),
+                np.array([0.15, 1.00, 0.25, 0.95], dtype=np.float32),
+            )
+            scene.ngeom += 1
 
     def step(self, tau: np.ndarray | None = None):
         """推进一步仿真，并在需要时渲染/录帧。
@@ -234,26 +316,33 @@ class MujRobot:
         # 末端执行器位置（基于 body/site 的数据，依模型而定）
         eef_pos = self.data.xpos[self.eef_id]
 
+        if self.steps % self._trail_stride_steps == 0:
+            self.actual_path.append(np.asarray(eef_pos, dtype=float).copy())
+            if len(self.actual_path) > self._max_trail_points:
+                self.actual_path.pop(0)
+
         # 更新可视化用的 site：把目标点与 ee 位置写入，便于在 viewer/renderer 中观察
         self.data.site_xpos[self.vis_id] = self.target_pos
         self.data.site_xpos[self.eef_marker_id] = eef_pos
 
         # 若存在交互式 viewer，则同步其显示（被动模式下需要手动 sync）
         if self.render and self.viewer:
+            if hasattr(self.viewer, "user_scn"):
+                self._add_trajectory_overlays(self.viewer.user_scn, reset_scene=True)
             self.viewer.sync()
 
         # 录帧：为了降低开销，这里做简单抽样（每 20 步采一帧）
         if self.record and hasattr(self, 'renderer'):
             if self.steps % 20 == 0:
-                # 每 1000 步切换一次透明标志，仅作可视化演示
                 if self.steps % 1000 == 0:
-                    self.renderer_options.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT] = (
-                        not self.renderer_options.flags[mujoco.mjtVisFlag.mjVIS_TRANSPARENT]
-                    )
                     print(f"Frames collected so far: {len(self.frames)}")
                 try:
                     # 更新渲染场景；指定摄像机与可视化选项
                     self.renderer.update_scene(self.data, camera=self.camera_name, scene_option=self.renderer_options)
+                    # 自定义轨迹点会被场景方向光拉出很长的阴影；视频模式关闭阴影，
+                    # 避免把这些阴影视为力矢量或轨迹误差。
+                    self.renderer.scene.flags[mujoco.mjtRndFlag.mjRND_SHADOW] = False
+                    self._add_trajectory_overlays(self.renderer.scene)
                     frame = self.renderer.render()
                     # 渲染返回 float32 [0..1]；某些场景可能需要后续转 uint8
                     self.frames.append(frame)

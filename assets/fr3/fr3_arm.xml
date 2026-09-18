@@ -10,6 +10,9 @@
 
   <visual>
     <global offwidth="1920" offheight="1080"/>
+    <scale forcewidth="0.005"/>
+    <map force="0.04"/>
+    <rgba haze="0.12 0.22 0.32 1"/>
   </visual>
 
   <default>
@@ -35,7 +38,9 @@
   <asset>
     <texture name="grid" type="2d" builtin="checker" width="512" height="512" rgb1=".1 .2 .3" rgb2=".2 .3 .4"/>
     <material name="grid" texture="grid" texrepeat="1 1" texuniform="true" reflectance="0."/>
-    <texture type="2d" name="groundplane" builtin="checker" mark="edge" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3" markrgb="0.8 0.8 0.8" width="300" height="300"/>
+    <!-- 与 iiwa14 场景保持一致，避免地平线上方回落为 MuJoCo 默认黑色背景。 -->
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0.02 0.04 0.08" width="512" height="3072"/>
+    <texture type="2d" name="groundplane" builtin="checker" mark="none" rgb1="0.2 0.3 0.4" rgb2="0.1 0.2 0.3" width="300" height="300"/>
     <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance="0.2"/>
     <material name="black" rgba=".2 .2 .2 1"/>
     <material name="white" rgba="1 1 1 1"/>

@@ -94,7 +94,16 @@ def run_simulation(muj_robot:MujRobot,
 
     muj_robot.init_simulators(q_init)
 
-
+    # 可视化用路径与控制采样相互独立：预采样完整规划路径，只进入渲染场景，
+    # 不参与物理或控制。规划轨迹为青色，实际轨迹为橙色，当前期望点为绿色。
+    path_duration = float(getattr(
+        trajector_planner, "total_duration", cfg.traj_duration,
+    ))
+    path_times = np.linspace(0.0, path_duration, 160)
+    planned_path = np.asarray([
+        trajector_planner.get_state(sample_t)[0] for sample_t in path_times
+    ])
+    muj_robot.set_trajectory_visualization(planned_path)
 
     q = q_init
     v = np.zeros(task_dynamics.model.nv)
@@ -130,6 +139,7 @@ def run_simulation(muj_robot:MujRobot,
         # 1) 根据当前仿真时间采样期望的末端位置/速度/加速度 /
         # 1) Sample desired end-effector pos/vel/acc at current sim time
         pos_des, vel_des, acc_des = trajector_planner.get_state(t)
+        muj_robot.set_desired_position(pos_des)
         #print(f"Current time: {t}, Desired position: {pos_des}, Desired position: {pos_des}, Desired velocity: {vel_des}, Desired acceleration: {acc_des}")
 
         # 2) 任务空间控制（含平动/姿态阻抗与外力补偿）→ 得到关节力矩 tau /
