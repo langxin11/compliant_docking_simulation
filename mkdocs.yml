@@ -65,6 +65,8 @@ nav:
   - 接口交互调形: petal_designer.md
   - 接口阶段收尾: stage_closeout_20261003.md
   - 本地 Git 阶段整理: git_stage_closeout_20261003.md
+  - HexFrame 正式组装场景: hexframe_assembly.md
+  - 完善方案与组合对接: development_plan.md
   - API 参考:
       - 控制器与力学工具: api/control.md
       - 轨迹与运动参考: api/planning.md

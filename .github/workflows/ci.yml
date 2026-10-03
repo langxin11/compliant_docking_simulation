@@ -27,7 +27,7 @@ jobs:
         run: uv python install 3.12
 
       - name: Sync dependencies
-        run: uv sync --dev
+        run: uv sync --frozen --dev
 
       - name: Lint (ruff)
         run: uv run ruff check .
@@ -36,3 +36,16 @@ jobs:
       # The slow contact regression (-m slow) is too slow for free CI runners
       - name: Run fast tests
         run: uv run pytest -m "not slow" -q
+
+      - name: Full HexFrame assembly and independent audit
+        env:
+          OPENBLAS_NUM_THREADS: "1"
+          OMP_NUM_THREADS: "1"
+        run: uv run docking --scene scenes/hexframe_assembly.yaml --out runs/ci_hexframe_assembly
+
+      - name: Preserve HexFrame diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hexframe-assembly-diagnostics
+          path: runs/ci_hexframe_assembly

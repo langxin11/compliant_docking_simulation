@@ -1,0 +1,27 @@
+{
+  "frame_vertex_radius_mm": 160.0,
+  "frame_ring_separation_mm": 160.0,
+  "beam_width_mm": 10.0,
+  "brace_width_mm": 8.0,
+  "mount_outer_diameter_mm": 110.0,
+  "mount_start_z_mm": 2.0,
+  "mount_thickness_mm": 6.0,
+  "density_kg_m3": 2700.0,
+  "enabled_ports": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ],
+  "port_clocking_deg": 67.5,
+  "detailed_collision_ports": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5
+  ]
+}

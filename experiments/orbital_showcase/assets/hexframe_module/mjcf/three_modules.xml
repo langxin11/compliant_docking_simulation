@@ -1,0 +1,28 @@
+<mujoco model="HexFrameModule_three_module_layout">
+  <compiler angle="radian" autolimits="true" />
+  <option timestep=".0005" gravity="0 0 0" integrator="implicitfast" solver="Newton" iterations="60" cone="elliptic" tolerance="1e-10" />
+  <include file="assets.xml" />
+  <asset>
+    <texture name="hf_sky" type="skybox" builtin="gradient" rgb1=".94 .96 .99" rgb2=".8 .86 .93" width="256" height="1536" />
+  </asset>
+  <visual>
+    <global offwidth="1800" offheight="1200" />
+    <headlight ambient=".5 .5 .5" diffuse=".6 .6 .6" specular=".2 .2 .2" />
+  </visual>
+  <statistic center="0.16176406460551018 0.10784270973700678 .2" extent="1.0" />
+  <worldbody>
+    <light pos="0 -.5 1" dir="0 .3 -1" diffuse=".7 .7 .7" />
+    <geom type="plane" size="1 1 .01" rgba=".94 .95 .97 1" contype="0" conaffinity="0" group="0" />
+    <body name="module_a" pos="0 0 .2">
+      <include file="a_contents.xml" />
+    </body>
+    <body name="module_b" pos="0.32352812921102037 0 0.2">
+      <freejoint name="module_b_free" />
+      <include file="b_contents.xml" />
+    </body>
+    <body name="module_c" pos="0.16176406460551018 0.28018357873559796 0.2">
+      <freejoint name="module_c_free" />
+      <include file="c_contents.xml" />
+    </body>
+  </worldbody>
+</mujoco>

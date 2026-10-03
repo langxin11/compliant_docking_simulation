@@ -1,0 +1,18 @@
+scene:
+  name: hexframe_fixed_base_assembly
+  kind: hexframe_assembly
+  controller: assembly_admittance
+physics:
+  timestep: 0.001
+  gravity: [0, 0, 0]
+assembly:
+  resource: experiments/orbital_showcase/assets/hexframe_module
+  workcell: assets/scenes/hexframe/workcell.xml
+  port_mapping: [3, 4, 5, 0, 1, 2]
+  layout:
+    pick: [0.34, 0.35, 0.195]
+    seed: [-0.34, 0.35, 0.195]
+    lift_height: 0.78
+    retract_distance: 0.075
+    contact_duration: 18.0
+    contact_force_n: 0.4

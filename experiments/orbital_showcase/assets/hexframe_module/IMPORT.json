@@ -1,0 +1,14 @@
+{
+  "source_archive": "/home/xiao/.codex/attachments/7f71b945-cf2e-49b0-b3e8-c7cb1831bdcd/hexframe_module.zip",
+  "sha256": "5a2f0a49c67f1eb926487f3fba01bf504698ec32b48ee3f07f6351dd00ad3a95",
+  "origin": "User supplied Astra HexFrame resource",
+  "unit": "OBJ/MJCF m; CAD STEP/STL mm",
+  "port_mapping": {
+    "1": 3,
+    "2": 4,
+    "3": 5,
+    "4": 0,
+    "5": 1,
+    "6": 2
+  }
+}

@@ -410,6 +410,9 @@ def load_scene(path: str | Path) -> Scene:
     if not scene_path.is_absolute():
         scene_path = REPO_ROOT / scene_path
     raw = yaml.safe_load(scene_path.read_text(encoding="utf-8"))
+    if raw["scene"].get("kind") == "hexframe_assembly":
+        from .assembly.config import load_assembly_scene
+        return load_assembly_scene(scene_path, raw)
 
     def asset(rel: str) -> Path:
         p = Path(rel)

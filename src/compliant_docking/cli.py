@@ -49,11 +49,25 @@ def build_parser() -> argparse.ArgumentParser:
                         help="控制器：impedance=固定增益任务空间阻抗（默认）；"
                              "se3_lie=SE(3) Lie 群阻抗（Kim et al. 2025 T-RO，指数坐标+dexp 全链路）；"
                              "hqp=HQP-AC 约束自适应控制（Ren & Shan 2026 §3.2）")
+    parser.add_argument("--out", help="HexFrame 运行结果目录；非空目录只能用于 --replay")
+    parser.add_argument("--preview-only", action="store_true", help="HexFrame 完整路径与几何预检，不执行组装")
+    parser.add_argument("--replay", action="store_true", help="从 --out 的已保存 HexFrame 状态回放")
     return parser
 
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+
+    scene = load_scene(args.scene)
+    from compliant_docking.assembly.config import AssemblyScene
+    if isinstance(scene, AssemblyScene):
+        if args.controller is not None or args.dt != .001 or args.duration is not None or args.render:
+            raise ValueError("HexFrame uses its validated 1 ms, full 53 s assembly controller; use --record for saved-state video")
+        from compliant_docking.assembly.runner import run
+        return run(scene, output=args.out, record=args.record,
+                   preview_only=args.preview_only or args.quick, replay=args.replay)
+    if args.out or args.preview_only or args.replay:
+        raise ValueError("--out/--preview-only/--replay currently apply to HexFrame assembly scenes")
 
     if args.quick:
         args.duration = 2.0

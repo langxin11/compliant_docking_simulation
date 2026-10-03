@@ -42,13 +42,23 @@ packages = ["src/compliant_docking"]
 [tool.ruff]
 line-length = 100
 target-version = "py310"
+# Keep imported upstream sources and immutable experiment provenance untouched.
+extend-exclude = [
+    "runs",
+    "experiments/orbital_showcase/assets/hexframe_module",
+]
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B"]
 ignore = ["E501"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = [
+    "tests",
+    "experiments/orbital_showcase/test_hexframe_integration.py",
+    "experiments/orbital_showcase/contact_force_study",
+    "experiments/orbital_showcase/crown_seating",
+]
 markers = [
     "slow: long physics regression runs",
 ]
