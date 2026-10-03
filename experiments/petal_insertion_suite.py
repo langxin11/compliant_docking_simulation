@@ -132,7 +132,12 @@ def preflight(scene):
                 full_tool_inertia_preserved=True, default_scene_replaced=False)
 
 
-def run_case(out, base, case, profile, setting, preview=False, error=None):
+def run_case(out, base, case, profile, setting, preview=False, error=None, telemetry="auto"):
+    # dt refinement reruns re-verify peaks/gates only; conclusions live in the JSON
+    # records, so per-step diagnostic channels are not persisted for them by default.
+    if telemetry not in ("auto", "full", "core"):
+        raise ValueError(f"unknown telemetry mode: {telemetry}")
+    effective = telemetry if telemetry != "auto" else ("core" if setting != "baseline" else "full")
     scene = variant(base, case, profile, error)
     if setting not in ("baseline", "dt_half", "dt_quarter"):
         raise ValueError("Unknown physical timestep setting")
@@ -170,12 +175,13 @@ def run_case(out, base, case, profile, setting, preview=False, error=None):
         reasons.append("lateral release not completed")
     assessment = dict(status="FAIL" if reasons else "CANDIDATE_PASS" if complete else "INCOMPLETE",
                       reasons=reasons, locking_verified=False)
-    save_rollout(out, name, scene, log)
+    save_rollout(out, name, scene, log, telemetry=effective)
     path = out / f"{name}.json"
     metadata = json.loads(path.read_text())
     metadata.update(contact_load_gate=contact, assessment=assessment,
                     simulation_warnings=log.simulation_warnings, wall_seconds=time.monotonic()-start,
                     case=case, profile=profile, numerics=setting, feedback_audit=feedback,
+                    telemetry=effective,
                     diagnostic_mode="every-step contact sums and stop counts; no individual events")
     path.write_text(json.dumps(metadata, indent=2)+"\n")
     print(f"DONE {name}: {assessment}; wall {metadata['wall_seconds']:.1f} s", flush=True)
@@ -276,6 +282,8 @@ def main():
     parser.add_argument("--case", nargs="+", choices=CASES, default=list(CASES))
     parser.add_argument("--profile", nargs="+", choices=PROFILES, default=["stiff", "compliant", "released"])
     parser.add_argument("--setting", nargs="+", choices=["baseline", "dt_half", "dt_quarter"], default=["baseline"])
+    parser.add_argument("--telemetry", choices=["auto", "full", "core"], default="auto",
+                        help="auto: baseline 存完整遥测，dt_half/dt_quarter 只存核心通道（省约一半空间）")
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--preview", action="store_true")
     parser.add_argument("--resume", action="store_true")
@@ -332,7 +340,7 @@ def main():
                 name = f"{case}_{profile}"+("" if setting == "baseline" else "_"+setting)
                 if args.resume and (args.out / f"{name}.json").exists():
                     continue
-                jobs.append((args.out, base, case, profile, setting, args.preview))
+                jobs.append((args.out, base, case, profile, setting, args.preview, args.telemetry))
     if args.jobs == 1:
         for job in jobs:
             run_case(*job)

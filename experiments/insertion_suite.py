@@ -67,7 +67,13 @@ def _json_default(value):
     raise TypeError(type(value).__name__)
 
 
-def save_rollout(out, name, scene, log):
+def save_rollout(out, name, scene, log, telemetry="full"):
+    """Persist one rollout. telemetry="core" omits per-step diagnostic_* channels
+    (and the raw contacts.npz events) from the file while still returning the full
+    array dict, so in-memory gate assessment keeps working; intended for physical
+    timestep refinement reruns whose conclusions live in the JSON gates/peaks."""
+    if telemetry not in ("full", "core"):
+        raise ValueError(f"unknown telemetry mode: {telemetry}")
     samples = log.docking_samples
     arrays = {key: np.asarray([s[key] for s in samples]) for key in samples[0]}
     arrays.update(q=np.asarray(log.joint_angles), qd=np.asarray(log.joint_velocities),
@@ -85,13 +91,17 @@ def save_rollout(out, name, scene, log):
     if log.contact_diagnostics:
         arrays.update({"diagnostic_"+key: np.asarray([sample[key] for sample in log.contact_diagnostics])
                        for key in log.contact_diagnostics[0]})
-        # Re-save with synchronized poses, solve-time F/T, inertia and contact sum.
-        events = {key: np.asarray([row[key] for row in log.contact_events])
-                  for key in log.contact_events[0]} if log.contact_events else {"t": np.array([])}
-        np.savez_compressed(out / f"{name}.contacts.npz", **events)
         metadata["contact_diagnostics"] = log.contact_summary
         metadata["geometry_evaluation"] = log.geometry_evaluation
-    np.savez_compressed(out / f"{name}.npz", **arrays)
+        if telemetry == "full":
+            # Re-save with synchronized poses, solve-time F/T, inertia and contact sum.
+            events = {key: np.asarray([row[key] for row in log.contact_events])
+                      for key in log.contact_events[0]} if log.contact_events else {"t": np.array([])}
+            np.savez_compressed(out / f"{name}.contacts.npz", **events)
+    metadata["telemetry"] = telemetry
+    written = arrays if telemetry == "full" else {
+        key: value for key, value in arrays.items() if not key.startswith("diagnostic_")}
+    np.savez_compressed(out / f"{name}.npz", **written)
     (out / f"{name}.json").write_text(
         json.dumps(metadata, indent=2, ensure_ascii=False, default=_json_default)+"\n")
     return arrays
