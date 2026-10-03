@@ -36,8 +36,8 @@ trajectory planning in robotic in-orbit assembly. _Acta Astronautica_ 243, 32–
 
 **姿态参考状态**：按步 `(T_d, V_d, Vdot_d)` body 运动参考接口已由
 `SE3ToppTrajectory.get_motion_state()` 生成，并经 `planning.motion_reference` 接入
-`se3_lie` 主循环。当前内置对接场景的起止姿态相同，因此已有端到端数值基线
-只覆盖恒定姿态；尚缺一个时变姿态对接场景及对应验收基线。
+`se3_lie` 主循环。传统对接场景的起止姿态相同。新增组合场景补充了接近阶段姿态过渡与
+接触后的被动绕轴转动；持续改变接触阶段期望姿态的旋转插入仍待验证。
 
 **toppra 评估**：数值 TOPP 包（TOPP-RA）已试验——论文的 TOPP 是纯运动学且常螺旋段限幅为常数，解析解即精确最优，数值包无增益，未采用（依赖已移除）。
 
@@ -89,4 +89,5 @@ trajectory planning in robotic in-orbit assembly. _Acta Astronautica_ 243, 32–
 1. **自由漂浮基座**（§2 核心建模差异）——浮基动力学耦合、动量守恒、基座扰动补偿均需重构；
 2. **莲花型接口几何**——以自研花冠 SDF 接口等效替代；
 3. **时变姿态场景的端到端验证**——规划器、运动参考适配器与 `se3_lie`
-   控制接口已经接线；内置场景仍为恒定姿态，尚未建立旋转对接的数值基线。
+   控制接口已经接线；新增组合场景覆盖接近阶段姿态过渡和接触阶段被动绕轴转动，
+   持续改变接触阶段期望姿态的旋转插入仍待验证。
