@@ -1,0 +1,42 @@
+{
+  "g_selected_combo_ny6_p15_lateral_released_dt_half": {
+    "status": "PASS",
+    "baseline_policy": "archived narrow rollout, not rerun",
+    "baseline_files_sha256": {
+      "runs/petal_guidance_geometry_20261003/g_narrow_combo_ny6_p15_lateral_released_dt_half.json": "114c9bd53904819b36864e8d30390c1be9e604db57911a8c59033c47e911d8a6",
+      "runs/petal_guidance_geometry_20261003/g_narrow_combo_ny6_p15_lateral_released_dt_half.npz": "aebf9bae5399947e443cf92b449726cbca0530adbeccdc100906b503e8f85391"
+    },
+    "positions_and_timestamps_identical": true,
+    "runtime_sources_identical": true
+  },
+  "g_selected_combo_py6_n15_lateral_released_dt_half": {
+    "status": "PASS",
+    "baseline_policy": "archived narrow rollout, not rerun",
+    "baseline_files_sha256": {
+      "runs/petal_guidance_geometry_20261003/g_narrow_combo_py6_n15_lateral_released_dt_half.json": "bbcd1b64fa3363f639e7d198c1d12f614e8743e64bd373487a48a57046e192cd",
+      "runs/petal_guidance_geometry_20261003/g_narrow_combo_py6_n15_lateral_released_dt_half.npz": "92d7923fd4149daae28bcb80d9151231af4b9ec5cbdca0c00f4c9f02d07a108b"
+    },
+    "positions_and_timestamps_identical": true,
+    "runtime_sources_identical": true
+  },
+  "g_selected_nx6_lateral_released_dt_half": {
+    "status": "PASS",
+    "baseline_policy": "archived narrow rollout, not rerun",
+    "baseline_files_sha256": {
+      "runs/petal_guidance_geometry_20261003/g_narrow_nx6_lateral_released_dt_half.json": "7c34cb327079c19ec17531f426e1b7ce90abf20a38b2391c79e983f19d28d8d7",
+      "runs/petal_guidance_geometry_20261003/g_narrow_nx6_lateral_released_dt_half.npz": "35729764577dfaf60f7c1fdbbb440cbf5e5f231897eb487cf3ea9ba18e524229"
+    },
+    "positions_and_timestamps_identical": true,
+    "runtime_sources_identical": true
+  },
+  "g_selected_nx6_lateral_released_dt_quarter": {
+    "status": "PASS",
+    "baseline_policy": "archived narrow rollout, not rerun",
+    "baseline_files_sha256": {
+      "runs/petal_guidance_geometry_20261003/g_narrow_nx6_lateral_released_dt_quarter.json": "f0e834487d6d44c81eebfb21ac40a8b84f520a15d50d241135bc9ea46e062d19",
+      "runs/petal_guidance_geometry_20261003/g_narrow_nx6_lateral_released_dt_quarter.npz": "b13b2be79597551ad621f3d1ac29b3b21a9f44c25db607c172c940eb5797ea66"
+    },
+    "positions_and_timestamps_identical": true,
+    "runtime_sources_identical": true
+  }
+}

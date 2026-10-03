@@ -1,0 +1,422 @@
+{
+  "scene": {
+    "name": "iiwa14_petal_guidance_selected_g_selected_nx6_lateral_released",
+    "robot": {
+      "mjcf": "/home/xiao/workspace/maintained/compliant_docking_simulation/assets/iiwa14/iiwa14_arm.xml",
+      "pin_model": null,
+      "ee_site": "attachment_site",
+      "ee_frame": "tool_dock",
+      "joint_ranges_deg": {
+        "joint1": [
+          -170,
+          170
+        ],
+        "joint2": [
+          -120,
+          120
+        ],
+        "joint3": [
+          -170,
+          170
+        ],
+        "joint4": [
+          -120,
+          120
+        ],
+        "joint5": [
+          -170,
+          170
+        ],
+        "joint6": [
+          -120,
+          120
+        ],
+        "joint7": [
+          -175,
+          175
+        ]
+      }
+    },
+    "tool": {
+      "mjcf": "/home/xiao/workspace/maintained/compliant_docking_simulation/assets/interfaces/petal_guidance/angle1_blend030/active.xml",
+      "prefix": "tool_",
+      "pose_pos": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pose_quat": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "pin_inertia": null
+    },
+    "physics": {
+      "timestep": 0.000125,
+      "gravity": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "integrator": "implicitfast",
+      "cone": "elliptic",
+      "sdf_iterations": 10,
+      "sdf_initpoints": 40,
+      "tolerance": 1e-10,
+      "iterations": 60
+    },
+    "task": {
+      "init_pos": [
+        -0.12,
+        0.4,
+        0.55
+      ],
+      "init_ori": [
+        [
+          0.7071067811865476,
+          0.7071067811865476,
+          0.0
+        ],
+        [
+          0.7071067811865476,
+          -0.7071067811865476,
+          0.0
+        ],
+        [
+          0.0,
+          0.0,
+          -1.0
+        ]
+      ],
+      "ik_guess": [
+        0.6882329351413595,
+        0.6954397875938523,
+        -1.3695893884291805,
+        1.7568197338788447,
+        2.462767248857433,
+        1.554635029645154,
+        -1.3952621967472831
+      ],
+      "stroke": [
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "path": "/home/xiao/workspace/maintained/compliant_docking_simulation/scenes/iiwa14_petal_insertion.yaml",
+    "target": {
+      "mjcf": "/home/xiao/workspace/maintained/compliant_docking_simulation/assets/interfaces/petal_guidance/angle1_blend030/passive.xml",
+      "prefix": "target_",
+      "pos": [
+        0.0,
+        0.5,
+        0.35
+      ],
+      "quat": [
+        1.0,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    "trajectory": {
+      "standoff": 0.1,
+      "v_max_approach": 0.1,
+      "a_max_approach": 0.2,
+      "v_max_docking": 0.02,
+      "a_max_docking": 0.05,
+      "type": "waypoints",
+      "omega_max_approach": 0.2,
+      "omega_max_docking": 0.05,
+      "alpha_max_approach": 0.2,
+      "alpha_max_docking": 0.05,
+      "transition_duration": 1.5,
+      "circle_duration": 5.0,
+      "circle_radius": 0.1,
+      "circle_frequency": 0.2,
+      "circle_center_offset": -0.06,
+      "figure8_duration": 5.0,
+      "figure8_radius_x": 0.1,
+      "figure8_radius_y": 0.07,
+      "figure8_frequency": 0.2
+    },
+    "tracking_thresholds": null,
+    "impedance": null,
+    "friction_comp": "torque",
+    "hqp": null,
+    "se3_impedance": {
+      "a_diag": [
+        10.0,
+        10.0,
+        10.0,
+        1.0,
+        1.0,
+        0.05
+      ],
+      "d_diag": [
+        80.0,
+        80.0,
+        90.0,
+        10.0,
+        10.0,
+        1.0
+      ],
+      "k_diag": [
+        80.0,
+        80.0,
+        1500.0,
+        25.0,
+        25.0,
+        0.5
+      ],
+      "null_damping": 10.0,
+      "control_period": 0.0005,
+      "contact_yaw": {
+        "force_threshold_N": 0.15,
+        "filter_s": 0.01,
+        "dwell_s": 0.02,
+        "release_s": 0.25,
+        "stiffness_after": 0.0,
+        "lateral_stiffness_after": 0.0
+      }
+    },
+    "docking": {
+      "estimate_pos": [
+        -0.006,
+        0.5,
+        0.35
+      ],
+      "estimate_yaw_deg": 0.0,
+      "mating_yaw_deg": 45.0,
+      "entry_height": 0.0814,
+      "clearance": 0.06,
+      "command_depth": 0.03515,
+      "insertion_speed": 0.01,
+      "insertion_acceleration": 0.03,
+      "hold_s": 8.0,
+      "min_depth": 0.03425,
+      "max_lateral": 0.0005,
+      "max_tilt_deg": 0.5,
+      "max_force": 40.0,
+      "max_axial_moment": 2.0,
+      "max_linear_speed": 0.003,
+      "max_angular_speed_deg": 2.0,
+      "max_torque_saturation_ratio": 0.01
+    },
+    "controller": "se3_lie"
+  },
+  "gate": {
+    "status": "PASS",
+    "reasons": [],
+    "duration_s": 23.263750000065574,
+    "first_contact_s": 13.315875000018075,
+    "final_depth_mm": 35.00000083788304,
+    "final_lateral_mm": 0.392884987909935,
+    "final_tilt_deg": 1.0663629423853027e-05,
+    "final_yaw_deg": 44.91664244170276,
+    "contact_yaw_change_deg": -0.08335768543985012,
+    "post_contact_advance_mm": 5.37965074650598,
+    "peak_force_N": 8.368565700299827,
+    "peak_axial_moment_Nm": 0.09092138545299444,
+    "torque_saturation_ratio": 0.0
+  },
+  "waypoint_names": [
+    "start",
+    "approach",
+    "descent",
+    "insert"
+  ],
+  "waypoint_times": [
+    0.0,
+    3.048242577699484,
+    8.673242577699483,
+    15.263867577699486
+  ],
+  "waypoints": [
+    [
+      [
+        0.7071067811865476,
+        0.7071067811865476,
+        0.0,
+        -0.12
+      ],
+      [
+        0.7071067811865476,
+        -0.7071067811865476,
+        0.0,
+        0.4
+      ],
+      [
+        0.0,
+        0.0,
+        -1.0,
+        0.55
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    [
+      [
+        0.7071067811865476,
+        0.7071067811865475,
+        0.0,
+        -0.006
+      ],
+      [
+        0.7071067811865475,
+        -0.7071067811865476,
+        0.0,
+        0.5
+      ],
+      [
+        0.0,
+        0.0,
+        -1.0,
+        0.4914
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    [
+      [
+        0.7071067811865476,
+        0.7071067811865475,
+        0.0,
+        -0.006
+      ],
+      [
+        0.7071067811865475,
+        -0.7071067811865476,
+        0.0,
+        0.5
+      ],
+      [
+        0.0,
+        0.0,
+        -1.0,
+        0.4314
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    [
+      [
+        0.7071067811865476,
+        0.7071067811865475,
+        0.0,
+        -0.006
+      ],
+      [
+        0.7071067811865475,
+        -0.7071067811865476,
+        0.0,
+        0.5
+      ],
+      [
+        0.0,
+        0.0,
+        -1.0,
+        0.39625
+      ],
+      [
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  ],
+  "feedback_convention": {
+    "control_period_s": 0.0005,
+    "delay_s": 0.0005,
+    "sensor_sample": "first solve of previous control interval; bootstrap zero at t=0",
+    "wrench": "world at saved sensor origin, transported to current control body pose",
+    "telemetry": "pose, F/T and contacts at pre-integration solve t"
+  },
+  "contact_diagnostics": {
+    "status": "RECORDED",
+    "solve_time_convention": "pre-integration t; state_t=t+dt",
+    "wrench_convention": "force on tool; world frame; moment about tool root",
+    "peak_sensor_axial_moment_Nm": 0.09092138545300683,
+    "peak_contact_axial_moment_Nm": 0.09570841544540945,
+    "peak_effective_inertial_axial_moment_Nm": 0.030394451731053707,
+    "peak_sensor_time_s": 13.750125000020148,
+    "at_sensor_peak": {
+      "sensor_Nm": 0.09092138545300683,
+      "contact_Nm": 0.09570841544540945,
+      "effective_inertia_Nm": 0.004787029992402422
+    },
+    "peak_balance_force_residual_N": 2.59080123555984e-14,
+    "peak_balance_moment_residual_Nm": 1.1447334935360403e-15,
+    "peak_contacts": []
+  },
+  "geometry_evaluation": {
+    "status": "SEATED_CANDIDATE",
+    "reasons": [],
+    "locking_verified": false,
+    "reference": "supplied flange separation / phase, with loaded stop contacts",
+    "nominal_separation_mm": 46.4,
+    "nominal_yaw_deg": 45.00000000000001,
+    "last_second_max_lateral_mm": 0.3928849879120203,
+    "last_second_max_tilt_deg": 2.831646840510158e-06,
+    "last_second_max_phase_error_deg": 0.08335755829731539,
+    "last_second_max_abs_axial_gap_mm": 8.378857052626643e-07,
+    "last_second_stop_contact_fraction": 1.0
+  },
+  "contact_load_gate": {
+    "status": "PASS",
+    "reasons": [],
+    "peak_contact_force_N": 8.915559049760034,
+    "peak_contact_axial_moment_Nm": 0.09570841544540945,
+    "force_limit_N": 40.0,
+    "axial_moment_limit_Nm": 2.0
+  },
+  "assessment": {
+    "status": "CANDIDATE_PASS",
+    "reasons": [],
+    "locking_verified": false
+  },
+  "simulation_warnings": {},
+  "wall_seconds": 725.918889470995,
+  "case": "g_selected_nx6",
+  "profile": "lateral_released",
+  "numerics": "dt_quarter",
+  "feedback_audit": {
+    "status": "PASS",
+    "control_updates": 46528,
+    "max_feedback_age_error_s": 2.3874131838130808e-15,
+    "max_wrench_transform_error": 4.440892098500626e-16,
+    "max_solve_pose_error_m": 3.941291737419306e-15,
+    "control_period_s": 0.0005,
+    "final_yaw_stiffness_Nm_rad": 0.0,
+    "yaw_trigger_s": 13.336500000018173,
+    "final_lateral_stiffness_N_m": [
+      0.0,
+      0.0
+    ],
+    "first_loaded_stop_s": 14.873500000025512
+  },
+  "diagnostic_mode": "every-step contact sums and stop counts; no individual events",
+  "guidance_geometry": "selected",
+  "guidance_case": "nx6",
+  "guidance_error": [
+    -6.0,
+    0.0,
+    0.0
+  ],
+  "guidance_stage": "representative_user_design"
+}

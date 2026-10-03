@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "complete_matrix": false,
+  "records": 4,
+  "outcomes": {
+    "CANDIDATE_PASS": 4
+  },
+  "matched_references": 0,
+  "all_numeric_channels_finite": true,
+  "verified_asset_files": 536,
+  "sources_and_assets_verified": true,
+  "recomputed_geometry_and_loads_match": true,
+  "no_early_lateral_release": true,
+  "simulation_issues": {},
+  "maxima": {
+    "pose_error_m": 4.107825191113079e-15,
+    "transport_error": 1.7763568394002505e-15,
+    "force_balance_N": 6.011465550776661e-14,
+    "moment_balance_Nm": 2.3288648128195195e-15
+  },
+  "history_equivalence": {},
+  "reference_policy": "separate archived_reference_checks.json compares to the historical narrow baseline",
+  "archived_reference_checks": 4
+}
