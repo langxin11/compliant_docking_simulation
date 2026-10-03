@@ -11,6 +11,11 @@ from .geometry import quaternion
 from .sequence import reference_ik
 
 
+def control_every_steps(dt):
+    """10 ms contact-IK / 100 Hz record cadence expressed in physics steps."""
+    return max(1, round(.01/dt))
+
+
 def simulate(r, model, spline, phase_list, planning):
     contact_wrench = r.geometry.wrench
     contact_seated = r.geometry.stop_loaded
@@ -32,6 +37,7 @@ def simulate(r, model, spline, phase_list, planning):
     storage_telemetry = []
     gripper_id = model.equality("gripper_lock").id
     low, high = np.asarray(planning["joint_limits"])
+    control_every = control_every_steps(r.dt)
     start_step = 0
     for step in range(start_step, round(ends[-1]/r.dt)+1):
         t = step*r.dt
@@ -64,7 +70,7 @@ def simulate(r, model, spline, phase_list, planning):
             else:
                 zvelocity = -.001
             position[2] = max(r.install_tip[2]-.002, position[2]+zvelocity*r.dt)
-            if step % 10 == 0:
+            if step % control_every == 0:
                 tip = data.site("gripper_tip")
                 actual = tip.xmat.reshape(3, 3)
                 position[:2] += .03*(r.install_tip[:2]-tip.xpos[:2])
@@ -127,7 +133,7 @@ def simulate(r, model, spline, phase_list, planning):
             separation = float(np.linalg.norm(data.site("module1_port_4_mating").xpos-data.site("storage_dock_mating").xpos))
             storage_telemetry.append([t, *storage_force, storage_depth, storage_count, separation,
                                       *data.eq_active.astype(int)])
-        if step % 10 == 0:
+        if step % control_every == 0:
             for key, value in [("t", t), ("qpos", data.qpos.copy()), ("qvel", data.qvel.copy()),
                                ("phase", k), ("locks", data.eq_active.copy())]:
                 records[key].append(value)

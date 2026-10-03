@@ -8,11 +8,20 @@ from pathlib import Path
 import numpy as np
 
 
+def window_n(dt):
+    """0.5 s dwell window expressed in contact-trace rows (one per physics step)."""
+    n = round(.5/dt)
+    assert n >= 1
+    return n
+
+
 def audit(output):
     report = json.loads((output/"validation.json").read_text())
     geometry = json.loads((output/"geometry_check.json").read_text())
     values = np.load(output/"contact_trace.npz")["values"]
     records = np.load(output/"rollout.npz")
+    dt = json.loads((output/"runtime.json").read_text())["physics_timestep_s"]
+    n = window_n(dt)
     assert report["status"] == geometry["status"] == "PASS"
     assert report["module_asset"] == "hexframe"
     assert abs(report["module_mass_kg"]-geometry["mass_kg"]) < 1e-8
@@ -23,14 +32,14 @@ def audit(output):
     assert geometry["storage_connection"]["status"] == "PASS"
     assert geometry["storage_connection"]["spare_empty"]
     assert geometry["storage_connection"]["module_port"] == "module1_port_4"
-    assert len(values) == round(report["duration_s"]/.001)+1
+    assert len(values) == round(report["duration_s"]/dt)+1
     assert records["t"][-1] == report["duration_s"]
     assert np.isfinite(values).all() and np.isfinite(records["qpos"]).all()
     assert [e["event"] for e in report["events"]] == ["grip_on", "rack_off", "assembly_on", "grip_off"]
     assert records["locks"][-1].tolist() == [False, False, True]
     index = np.flatnonzero(values[:, 11])[0]
-    window = values[index-499:index+1]
-    assert len(window) == 500
+    window = values[index-n+1:index+1]
+    assert len(window) == n
     for valid in [(window[:, 1] >= .15) & (window[:, 1] <= .6), window[:, 3] <= .5,
                   window[:, 5] <= .0003, window[:, 7] <= .00075,
                   window[:, 8] <= np.deg2rad(.5), window[:, 9] <= .0005,
@@ -41,9 +50,9 @@ def audit(output):
     assert report["events"][3]["gripper_constraint_force_n"] <= .2
     assert report["events"][3]["unloaded_dwell_s"] >= .5
     if values.shape[1] >= 17:
-        released = round(report["events"][3]["t"]/.001)
-        unload = values[released-499:released+1]
-        assert len(unload) == 500
+        released = round(report["events"][3]["t"]/dt)
+        unload = values[released-n+1:released+1]
+        assert len(unload) == n
         assert np.all(unload[:, 12] <= .2) and np.all(unload[:, 16] <= .002)
         assert np.all(unload[:, 11] == 1)
     stored = np.load(output/"storage_trace.npz")["values"]
@@ -79,7 +88,7 @@ def audit(output):
         mujoco.mj_forward(model, data)
         assert np.linalg.norm(data.site("gripper_anchor").xpos-data.site("module1_anchor").xpos) >= .07
     result = dict(final_retreat_clearance_verified=True, status="PASS", module="HexFrame", geometry_mass_and_port_mapping_verified=True,
-                  handover_and_unload_verified=True, prelock_physical_samples_recomputed=500,
+                  handover_and_unload_verified=True, prelock_physical_samples_recomputed=n,
                   loaded_stop_continuous_dwell_verified=True, prelocked_base_interface_verified=True,
                   storage_unlock_after_grip_verified=True, storage_extraction_clearance_verified=True)
     (output/"audit.json").write_text(json.dumps(result, indent=2)+"\n")
