@@ -38,3 +38,10 @@ def test_incomplete_and_docking_keep_success_exit_code(monkeypatch):
         lambda: SimpleNamespace(main=lambda **_: _log_with_gate(None)),
     )
     assert cli.main([]) == 0
+
+
+def test_insertion_gate_failure_returns_2(monkeypatch):
+    log = _log_with_gate(None)
+    log.docking_gate = {"status": "FAIL"}
+    monkeypatch.setattr(cli, "_load_run_docking", lambda: SimpleNamespace(main=lambda **_: log))
+    assert cli.main([]) == 2

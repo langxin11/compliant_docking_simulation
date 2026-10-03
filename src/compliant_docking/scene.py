@@ -21,6 +21,8 @@ import mujoco
 import numpy as np
 import yaml
 
+from .control.contact_yaw import ContactYawSpec
+from .docking_task import DockingTaskSpec, target_rotation
 from .metrics import TrackingThresholds
 
 # 仓库根目录（与 models.py 的 ASSETS_DIR 同口径：src/<pkg>/scene.py 上溯 3 级）
@@ -42,7 +44,7 @@ _CONES = {
 }
 
 # trajectory.type 的 YAML 合法取值（两段式对接 / 圆+8字跟踪测试）
-_TRAJECTORY_TYPES = {"twophase", "tracking", "se3topp"}
+_TRAJECTORY_TYPES = {"twophase", "tracking", "se3topp", "waypoints"}
 
 
 def _enum_value(table: dict[str, int], kind: str, value: str) -> int:
@@ -63,9 +65,10 @@ class RobotSpec:
     """
 
     mjcf: Path
-    pin_model: Path
+    pin_model: Path | None  # None: parse the same assembled MJCF as MuJoCo
     ee_site: str
     ee_frame: str
+    joint_ranges_deg: dict[str, list[float]] | None = None
 
 
 @dataclass(frozen=True)
@@ -108,6 +111,8 @@ class PhysicsSpec:
     cone: str  # YAML 字符串，编译时映射为 mujoco.mjtCone
     sdf_iterations: int
     sdf_initpoints: int
+    tolerance: float = 0.001
+    iterations: int | None = None
 
 
 @dataclass(frozen=True)
@@ -176,6 +181,8 @@ class SE3ImpedanceOverride:
     d_diag: list[float] | None = None
     k_diag: list[float] | None = None
     null_damping: float | None = None
+    control_period: float | None = None
+    contact_yaw: ContactYawSpec | None = None
 
 
 @dataclass(frozen=True)
@@ -252,6 +259,8 @@ class Scene:
     friction_comp: str = "torque"  # 摩擦前馈模式："torque"（默认，力矩方向，治零速死区） | "velocity"
     hqp: HQPOverride | None = None  # 可选 HQP-AC 参数覆盖（外力源/预紧力）
     se3_impedance: SE3ImpedanceOverride | None = None  # 可选 SE(3) Lie 阻抗覆盖
+    docking: DockingTaskSpec | None = None
+    controller: str = "impedance"
 
     # ---- 解析后的名称属性（下阶段接线时使用） ----
 
@@ -270,7 +279,7 @@ class Scene:
         """组装器统一添加的跟随相机名。"""
         return "track_cam"
 
-    def build_mjmodel(self) -> mujoco.MjModel:
+    def build_mjspec(self) -> mujoco.MjSpec:
         """按已验证配方组装 MjSpec 并编译为 MjModel。
 
         配方顺序敏感（与 legacy XML 物理逐位等价，勿改 attach 语义与数值）：
@@ -279,9 +288,24 @@ class Scene:
         """
         # 1) 机械臂基底
         arm = mujoco.MjSpec.from_file(str(self.robot.mjcf))
+        def resolve_meshes(spec, path):
+            if self.robot.pin_model is None:
+                for mesh in spec.meshes:
+                    if mesh.file and not Path(mesh.file).is_absolute():
+                        mesh.file = str((path.parent / spec.compiler.meshdir / mesh.file).resolve())
+        resolve_meshes(arm, self.robot.mjcf)
+        if self.robot.joint_ranges_deg is not None:
+            for name, bounds in self.robot.joint_ranges_deg.items():
+                values = np.asarray(bounds, dtype=float)
+                if values.shape != (2,) or not np.isfinite(values).all() or values[0] >= values[1]:
+                    raise ValueError(f"Invalid joint range for {name}")
+                joint = arm.joint(name)
+                joint.range = values if arm.compiler.degree else np.deg2rad(values)
+                joint.limited = True
 
         # 2) 公头：先给根 body 设挂载位姿（相对 ee_site），再挂到法兰 site
         tool = mujoco.MjSpec.from_file(str(self.tool.mjcf))
+        resolve_meshes(tool, self.tool.mjcf)
         tool_root = tool.body("dock")
         tool_root.pos = self.tool.pose_pos
         tool_root.quat = self.tool.pose_quat
@@ -292,6 +316,7 @@ class Scene:
         #    Skip the female-side attach entirely for tracking scenes (target=None)
         if self.target is not None:
             female = mujoco.MjSpec.from_file(str(self.target.mjcf))
+            resolve_meshes(female, self.target.mjcf)
             frame = arm.worldbody.add_frame(
                 name="target_frame", pos=self.target.pos, quat=self.target.quat
             )
@@ -328,7 +353,8 @@ class Scene:
             name="track_cam",
             pos=[0.5, 1.3, 0.8],
             mode=int(mujoco.mjtCamLight.mjCAMLIGHT_TARGETBODY),
-            targetbody=f"{self.tool.prefix}rev",
+            targetbody=(f"{self.tool.prefix}rev" if any(
+                b.name == f"{self.tool.prefix}rev" for b in arm.bodies) else self.eef_body),
         )
 
         # 5) 传感器：framepos 跟踪公头根 body，force/torque 锚在公头 sensor_site
@@ -359,8 +385,19 @@ class Scene:
         opt.cone = _enum_value(_CONES, "cone", self.physics.cone)
         opt.sdf_iterations = self.physics.sdf_iterations
         opt.sdf_initpoints = self.physics.sdf_initpoints
+        opt.tolerance = self.physics.tolerance
+        if self.physics.iterations is not None:
+            opt.iterations = self.physics.iterations
 
-        return arm.compile()
+        return arm
+
+    def build_mjmodel(self) -> mujoco.MjModel:
+        spec = self.build_mjspec()
+        # Both parsers consume the same serialized description in shared mode.
+        # This also avoids small mismatches due to MJCF serialization rounding.
+        if self.robot.pin_model is None:
+            return mujoco.MjModel.from_xml_string(spec.to_xml())
+        return spec.compile()
 
 
 def load_scene(path: str | Path) -> Scene:
@@ -386,7 +423,14 @@ def load_scene(path: str | Path) -> Scene:
     target = raw.get("target")  # 跟踪测试场景无母头段（target=None）
     impedance = ImpedanceOverride(**raw["impedance"]) if "impedance" in raw else None
     hqp = HQPOverride(**raw["hqp"]) if "hqp" in raw else None
-    se3_impedance = SE3ImpedanceOverride(**raw["se3_impedance"]) if "se3_impedance" in raw else None
+    se3_raw = dict(raw["se3_impedance"]) if "se3_impedance" in raw else None
+    if se3_raw is not None and se3_raw.get("contact_yaw") is not None:
+        se3_raw["contact_yaw"] = ContactYawSpec(**se3_raw["contact_yaw"])
+    se3_impedance = SE3ImpedanceOverride(**se3_raw) if se3_raw is not None else None
+    docking = DockingTaskSpec(**raw["docking"]) if "docking" in raw else None
+    controller = str(scene.get("controller", "impedance"))
+    if controller not in ("impedance", "hqp", "se3_lie"):
+        raise ValueError(f"Unsupported scene.controller: {controller}")
     if hqp is not None and hqp.force_source not in ("sensor", "observer"):
         raise ValueError(
             f"scene 配置 hqp.force_source 不支持 {hqp.force_source!r}，可选值: sensor, observer")
@@ -415,13 +459,22 @@ def load_scene(path: str | Path) -> Scene:
             threshold_raw = raw.get("tracking_thresholds", {})
             tracking_thresholds = TrackingThresholds(**threshold_raw)
 
-    return Scene(
+    if docking is not None:
+        if target is None or trajectory is None or trajectory.type != "waypoints":
+            raise ValueError("docking requires target and trajectory.type: waypoints")
+        if controller != "se3_lie":
+            raise ValueError("waypoint docking requires scene.controller: se3_lie")
+    elif trajectory is not None and trajectory.type == "waypoints":
+        raise ValueError("trajectory.type: waypoints requires docking configuration")
+
+    result = Scene(
         name=str(scene["name"]),
         robot=RobotSpec(
             mjcf=asset(robot["mjcf"]),
-            pin_model=asset(robot["pin_model"]),
+            pin_model=asset(robot["pin_model"]) if robot.get("pin_model") else None,
             ee_site=str(robot["ee_site"]),
             ee_frame=str(robot["ee_frame"]),
+            joint_ranges_deg=robot.get("joint_ranges_deg"),
         ),
         tool=ToolSpec(
             mjcf=asset(tool["mjcf"]),
@@ -447,12 +500,14 @@ def load_scene(path: str | Path) -> Scene:
             cone=str(physics["cone"]),
             sdf_iterations=int(physics["sdf_iterations"]),
             sdf_initpoints=int(physics["sdf_initpoints"]),
+            tolerance=float(physics.get("tolerance", 0.001)),
+            iterations=int(physics["iterations"]) if "iterations" in physics else None,
         ),
         task=TaskSpec(
             init_pos=np.asarray(task["init_pos"], dtype=float),
             init_ori=np.asarray(task["init_ori"], dtype=float).reshape(3, 3),
             ik_guess=np.asarray(task["ik_guess"], dtype=float),
-            stroke=np.asarray(task["stroke"], dtype=float),
+            stroke=np.asarray(task.get("stroke", [0, 0, 0]) if docking else task["stroke"], dtype=float),
         ),
         path=scene_path,
         trajectory=trajectory,
@@ -461,4 +516,9 @@ def load_scene(path: str | Path) -> Scene:
     friction_comp=friction_comp,
     hqp=hqp,
     se3_impedance=se3_impedance,
+    docking=docking,
+    controller=controller,
     )
+    if docking is not None and not np.allclose(target_rotation(result.target)[:, 2], [0, 0, 1]):
+        raise ValueError("waypoint docking currently supports upright targets (world +Z) only")
+    return result

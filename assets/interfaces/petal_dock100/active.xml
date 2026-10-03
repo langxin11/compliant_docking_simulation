@@ -1,0 +1,923 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mujoco model="PetalDock100_active_fragment">
+  <compiler angle="radian" />
+  <default>
+    <default class="pd_visual">
+      <geom contype="0" conaffinity="0" group="2" density="0" />
+    </default>
+    <default class="pd_collision">
+      <geom contype="1" conaffinity="1" group="3" rgba="0.35 0.65 0.85 0.3" condim="3" friction="0.15 0.003 0.0001" margin="0" gap="0" density="0" solref="0.003 1" solimp="0.95 0.99 0.0002" />
+    </default>
+  </default>
+  <asset>
+    <material name="pd_dark" rgba=".20 .24 .30 1" specular="0.35" shininess="0.35" />
+    <material name="pd_blue" rgba=".34 .48 .64 1" specular="0.35" shininess="0.35" />
+    <material name="pd_silver" rgba=".68 .74 .81 1" specular="0.35" shininess="0.35" />
+    <mesh name="pd_base_proxy" file="meshes/collision/base_proxy.obj" />
+    <mesh name="pd_v_petal_2" file="meshes/visual/petal_2.obj" />
+    <mesh name="pd_v_head_plate" file="meshes/visual/head_plate.obj" />
+    <mesh name="pd_v_petal_0" file="meshes/visual/petal_0.obj" />
+    <mesh name="pd_v_petal_1" file="meshes/visual/petal_1.obj" />
+    <mesh name="pd_v_stop_land" file="meshes/visual/stop_land.obj" />
+    <mesh name="pd_v_adapter" file="meshes/visual/adapter.obj" />
+    <mesh name="pd_v_petal_3" file="meshes/visual/petal_3.obj" />
+    <mesh name="pd_c_000" file="meshes/collision/cell_000.obj" />
+    <mesh name="pd_c_001" file="meshes/collision/cell_001.obj" />
+    <mesh name="pd_c_002" file="meshes/collision/cell_002.obj" />
+    <mesh name="pd_c_003" file="meshes/collision/cell_003.obj" />
+    <mesh name="pd_c_004" file="meshes/collision/cell_004.obj" />
+    <mesh name="pd_c_005" file="meshes/collision/cell_005.obj" />
+    <mesh name="pd_c_006" file="meshes/collision/cell_006.obj" />
+    <mesh name="pd_c_007" file="meshes/collision/cell_007.obj" />
+    <mesh name="pd_c_008" file="meshes/collision/cell_008.obj" />
+    <mesh name="pd_c_009" file="meshes/collision/cell_009.obj" />
+    <mesh name="pd_c_010" file="meshes/collision/cell_010.obj" />
+    <mesh name="pd_c_011" file="meshes/collision/cell_011.obj" />
+    <mesh name="pd_c_012" file="meshes/collision/cell_012.obj" />
+    <mesh name="pd_c_013" file="meshes/collision/cell_013.obj" />
+    <mesh name="pd_c_014" file="meshes/collision/cell_014.obj" />
+    <mesh name="pd_c_015" file="meshes/collision/cell_015.obj" />
+    <mesh name="pd_c_016" file="meshes/collision/cell_016.obj" />
+    <mesh name="pd_c_017" file="meshes/collision/cell_017.obj" />
+    <mesh name="pd_c_018" file="meshes/collision/cell_018.obj" />
+    <mesh name="pd_c_019" file="meshes/collision/cell_019.obj" />
+    <mesh name="pd_c_020" file="meshes/collision/cell_020.obj" />
+    <mesh name="pd_c_021" file="meshes/collision/cell_021.obj" />
+    <mesh name="pd_c_022" file="meshes/collision/cell_022.obj" />
+    <mesh name="pd_c_023" file="meshes/collision/cell_023.obj" />
+    <mesh name="pd_c_024" file="meshes/collision/cell_024.obj" />
+    <mesh name="pd_c_025" file="meshes/collision/cell_025.obj" />
+    <mesh name="pd_c_026" file="meshes/collision/cell_026.obj" />
+    <mesh name="pd_c_027" file="meshes/collision/cell_027.obj" />
+    <mesh name="pd_c_028" file="meshes/collision/cell_028.obj" />
+    <mesh name="pd_c_029" file="meshes/collision/cell_029.obj" />
+    <mesh name="pd_c_030" file="meshes/collision/cell_030.obj" />
+    <mesh name="pd_c_031" file="meshes/collision/cell_031.obj" />
+    <mesh name="pd_c_032" file="meshes/collision/cell_032.obj" />
+    <mesh name="pd_c_033" file="meshes/collision/cell_033.obj" />
+    <mesh name="pd_c_034" file="meshes/collision/cell_034.obj" />
+    <mesh name="pd_c_035" file="meshes/collision/cell_035.obj" />
+    <mesh name="pd_c_036" file="meshes/collision/cell_036.obj" />
+    <mesh name="pd_c_037" file="meshes/collision/cell_037.obj" />
+    <mesh name="pd_c_038" file="meshes/collision/cell_038.obj" />
+    <mesh name="pd_c_039" file="meshes/collision/cell_039.obj" />
+    <mesh name="pd_c_040" file="meshes/collision/cell_040.obj" />
+    <mesh name="pd_c_041" file="meshes/collision/cell_041.obj" />
+    <mesh name="pd_c_042" file="meshes/collision/cell_042.obj" />
+    <mesh name="pd_c_043" file="meshes/collision/cell_043.obj" />
+    <mesh name="pd_c_044" file="meshes/collision/cell_044.obj" />
+    <mesh name="pd_c_045" file="meshes/collision/cell_045.obj" />
+    <mesh name="pd_c_046" file="meshes/collision/cell_046.obj" />
+    <mesh name="pd_c_047" file="meshes/collision/cell_047.obj" />
+    <mesh name="pd_c_048" file="meshes/collision/cell_048.obj" />
+    <mesh name="pd_c_049" file="meshes/collision/cell_049.obj" />
+    <mesh name="pd_c_050" file="meshes/collision/cell_050.obj" />
+    <mesh name="pd_c_051" file="meshes/collision/cell_051.obj" />
+    <mesh name="pd_c_052" file="meshes/collision/cell_052.obj" />
+    <mesh name="pd_c_053" file="meshes/collision/cell_053.obj" />
+    <mesh name="pd_c_054" file="meshes/collision/cell_054.obj" />
+    <mesh name="pd_c_055" file="meshes/collision/cell_055.obj" />
+    <mesh name="pd_c_056" file="meshes/collision/cell_056.obj" />
+    <mesh name="pd_c_057" file="meshes/collision/cell_057.obj" />
+    <mesh name="pd_c_058" file="meshes/collision/cell_058.obj" />
+    <mesh name="pd_c_059" file="meshes/collision/cell_059.obj" />
+    <mesh name="pd_c_060" file="meshes/collision/cell_060.obj" />
+    <mesh name="pd_c_061" file="meshes/collision/cell_061.obj" />
+    <mesh name="pd_c_062" file="meshes/collision/cell_062.obj" />
+    <mesh name="pd_c_063" file="meshes/collision/cell_063.obj" />
+    <mesh name="pd_c_064" file="meshes/collision/cell_064.obj" />
+    <mesh name="pd_c_065" file="meshes/collision/cell_065.obj" />
+    <mesh name="pd_c_066" file="meshes/collision/cell_066.obj" />
+    <mesh name="pd_c_067" file="meshes/collision/cell_067.obj" />
+    <mesh name="pd_c_068" file="meshes/collision/cell_068.obj" />
+    <mesh name="pd_c_069" file="meshes/collision/cell_069.obj" />
+    <mesh name="pd_c_070" file="meshes/collision/cell_070.obj" />
+    <mesh name="pd_c_071" file="meshes/collision/cell_071.obj" />
+    <mesh name="pd_c_072" file="meshes/collision/cell_072.obj" />
+    <mesh name="pd_c_073" file="meshes/collision/cell_073.obj" />
+    <mesh name="pd_c_074" file="meshes/collision/cell_074.obj" />
+    <mesh name="pd_c_075" file="meshes/collision/cell_075.obj" />
+    <mesh name="pd_c_076" file="meshes/collision/cell_076.obj" />
+    <mesh name="pd_c_077" file="meshes/collision/cell_077.obj" />
+    <mesh name="pd_c_078" file="meshes/collision/cell_078.obj" />
+    <mesh name="pd_c_079" file="meshes/collision/cell_079.obj" />
+    <mesh name="pd_c_080" file="meshes/collision/cell_080.obj" />
+    <mesh name="pd_c_081" file="meshes/collision/cell_081.obj" />
+    <mesh name="pd_c_082" file="meshes/collision/cell_082.obj" />
+    <mesh name="pd_c_083" file="meshes/collision/cell_083.obj" />
+    <mesh name="pd_c_084" file="meshes/collision/cell_084.obj" />
+    <mesh name="pd_c_085" file="meshes/collision/cell_085.obj" />
+    <mesh name="pd_c_086" file="meshes/collision/cell_086.obj" />
+    <mesh name="pd_c_087" file="meshes/collision/cell_087.obj" />
+    <mesh name="pd_c_088" file="meshes/collision/cell_088.obj" />
+    <mesh name="pd_c_089" file="meshes/collision/cell_089.obj" />
+    <mesh name="pd_c_090" file="meshes/collision/cell_090.obj" />
+    <mesh name="pd_c_091" file="meshes/collision/cell_091.obj" />
+    <mesh name="pd_c_092" file="meshes/collision/cell_092.obj" />
+    <mesh name="pd_c_093" file="meshes/collision/cell_093.obj" />
+    <mesh name="pd_c_094" file="meshes/collision/cell_094.obj" />
+    <mesh name="pd_c_095" file="meshes/collision/cell_095.obj" />
+    <mesh name="pd_c_096" file="meshes/collision/cell_096.obj" />
+    <mesh name="pd_c_097" file="meshes/collision/cell_097.obj" />
+    <mesh name="pd_c_098" file="meshes/collision/cell_098.obj" />
+    <mesh name="pd_c_099" file="meshes/collision/cell_099.obj" />
+    <mesh name="pd_c_100" file="meshes/collision/cell_100.obj" />
+    <mesh name="pd_c_101" file="meshes/collision/cell_101.obj" />
+    <mesh name="pd_c_102" file="meshes/collision/cell_102.obj" />
+    <mesh name="pd_c_103" file="meshes/collision/cell_103.obj" />
+    <mesh name="pd_c_104" file="meshes/collision/cell_104.obj" />
+    <mesh name="pd_c_105" file="meshes/collision/cell_105.obj" />
+    <mesh name="pd_c_106" file="meshes/collision/cell_106.obj" />
+    <mesh name="pd_c_107" file="meshes/collision/cell_107.obj" />
+    <mesh name="pd_c_108" file="meshes/collision/cell_108.obj" />
+    <mesh name="pd_c_109" file="meshes/collision/cell_109.obj" />
+    <mesh name="pd_c_110" file="meshes/collision/cell_110.obj" />
+    <mesh name="pd_c_111" file="meshes/collision/cell_111.obj" />
+    <mesh name="pd_c_112" file="meshes/collision/cell_112.obj" />
+    <mesh name="pd_c_113" file="meshes/collision/cell_113.obj" />
+    <mesh name="pd_c_114" file="meshes/collision/cell_114.obj" />
+    <mesh name="pd_c_115" file="meshes/collision/cell_115.obj" />
+    <mesh name="pd_c_116" file="meshes/collision/cell_116.obj" />
+    <mesh name="pd_c_117" file="meshes/collision/cell_117.obj" />
+    <mesh name="pd_c_118" file="meshes/collision/cell_118.obj" />
+    <mesh name="pd_c_119" file="meshes/collision/cell_119.obj" />
+    <mesh name="pd_c_120" file="meshes/collision/cell_120.obj" />
+    <mesh name="pd_c_121" file="meshes/collision/cell_121.obj" />
+    <mesh name="pd_c_122" file="meshes/collision/cell_122.obj" />
+    <mesh name="pd_c_123" file="meshes/collision/cell_123.obj" />
+    <mesh name="pd_c_124" file="meshes/collision/cell_124.obj" />
+    <mesh name="pd_c_125" file="meshes/collision/cell_125.obj" />
+    <mesh name="pd_c_126" file="meshes/collision/cell_126.obj" />
+    <mesh name="pd_c_127" file="meshes/collision/cell_127.obj" />
+    <mesh name="pd_c_128" file="meshes/collision/cell_128.obj" />
+    <mesh name="pd_c_129" file="meshes/collision/cell_129.obj" />
+    <mesh name="pd_c_130" file="meshes/collision/cell_130.obj" />
+    <mesh name="pd_c_131" file="meshes/collision/cell_131.obj" />
+    <mesh name="pd_c_132" file="meshes/collision/cell_132.obj" />
+    <mesh name="pd_c_133" file="meshes/collision/cell_133.obj" />
+    <mesh name="pd_c_134" file="meshes/collision/cell_134.obj" />
+    <mesh name="pd_c_135" file="meshes/collision/cell_135.obj" />
+    <mesh name="pd_c_136" file="meshes/collision/cell_136.obj" />
+    <mesh name="pd_c_137" file="meshes/collision/cell_137.obj" />
+    <mesh name="pd_c_138" file="meshes/collision/cell_138.obj" />
+    <mesh name="pd_c_139" file="meshes/collision/cell_139.obj" />
+    <mesh name="pd_c_140" file="meshes/collision/cell_140.obj" />
+    <mesh name="pd_c_141" file="meshes/collision/cell_141.obj" />
+    <mesh name="pd_c_142" file="meshes/collision/cell_142.obj" />
+    <mesh name="pd_c_143" file="meshes/collision/cell_143.obj" />
+    <mesh name="pd_c_144" file="meshes/collision/cell_144.obj" />
+    <mesh name="pd_c_145" file="meshes/collision/cell_145.obj" />
+    <mesh name="pd_c_146" file="meshes/collision/cell_146.obj" />
+    <mesh name="pd_c_147" file="meshes/collision/cell_147.obj" />
+    <mesh name="pd_c_148" file="meshes/collision/cell_148.obj" />
+    <mesh name="pd_c_149" file="meshes/collision/cell_149.obj" />
+    <mesh name="pd_c_150" file="meshes/collision/cell_150.obj" />
+    <mesh name="pd_c_151" file="meshes/collision/cell_151.obj" />
+    <mesh name="pd_c_152" file="meshes/collision/cell_152.obj" />
+    <mesh name="pd_c_153" file="meshes/collision/cell_153.obj" />
+    <mesh name="pd_c_154" file="meshes/collision/cell_154.obj" />
+    <mesh name="pd_c_155" file="meshes/collision/cell_155.obj" />
+    <mesh name="pd_c_156" file="meshes/collision/cell_156.obj" />
+    <mesh name="pd_c_157" file="meshes/collision/cell_157.obj" />
+    <mesh name="pd_c_158" file="meshes/collision/cell_158.obj" />
+    <mesh name="pd_c_159" file="meshes/collision/cell_159.obj" />
+    <mesh name="pd_c_160" file="meshes/collision/cell_160.obj" />
+    <mesh name="pd_c_161" file="meshes/collision/cell_161.obj" />
+    <mesh name="pd_c_162" file="meshes/collision/cell_162.obj" />
+    <mesh name="pd_c_163" file="meshes/collision/cell_163.obj" />
+    <mesh name="pd_c_164" file="meshes/collision/cell_164.obj" />
+    <mesh name="pd_c_165" file="meshes/collision/cell_165.obj" />
+    <mesh name="pd_c_166" file="meshes/collision/cell_166.obj" />
+    <mesh name="pd_c_167" file="meshes/collision/cell_167.obj" />
+    <mesh name="pd_c_168" file="meshes/collision/cell_168.obj" />
+    <mesh name="pd_c_169" file="meshes/collision/cell_169.obj" />
+    <mesh name="pd_c_170" file="meshes/collision/cell_170.obj" />
+    <mesh name="pd_c_171" file="meshes/collision/cell_171.obj" />
+    <mesh name="pd_c_172" file="meshes/collision/cell_172.obj" />
+    <mesh name="pd_c_173" file="meshes/collision/cell_173.obj" />
+    <mesh name="pd_c_174" file="meshes/collision/cell_174.obj" />
+    <mesh name="pd_c_175" file="meshes/collision/cell_175.obj" />
+    <mesh name="pd_c_176" file="meshes/collision/cell_176.obj" />
+    <mesh name="pd_c_177" file="meshes/collision/cell_177.obj" />
+    <mesh name="pd_c_178" file="meshes/collision/cell_178.obj" />
+    <mesh name="pd_c_179" file="meshes/collision/cell_179.obj" />
+    <mesh name="pd_c_180" file="meshes/collision/cell_180.obj" />
+    <mesh name="pd_c_181" file="meshes/collision/cell_181.obj" />
+    <mesh name="pd_c_182" file="meshes/collision/cell_182.obj" />
+    <mesh name="pd_c_183" file="meshes/collision/cell_183.obj" />
+    <mesh name="pd_c_184" file="meshes/collision/cell_184.obj" />
+    <mesh name="pd_c_185" file="meshes/collision/cell_185.obj" />
+    <mesh name="pd_c_186" file="meshes/collision/cell_186.obj" />
+    <mesh name="pd_c_187" file="meshes/collision/cell_187.obj" />
+    <mesh name="pd_c_188" file="meshes/collision/cell_188.obj" />
+    <mesh name="pd_c_189" file="meshes/collision/cell_189.obj" />
+    <mesh name="pd_c_190" file="meshes/collision/cell_190.obj" />
+    <mesh name="pd_c_191" file="meshes/collision/cell_191.obj" />
+    <mesh name="pd_c_192" file="meshes/collision/cell_192.obj" />
+    <mesh name="pd_c_193" file="meshes/collision/cell_193.obj" />
+    <mesh name="pd_c_194" file="meshes/collision/cell_194.obj" />
+    <mesh name="pd_c_195" file="meshes/collision/cell_195.obj" />
+    <mesh name="pd_c_196" file="meshes/collision/cell_196.obj" />
+    <mesh name="pd_c_197" file="meshes/collision/cell_197.obj" />
+    <mesh name="pd_c_198" file="meshes/collision/cell_198.obj" />
+    <mesh name="pd_c_199" file="meshes/collision/cell_199.obj" />
+    <mesh name="pd_c_200" file="meshes/collision/cell_200.obj" />
+    <mesh name="pd_c_201" file="meshes/collision/cell_201.obj" />
+    <mesh name="pd_c_202" file="meshes/collision/cell_202.obj" />
+    <mesh name="pd_c_203" file="meshes/collision/cell_203.obj" />
+    <mesh name="pd_c_204" file="meshes/collision/cell_204.obj" />
+    <mesh name="pd_c_205" file="meshes/collision/cell_205.obj" />
+    <mesh name="pd_c_206" file="meshes/collision/cell_206.obj" />
+    <mesh name="pd_c_207" file="meshes/collision/cell_207.obj" />
+    <mesh name="pd_c_208" file="meshes/collision/cell_208.obj" />
+    <mesh name="pd_c_209" file="meshes/collision/cell_209.obj" />
+    <mesh name="pd_c_210" file="meshes/collision/cell_210.obj" />
+    <mesh name="pd_c_211" file="meshes/collision/cell_211.obj" />
+    <mesh name="pd_c_212" file="meshes/collision/cell_212.obj" />
+    <mesh name="pd_c_213" file="meshes/collision/cell_213.obj" />
+    <mesh name="pd_c_214" file="meshes/collision/cell_214.obj" />
+    <mesh name="pd_c_215" file="meshes/collision/cell_215.obj" />
+    <mesh name="pd_c_216" file="meshes/collision/cell_216.obj" />
+    <mesh name="pd_c_217" file="meshes/collision/cell_217.obj" />
+    <mesh name="pd_c_218" file="meshes/collision/cell_218.obj" />
+    <mesh name="pd_c_219" file="meshes/collision/cell_219.obj" />
+    <mesh name="pd_c_220" file="meshes/collision/cell_220.obj" />
+    <mesh name="pd_c_221" file="meshes/collision/cell_221.obj" />
+    <mesh name="pd_c_222" file="meshes/collision/cell_222.obj" />
+    <mesh name="pd_c_223" file="meshes/collision/cell_223.obj" />
+    <mesh name="pd_c_224" file="meshes/collision/cell_224.obj" />
+    <mesh name="pd_c_225" file="meshes/collision/cell_225.obj" />
+    <mesh name="pd_c_226" file="meshes/collision/cell_226.obj" />
+    <mesh name="pd_c_227" file="meshes/collision/cell_227.obj" />
+    <mesh name="pd_c_228" file="meshes/collision/cell_228.obj" />
+    <mesh name="pd_c_229" file="meshes/collision/cell_229.obj" />
+    <mesh name="pd_c_230" file="meshes/collision/cell_230.obj" />
+    <mesh name="pd_c_231" file="meshes/collision/cell_231.obj" />
+    <mesh name="pd_c_232" file="meshes/collision/cell_232.obj" />
+    <mesh name="pd_c_233" file="meshes/collision/cell_233.obj" />
+    <mesh name="pd_c_234" file="meshes/collision/cell_234.obj" />
+    <mesh name="pd_c_235" file="meshes/collision/cell_235.obj" />
+    <mesh name="pd_c_236" file="meshes/collision/cell_236.obj" />
+    <mesh name="pd_c_237" file="meshes/collision/cell_237.obj" />
+    <mesh name="pd_c_238" file="meshes/collision/cell_238.obj" />
+    <mesh name="pd_c_239" file="meshes/collision/cell_239.obj" />
+    <mesh name="pd_c_240" file="meshes/collision/cell_240.obj" />
+    <mesh name="pd_c_241" file="meshes/collision/cell_241.obj" />
+    <mesh name="pd_c_242" file="meshes/collision/cell_242.obj" />
+    <mesh name="pd_c_243" file="meshes/collision/cell_243.obj" />
+    <mesh name="pd_c_244" file="meshes/collision/cell_244.obj" />
+    <mesh name="pd_c_245" file="meshes/collision/cell_245.obj" />
+    <mesh name="pd_c_246" file="meshes/collision/cell_246.obj" />
+    <mesh name="pd_c_247" file="meshes/collision/cell_247.obj" />
+    <mesh name="pd_c_248" file="meshes/collision/cell_248.obj" />
+    <mesh name="pd_c_249" file="meshes/collision/cell_249.obj" />
+    <mesh name="pd_c_250" file="meshes/collision/cell_250.obj" />
+    <mesh name="pd_c_251" file="meshes/collision/cell_251.obj" />
+    <mesh name="pd_c_252" file="meshes/collision/cell_252.obj" />
+    <mesh name="pd_c_253" file="meshes/collision/cell_253.obj" />
+    <mesh name="pd_c_254" file="meshes/collision/cell_254.obj" />
+    <mesh name="pd_c_255" file="meshes/collision/cell_255.obj" />
+    <mesh name="pd_c_256" file="meshes/collision/cell_256.obj" />
+    <mesh name="pd_c_257" file="meshes/collision/cell_257.obj" />
+    <mesh name="pd_c_258" file="meshes/collision/cell_258.obj" />
+    <mesh name="pd_c_259" file="meshes/collision/cell_259.obj" />
+    <mesh name="pd_c_260" file="meshes/collision/cell_260.obj" />
+    <mesh name="pd_c_261" file="meshes/collision/cell_261.obj" />
+    <mesh name="pd_c_262" file="meshes/collision/cell_262.obj" />
+    <mesh name="pd_c_263" file="meshes/collision/cell_263.obj" />
+    <mesh name="pd_c_264" file="meshes/collision/cell_264.obj" />
+    <mesh name="pd_c_265" file="meshes/collision/cell_265.obj" />
+    <mesh name="pd_c_266" file="meshes/collision/cell_266.obj" />
+    <mesh name="pd_c_267" file="meshes/collision/cell_267.obj" />
+    <mesh name="pd_c_268" file="meshes/collision/cell_268.obj" />
+    <mesh name="pd_c_269" file="meshes/collision/cell_269.obj" />
+    <mesh name="pd_c_270" file="meshes/collision/cell_270.obj" />
+    <mesh name="pd_c_271" file="meshes/collision/cell_271.obj" />
+    <mesh name="pd_c_272" file="meshes/collision/cell_272.obj" />
+    <mesh name="pd_c_273" file="meshes/collision/cell_273.obj" />
+    <mesh name="pd_c_274" file="meshes/collision/cell_274.obj" />
+    <mesh name="pd_c_275" file="meshes/collision/cell_275.obj" />
+    <mesh name="pd_c_276" file="meshes/collision/cell_276.obj" />
+    <mesh name="pd_c_277" file="meshes/collision/cell_277.obj" />
+    <mesh name="pd_c_278" file="meshes/collision/cell_278.obj" />
+    <mesh name="pd_c_279" file="meshes/collision/cell_279.obj" />
+    <mesh name="pd_c_280" file="meshes/collision/cell_280.obj" />
+    <mesh name="pd_c_281" file="meshes/collision/cell_281.obj" />
+    <mesh name="pd_c_282" file="meshes/collision/cell_282.obj" />
+    <mesh name="pd_c_283" file="meshes/collision/cell_283.obj" />
+    <mesh name="pd_c_284" file="meshes/collision/cell_284.obj" />
+    <mesh name="pd_c_285" file="meshes/collision/cell_285.obj" />
+    <mesh name="pd_c_286" file="meshes/collision/cell_286.obj" />
+    <mesh name="pd_c_287" file="meshes/collision/cell_287.obj" />
+    <mesh name="pd_c_288" file="meshes/collision/cell_288.obj" />
+    <mesh name="pd_c_289" file="meshes/collision/cell_289.obj" />
+    <mesh name="pd_c_290" file="meshes/collision/cell_290.obj" />
+    <mesh name="pd_c_291" file="meshes/collision/cell_291.obj" />
+    <mesh name="pd_c_292" file="meshes/collision/cell_292.obj" />
+    <mesh name="pd_c_293" file="meshes/collision/cell_293.obj" />
+    <mesh name="pd_c_294" file="meshes/collision/cell_294.obj" />
+    <mesh name="pd_c_295" file="meshes/collision/cell_295.obj" />
+    <mesh name="pd_c_296" file="meshes/collision/cell_296.obj" />
+    <mesh name="pd_c_297" file="meshes/collision/cell_297.obj" />
+    <mesh name="pd_c_298" file="meshes/collision/cell_298.obj" />
+    <mesh name="pd_c_299" file="meshes/collision/cell_299.obj" />
+    <mesh name="pd_c_300" file="meshes/collision/cell_300.obj" />
+    <mesh name="pd_c_301" file="meshes/collision/cell_301.obj" />
+    <mesh name="pd_c_302" file="meshes/collision/cell_302.obj" />
+    <mesh name="pd_c_303" file="meshes/collision/cell_303.obj" />
+    <mesh name="pd_c_304" file="meshes/collision/cell_304.obj" />
+    <mesh name="pd_c_305" file="meshes/collision/cell_305.obj" />
+    <mesh name="pd_c_306" file="meshes/collision/cell_306.obj" />
+    <mesh name="pd_c_307" file="meshes/collision/cell_307.obj" />
+    <mesh name="pd_c_308" file="meshes/collision/cell_308.obj" />
+    <mesh name="pd_c_309" file="meshes/collision/cell_309.obj" />
+    <mesh name="pd_c_310" file="meshes/collision/cell_310.obj" />
+    <mesh name="pd_c_311" file="meshes/collision/cell_311.obj" />
+    <mesh name="pd_c_312" file="meshes/collision/cell_312.obj" />
+    <mesh name="pd_c_313" file="meshes/collision/cell_313.obj" />
+    <mesh name="pd_c_314" file="meshes/collision/cell_314.obj" />
+    <mesh name="pd_c_315" file="meshes/collision/cell_315.obj" />
+    <mesh name="pd_c_316" file="meshes/collision/cell_316.obj" />
+    <mesh name="pd_c_317" file="meshes/collision/cell_317.obj" />
+    <mesh name="pd_c_318" file="meshes/collision/cell_318.obj" />
+    <mesh name="pd_c_319" file="meshes/collision/cell_319.obj" />
+    <mesh name="pd_c_320" file="meshes/collision/cell_320.obj" />
+    <mesh name="pd_c_321" file="meshes/collision/cell_321.obj" />
+    <mesh name="pd_c_322" file="meshes/collision/cell_322.obj" />
+    <mesh name="pd_c_323" file="meshes/collision/cell_323.obj" />
+    <mesh name="pd_c_324" file="meshes/collision/cell_324.obj" />
+    <mesh name="pd_c_325" file="meshes/collision/cell_325.obj" />
+    <mesh name="pd_c_326" file="meshes/collision/cell_326.obj" />
+    <mesh name="pd_c_327" file="meshes/collision/cell_327.obj" />
+    <mesh name="pd_c_328" file="meshes/collision/cell_328.obj" />
+    <mesh name="pd_c_329" file="meshes/collision/cell_329.obj" />
+    <mesh name="pd_c_330" file="meshes/collision/cell_330.obj" />
+    <mesh name="pd_c_331" file="meshes/collision/cell_331.obj" />
+    <mesh name="pd_c_332" file="meshes/collision/cell_332.obj" />
+    <mesh name="pd_c_333" file="meshes/collision/cell_333.obj" />
+    <mesh name="pd_c_334" file="meshes/collision/cell_334.obj" />
+    <mesh name="pd_c_335" file="meshes/collision/cell_335.obj" />
+    <mesh name="pd_c_336" file="meshes/collision/cell_336.obj" />
+    <mesh name="pd_c_337" file="meshes/collision/cell_337.obj" />
+    <mesh name="pd_c_338" file="meshes/collision/cell_338.obj" />
+    <mesh name="pd_c_339" file="meshes/collision/cell_339.obj" />
+    <mesh name="pd_c_340" file="meshes/collision/cell_340.obj" />
+    <mesh name="pd_c_341" file="meshes/collision/cell_341.obj" />
+    <mesh name="pd_c_342" file="meshes/collision/cell_342.obj" />
+    <mesh name="pd_c_343" file="meshes/collision/cell_343.obj" />
+    <mesh name="pd_c_344" file="meshes/collision/cell_344.obj" />
+    <mesh name="pd_c_345" file="meshes/collision/cell_345.obj" />
+    <mesh name="pd_c_346" file="meshes/collision/cell_346.obj" />
+    <mesh name="pd_c_347" file="meshes/collision/cell_347.obj" />
+    <mesh name="pd_c_348" file="meshes/collision/cell_348.obj" />
+    <mesh name="pd_c_349" file="meshes/collision/cell_349.obj" />
+    <mesh name="pd_c_350" file="meshes/collision/cell_350.obj" />
+    <mesh name="pd_c_351" file="meshes/collision/cell_351.obj" />
+    <mesh name="pd_c_352" file="meshes/collision/cell_352.obj" />
+    <mesh name="pd_c_353" file="meshes/collision/cell_353.obj" />
+    <mesh name="pd_c_354" file="meshes/collision/cell_354.obj" />
+    <mesh name="pd_c_355" file="meshes/collision/cell_355.obj" />
+    <mesh name="pd_c_356" file="meshes/collision/cell_356.obj" />
+    <mesh name="pd_c_357" file="meshes/collision/cell_357.obj" />
+    <mesh name="pd_c_358" file="meshes/collision/cell_358.obj" />
+    <mesh name="pd_c_359" file="meshes/collision/cell_359.obj" />
+    <mesh name="pd_c_360" file="meshes/collision/cell_360.obj" />
+    <mesh name="pd_c_361" file="meshes/collision/cell_361.obj" />
+    <mesh name="pd_c_362" file="meshes/collision/cell_362.obj" />
+    <mesh name="pd_c_363" file="meshes/collision/cell_363.obj" />
+    <mesh name="pd_c_364" file="meshes/collision/cell_364.obj" />
+    <mesh name="pd_c_365" file="meshes/collision/cell_365.obj" />
+    <mesh name="pd_c_366" file="meshes/collision/cell_366.obj" />
+    <mesh name="pd_c_367" file="meshes/collision/cell_367.obj" />
+    <mesh name="pd_c_368" file="meshes/collision/cell_368.obj" />
+    <mesh name="pd_c_369" file="meshes/collision/cell_369.obj" />
+    <mesh name="pd_c_370" file="meshes/collision/cell_370.obj" />
+    <mesh name="pd_c_371" file="meshes/collision/cell_371.obj" />
+    <mesh name="pd_c_372" file="meshes/collision/cell_372.obj" />
+    <mesh name="pd_c_373" file="meshes/collision/cell_373.obj" />
+    <mesh name="pd_c_374" file="meshes/collision/cell_374.obj" />
+    <mesh name="pd_c_375" file="meshes/collision/cell_375.obj" />
+    <mesh name="pd_c_376" file="meshes/collision/cell_376.obj" />
+    <mesh name="pd_c_377" file="meshes/collision/cell_377.obj" />
+    <mesh name="pd_c_378" file="meshes/collision/cell_378.obj" />
+    <mesh name="pd_c_379" file="meshes/collision/cell_379.obj" />
+    <mesh name="pd_c_380" file="meshes/collision/cell_380.obj" />
+    <mesh name="pd_c_381" file="meshes/collision/cell_381.obj" />
+    <mesh name="pd_c_382" file="meshes/collision/cell_382.obj" />
+    <mesh name="pd_c_383" file="meshes/collision/cell_383.obj" />
+    <mesh name="pd_c_384" file="meshes/collision/cell_384.obj" />
+    <mesh name="pd_c_385" file="meshes/collision/cell_385.obj" />
+    <mesh name="pd_c_386" file="meshes/collision/cell_386.obj" />
+    <mesh name="pd_c_387" file="meshes/collision/cell_387.obj" />
+    <mesh name="pd_c_388" file="meshes/collision/cell_388.obj" />
+    <mesh name="pd_c_389" file="meshes/collision/cell_389.obj" />
+    <mesh name="pd_c_390" file="meshes/collision/cell_390.obj" />
+    <mesh name="pd_c_391" file="meshes/collision/cell_391.obj" />
+    <mesh name="pd_c_392" file="meshes/collision/cell_392.obj" />
+    <mesh name="pd_c_393" file="meshes/collision/cell_393.obj" />
+    <mesh name="pd_c_394" file="meshes/collision/cell_394.obj" />
+    <mesh name="pd_c_395" file="meshes/collision/cell_395.obj" />
+    <mesh name="pd_c_396" file="meshes/collision/cell_396.obj" />
+    <mesh name="pd_c_397" file="meshes/collision/cell_397.obj" />
+    <mesh name="pd_c_398" file="meshes/collision/cell_398.obj" />
+    <mesh name="pd_c_399" file="meshes/collision/cell_399.obj" />
+    <mesh name="pd_c_400" file="meshes/collision/cell_400.obj" />
+    <mesh name="pd_c_401" file="meshes/collision/cell_401.obj" />
+    <mesh name="pd_c_402" file="meshes/collision/cell_402.obj" />
+    <mesh name="pd_c_403" file="meshes/collision/cell_403.obj" />
+    <mesh name="pd_c_404" file="meshes/collision/cell_404.obj" />
+    <mesh name="pd_c_405" file="meshes/collision/cell_405.obj" />
+    <mesh name="pd_c_406" file="meshes/collision/cell_406.obj" />
+    <mesh name="pd_c_407" file="meshes/collision/cell_407.obj" />
+    <mesh name="pd_c_408" file="meshes/collision/cell_408.obj" />
+    <mesh name="pd_c_409" file="meshes/collision/cell_409.obj" />
+    <mesh name="pd_c_410" file="meshes/collision/cell_410.obj" />
+    <mesh name="pd_c_411" file="meshes/collision/cell_411.obj" />
+    <mesh name="pd_c_412" file="meshes/collision/cell_412.obj" />
+    <mesh name="pd_c_413" file="meshes/collision/cell_413.obj" />
+    <mesh name="pd_c_414" file="meshes/collision/cell_414.obj" />
+    <mesh name="pd_c_415" file="meshes/collision/cell_415.obj" />
+    <mesh name="pd_c_416" file="meshes/collision/cell_416.obj" />
+    <mesh name="pd_c_417" file="meshes/collision/cell_417.obj" />
+    <mesh name="pd_c_418" file="meshes/collision/cell_418.obj" />
+    <mesh name="pd_c_419" file="meshes/collision/cell_419.obj" />
+    <mesh name="pd_c_420" file="meshes/collision/cell_420.obj" />
+    <mesh name="pd_c_421" file="meshes/collision/cell_421.obj" />
+    <mesh name="pd_c_422" file="meshes/collision/cell_422.obj" />
+    <mesh name="pd_c_423" file="meshes/collision/cell_423.obj" />
+    <mesh name="pd_c_424" file="meshes/collision/cell_424.obj" />
+    <mesh name="pd_c_425" file="meshes/collision/cell_425.obj" />
+    <mesh name="pd_c_426" file="meshes/collision/cell_426.obj" />
+    <mesh name="pd_c_427" file="meshes/collision/cell_427.obj" />
+    <mesh name="pd_c_428" file="meshes/collision/cell_428.obj" />
+    <mesh name="pd_c_429" file="meshes/collision/cell_429.obj" />
+    <mesh name="pd_c_430" file="meshes/collision/cell_430.obj" />
+    <mesh name="pd_c_431" file="meshes/collision/cell_431.obj" />
+    <mesh name="pd_c_432" file="meshes/collision/cell_432.obj" />
+    <mesh name="pd_c_433" file="meshes/collision/cell_433.obj" />
+    <mesh name="pd_c_434" file="meshes/collision/cell_434.obj" />
+    <mesh name="pd_c_435" file="meshes/collision/cell_435.obj" />
+    <mesh name="pd_c_436" file="meshes/collision/cell_436.obj" />
+    <mesh name="pd_c_437" file="meshes/collision/cell_437.obj" />
+    <mesh name="pd_c_438" file="meshes/collision/cell_438.obj" />
+    <mesh name="pd_c_439" file="meshes/collision/cell_439.obj" />
+  </asset>
+  <worldbody>
+    <body name="dock">
+      <inertial mass="0.391690843" pos="4.739133765e-05 8.742038634e-08 0.01276523591" fullinertia="0.0002727264886 0.0002731936757 0.0004999956876 -5.058512328e-10 1.303787948e-07 -3.748925735e-10" />
+      <geom name="petal_2_visual" mesh="pd_v_petal_2" type="mesh" class="pd_visual" material="pd_blue" />
+      <geom name="head_plate_visual" mesh="pd_v_head_plate" type="mesh" class="pd_visual" material="pd_blue" />
+      <geom name="petal_0_visual" mesh="pd_v_petal_0" type="mesh" class="pd_visual" material="pd_blue" />
+      <geom name="petal_1_visual" mesh="pd_v_petal_1" type="mesh" class="pd_visual" material="pd_blue" />
+      <geom name="stop_land_visual" mesh="pd_v_stop_land" type="mesh" class="pd_visual" material="pd_silver" />
+      <geom name="adapter_visual" mesh="pd_v_adapter" type="mesh" class="pd_visual" material="pd_dark" />
+      <geom name="petal_3_visual" mesh="pd_v_petal_3" type="mesh" class="pd_visual" material="pd_blue" />
+      <geom name="guide_000" mesh="pd_c_000" type="mesh" class="pd_collision" />
+      <geom name="guide_001" mesh="pd_c_001" type="mesh" class="pd_collision" />
+      <geom name="guide_002" mesh="pd_c_002" type="mesh" class="pd_collision" />
+      <geom name="guide_003" mesh="pd_c_003" type="mesh" class="pd_collision" />
+      <geom name="guide_004" mesh="pd_c_004" type="mesh" class="pd_collision" />
+      <geom name="guide_005" mesh="pd_c_005" type="mesh" class="pd_collision" />
+      <geom name="guide_006" mesh="pd_c_006" type="mesh" class="pd_collision" />
+      <geom name="guide_007" mesh="pd_c_007" type="mesh" class="pd_collision" />
+      <geom name="guide_008" mesh="pd_c_008" type="mesh" class="pd_collision" />
+      <geom name="guide_009" mesh="pd_c_009" type="mesh" class="pd_collision" />
+      <geom name="guide_010" mesh="pd_c_010" type="mesh" class="pd_collision" />
+      <geom name="guide_011" mesh="pd_c_011" type="mesh" class="pd_collision" />
+      <geom name="guide_012" mesh="pd_c_012" type="mesh" class="pd_collision" />
+      <geom name="guide_013" mesh="pd_c_013" type="mesh" class="pd_collision" />
+      <geom name="guide_014" mesh="pd_c_014" type="mesh" class="pd_collision" />
+      <geom name="guide_015" mesh="pd_c_015" type="mesh" class="pd_collision" />
+      <geom name="guide_016" mesh="pd_c_016" type="mesh" class="pd_collision" />
+      <geom name="guide_017" mesh="pd_c_017" type="mesh" class="pd_collision" />
+      <geom name="guide_018" mesh="pd_c_018" type="mesh" class="pd_collision" />
+      <geom name="guide_019" mesh="pd_c_019" type="mesh" class="pd_collision" />
+      <geom name="guide_020" mesh="pd_c_020" type="mesh" class="pd_collision" />
+      <geom name="guide_021" mesh="pd_c_021" type="mesh" class="pd_collision" />
+      <geom name="guide_022" mesh="pd_c_022" type="mesh" class="pd_collision" />
+      <geom name="guide_023" mesh="pd_c_023" type="mesh" class="pd_collision" />
+      <geom name="guide_024" mesh="pd_c_024" type="mesh" class="pd_collision" />
+      <geom name="guide_025" mesh="pd_c_025" type="mesh" class="pd_collision" />
+      <geom name="guide_026" mesh="pd_c_026" type="mesh" class="pd_collision" />
+      <geom name="guide_027" mesh="pd_c_027" type="mesh" class="pd_collision" />
+      <geom name="guide_028" mesh="pd_c_028" type="mesh" class="pd_collision" />
+      <geom name="guide_029" mesh="pd_c_029" type="mesh" class="pd_collision" />
+      <geom name="guide_030" mesh="pd_c_030" type="mesh" class="pd_collision" />
+      <geom name="guide_031" mesh="pd_c_031" type="mesh" class="pd_collision" />
+      <geom name="guide_032" mesh="pd_c_032" type="mesh" class="pd_collision" />
+      <geom name="guide_033" mesh="pd_c_033" type="mesh" class="pd_collision" />
+      <geom name="guide_034" mesh="pd_c_034" type="mesh" class="pd_collision" />
+      <geom name="guide_035" mesh="pd_c_035" type="mesh" class="pd_collision" />
+      <geom name="guide_036" mesh="pd_c_036" type="mesh" class="pd_collision" />
+      <geom name="guide_037" mesh="pd_c_037" type="mesh" class="pd_collision" />
+      <geom name="guide_038" mesh="pd_c_038" type="mesh" class="pd_collision" />
+      <geom name="guide_039" mesh="pd_c_039" type="mesh" class="pd_collision" />
+      <geom name="guide_040" mesh="pd_c_040" type="mesh" class="pd_collision" />
+      <geom name="guide_041" mesh="pd_c_041" type="mesh" class="pd_collision" />
+      <geom name="guide_042" mesh="pd_c_042" type="mesh" class="pd_collision" />
+      <geom name="guide_043" mesh="pd_c_043" type="mesh" class="pd_collision" />
+      <geom name="guide_044" mesh="pd_c_044" type="mesh" class="pd_collision" />
+      <geom name="guide_045" mesh="pd_c_045" type="mesh" class="pd_collision" />
+      <geom name="guide_046" mesh="pd_c_046" type="mesh" class="pd_collision" />
+      <geom name="guide_047" mesh="pd_c_047" type="mesh" class="pd_collision" />
+      <geom name="guide_048" mesh="pd_c_048" type="mesh" class="pd_collision" />
+      <geom name="guide_049" mesh="pd_c_049" type="mesh" class="pd_collision" />
+      <geom name="guide_050" mesh="pd_c_050" type="mesh" class="pd_collision" />
+      <geom name="guide_051" mesh="pd_c_051" type="mesh" class="pd_collision" />
+      <geom name="guide_052" mesh="pd_c_052" type="mesh" class="pd_collision" />
+      <geom name="guide_053" mesh="pd_c_053" type="mesh" class="pd_collision" />
+      <geom name="guide_054" mesh="pd_c_054" type="mesh" class="pd_collision" />
+      <geom name="guide_055" mesh="pd_c_055" type="mesh" class="pd_collision" />
+      <geom name="guide_056" mesh="pd_c_056" type="mesh" class="pd_collision" />
+      <geom name="guide_057" mesh="pd_c_057" type="mesh" class="pd_collision" />
+      <geom name="guide_058" mesh="pd_c_058" type="mesh" class="pd_collision" />
+      <geom name="guide_059" mesh="pd_c_059" type="mesh" class="pd_collision" />
+      <geom name="guide_060" mesh="pd_c_060" type="mesh" class="pd_collision" />
+      <geom name="guide_061" mesh="pd_c_061" type="mesh" class="pd_collision" />
+      <geom name="guide_062" mesh="pd_c_062" type="mesh" class="pd_collision" />
+      <geom name="guide_063" mesh="pd_c_063" type="mesh" class="pd_collision" />
+      <geom name="guide_064" mesh="pd_c_064" type="mesh" class="pd_collision" />
+      <geom name="guide_065" mesh="pd_c_065" type="mesh" class="pd_collision" />
+      <geom name="guide_066" mesh="pd_c_066" type="mesh" class="pd_collision" />
+      <geom name="guide_067" mesh="pd_c_067" type="mesh" class="pd_collision" />
+      <geom name="guide_068" mesh="pd_c_068" type="mesh" class="pd_collision" />
+      <geom name="guide_069" mesh="pd_c_069" type="mesh" class="pd_collision" />
+      <geom name="guide_070" mesh="pd_c_070" type="mesh" class="pd_collision" />
+      <geom name="guide_071" mesh="pd_c_071" type="mesh" class="pd_collision" />
+      <geom name="guide_072" mesh="pd_c_072" type="mesh" class="pd_collision" />
+      <geom name="guide_073" mesh="pd_c_073" type="mesh" class="pd_collision" />
+      <geom name="guide_074" mesh="pd_c_074" type="mesh" class="pd_collision" />
+      <geom name="guide_075" mesh="pd_c_075" type="mesh" class="pd_collision" />
+      <geom name="guide_076" mesh="pd_c_076" type="mesh" class="pd_collision" />
+      <geom name="guide_077" mesh="pd_c_077" type="mesh" class="pd_collision" />
+      <geom name="guide_078" mesh="pd_c_078" type="mesh" class="pd_collision" />
+      <geom name="guide_079" mesh="pd_c_079" type="mesh" class="pd_collision" />
+      <geom name="guide_080" mesh="pd_c_080" type="mesh" class="pd_collision" />
+      <geom name="guide_081" mesh="pd_c_081" type="mesh" class="pd_collision" />
+      <geom name="guide_082" mesh="pd_c_082" type="mesh" class="pd_collision" />
+      <geom name="guide_083" mesh="pd_c_083" type="mesh" class="pd_collision" />
+      <geom name="guide_084" mesh="pd_c_084" type="mesh" class="pd_collision" />
+      <geom name="guide_085" mesh="pd_c_085" type="mesh" class="pd_collision" />
+      <geom name="guide_086" mesh="pd_c_086" type="mesh" class="pd_collision" />
+      <geom name="guide_087" mesh="pd_c_087" type="mesh" class="pd_collision" />
+      <geom name="guide_088" mesh="pd_c_088" type="mesh" class="pd_collision" />
+      <geom name="guide_089" mesh="pd_c_089" type="mesh" class="pd_collision" />
+      <geom name="guide_090" mesh="pd_c_090" type="mesh" class="pd_collision" />
+      <geom name="guide_091" mesh="pd_c_091" type="mesh" class="pd_collision" />
+      <geom name="guide_092" mesh="pd_c_092" type="mesh" class="pd_collision" />
+      <geom name="guide_093" mesh="pd_c_093" type="mesh" class="pd_collision" />
+      <geom name="guide_094" mesh="pd_c_094" type="mesh" class="pd_collision" />
+      <geom name="guide_095" mesh="pd_c_095" type="mesh" class="pd_collision" />
+      <geom name="guide_096" mesh="pd_c_096" type="mesh" class="pd_collision" />
+      <geom name="guide_097" mesh="pd_c_097" type="mesh" class="pd_collision" />
+      <geom name="guide_098" mesh="pd_c_098" type="mesh" class="pd_collision" />
+      <geom name="guide_099" mesh="pd_c_099" type="mesh" class="pd_collision" />
+      <geom name="guide_100" mesh="pd_c_100" type="mesh" class="pd_collision" />
+      <geom name="guide_101" mesh="pd_c_101" type="mesh" class="pd_collision" />
+      <geom name="guide_102" mesh="pd_c_102" type="mesh" class="pd_collision" />
+      <geom name="guide_103" mesh="pd_c_103" type="mesh" class="pd_collision" />
+      <geom name="guide_104" mesh="pd_c_104" type="mesh" class="pd_collision" />
+      <geom name="guide_105" mesh="pd_c_105" type="mesh" class="pd_collision" />
+      <geom name="guide_106" mesh="pd_c_106" type="mesh" class="pd_collision" />
+      <geom name="guide_107" mesh="pd_c_107" type="mesh" class="pd_collision" />
+      <geom name="guide_108" mesh="pd_c_108" type="mesh" class="pd_collision" />
+      <geom name="guide_109" mesh="pd_c_109" type="mesh" class="pd_collision" />
+      <geom name="guide_110" mesh="pd_c_110" type="mesh" class="pd_collision" />
+      <geom name="guide_111" mesh="pd_c_111" type="mesh" class="pd_collision" />
+      <geom name="guide_112" mesh="pd_c_112" type="mesh" class="pd_collision" />
+      <geom name="guide_113" mesh="pd_c_113" type="mesh" class="pd_collision" />
+      <geom name="guide_114" mesh="pd_c_114" type="mesh" class="pd_collision" />
+      <geom name="guide_115" mesh="pd_c_115" type="mesh" class="pd_collision" />
+      <geom name="guide_116" mesh="pd_c_116" type="mesh" class="pd_collision" />
+      <geom name="guide_117" mesh="pd_c_117" type="mesh" class="pd_collision" />
+      <geom name="guide_118" mesh="pd_c_118" type="mesh" class="pd_collision" />
+      <geom name="guide_119" mesh="pd_c_119" type="mesh" class="pd_collision" />
+      <geom name="guide_120" mesh="pd_c_120" type="mesh" class="pd_collision" />
+      <geom name="guide_121" mesh="pd_c_121" type="mesh" class="pd_collision" />
+      <geom name="guide_122" mesh="pd_c_122" type="mesh" class="pd_collision" />
+      <geom name="guide_123" mesh="pd_c_123" type="mesh" class="pd_collision" />
+      <geom name="guide_124" mesh="pd_c_124" type="mesh" class="pd_collision" />
+      <geom name="guide_125" mesh="pd_c_125" type="mesh" class="pd_collision" />
+      <geom name="guide_126" mesh="pd_c_126" type="mesh" class="pd_collision" />
+      <geom name="guide_127" mesh="pd_c_127" type="mesh" class="pd_collision" />
+      <geom name="guide_128" mesh="pd_c_128" type="mesh" class="pd_collision" />
+      <geom name="guide_129" mesh="pd_c_129" type="mesh" class="pd_collision" />
+      <geom name="guide_130" mesh="pd_c_130" type="mesh" class="pd_collision" />
+      <geom name="guide_131" mesh="pd_c_131" type="mesh" class="pd_collision" />
+      <geom name="guide_132" mesh="pd_c_132" type="mesh" class="pd_collision" />
+      <geom name="guide_133" mesh="pd_c_133" type="mesh" class="pd_collision" />
+      <geom name="guide_134" mesh="pd_c_134" type="mesh" class="pd_collision" />
+      <geom name="guide_135" mesh="pd_c_135" type="mesh" class="pd_collision" />
+      <geom name="guide_136" mesh="pd_c_136" type="mesh" class="pd_collision" />
+      <geom name="guide_137" mesh="pd_c_137" type="mesh" class="pd_collision" />
+      <geom name="guide_138" mesh="pd_c_138" type="mesh" class="pd_collision" />
+      <geom name="guide_139" mesh="pd_c_139" type="mesh" class="pd_collision" />
+      <geom name="guide_140" mesh="pd_c_140" type="mesh" class="pd_collision" />
+      <geom name="guide_141" mesh="pd_c_141" type="mesh" class="pd_collision" />
+      <geom name="guide_142" mesh="pd_c_142" type="mesh" class="pd_collision" />
+      <geom name="guide_143" mesh="pd_c_143" type="mesh" class="pd_collision" />
+      <geom name="guide_144" mesh="pd_c_144" type="mesh" class="pd_collision" />
+      <geom name="guide_145" mesh="pd_c_145" type="mesh" class="pd_collision" />
+      <geom name="guide_146" mesh="pd_c_146" type="mesh" class="pd_collision" />
+      <geom name="guide_147" mesh="pd_c_147" type="mesh" class="pd_collision" />
+      <geom name="guide_148" mesh="pd_c_148" type="mesh" class="pd_collision" />
+      <geom name="guide_149" mesh="pd_c_149" type="mesh" class="pd_collision" />
+      <geom name="guide_150" mesh="pd_c_150" type="mesh" class="pd_collision" />
+      <geom name="guide_151" mesh="pd_c_151" type="mesh" class="pd_collision" />
+      <geom name="guide_152" mesh="pd_c_152" type="mesh" class="pd_collision" />
+      <geom name="guide_153" mesh="pd_c_153" type="mesh" class="pd_collision" />
+      <geom name="guide_154" mesh="pd_c_154" type="mesh" class="pd_collision" />
+      <geom name="guide_155" mesh="pd_c_155" type="mesh" class="pd_collision" />
+      <geom name="guide_156" mesh="pd_c_156" type="mesh" class="pd_collision" />
+      <geom name="guide_157" mesh="pd_c_157" type="mesh" class="pd_collision" />
+      <geom name="guide_158" mesh="pd_c_158" type="mesh" class="pd_collision" />
+      <geom name="guide_159" mesh="pd_c_159" type="mesh" class="pd_collision" />
+      <geom name="guide_160" mesh="pd_c_160" type="mesh" class="pd_collision" />
+      <geom name="guide_161" mesh="pd_c_161" type="mesh" class="pd_collision" />
+      <geom name="guide_162" mesh="pd_c_162" type="mesh" class="pd_collision" />
+      <geom name="guide_163" mesh="pd_c_163" type="mesh" class="pd_collision" />
+      <geom name="guide_164" mesh="pd_c_164" type="mesh" class="pd_collision" />
+      <geom name="guide_165" mesh="pd_c_165" type="mesh" class="pd_collision" />
+      <geom name="guide_166" mesh="pd_c_166" type="mesh" class="pd_collision" />
+      <geom name="guide_167" mesh="pd_c_167" type="mesh" class="pd_collision" />
+      <geom name="guide_168" mesh="pd_c_168" type="mesh" class="pd_collision" />
+      <geom name="guide_169" mesh="pd_c_169" type="mesh" class="pd_collision" />
+      <geom name="guide_170" mesh="pd_c_170" type="mesh" class="pd_collision" />
+      <geom name="guide_171" mesh="pd_c_171" type="mesh" class="pd_collision" />
+      <geom name="guide_172" mesh="pd_c_172" type="mesh" class="pd_collision" />
+      <geom name="guide_173" mesh="pd_c_173" type="mesh" class="pd_collision" />
+      <geom name="guide_174" mesh="pd_c_174" type="mesh" class="pd_collision" />
+      <geom name="guide_175" mesh="pd_c_175" type="mesh" class="pd_collision" />
+      <geom name="guide_176" mesh="pd_c_176" type="mesh" class="pd_collision" />
+      <geom name="guide_177" mesh="pd_c_177" type="mesh" class="pd_collision" />
+      <geom name="guide_178" mesh="pd_c_178" type="mesh" class="pd_collision" />
+      <geom name="guide_179" mesh="pd_c_179" type="mesh" class="pd_collision" />
+      <geom name="guide_180" mesh="pd_c_180" type="mesh" class="pd_collision" />
+      <geom name="guide_181" mesh="pd_c_181" type="mesh" class="pd_collision" />
+      <geom name="guide_182" mesh="pd_c_182" type="mesh" class="pd_collision" />
+      <geom name="guide_183" mesh="pd_c_183" type="mesh" class="pd_collision" />
+      <geom name="guide_184" mesh="pd_c_184" type="mesh" class="pd_collision" />
+      <geom name="guide_185" mesh="pd_c_185" type="mesh" class="pd_collision" />
+      <geom name="guide_186" mesh="pd_c_186" type="mesh" class="pd_collision" />
+      <geom name="guide_187" mesh="pd_c_187" type="mesh" class="pd_collision" />
+      <geom name="guide_188" mesh="pd_c_188" type="mesh" class="pd_collision" />
+      <geom name="guide_189" mesh="pd_c_189" type="mesh" class="pd_collision" />
+      <geom name="guide_190" mesh="pd_c_190" type="mesh" class="pd_collision" />
+      <geom name="guide_191" mesh="pd_c_191" type="mesh" class="pd_collision" />
+      <geom name="guide_192" mesh="pd_c_192" type="mesh" class="pd_collision" />
+      <geom name="guide_193" mesh="pd_c_193" type="mesh" class="pd_collision" />
+      <geom name="guide_194" mesh="pd_c_194" type="mesh" class="pd_collision" />
+      <geom name="guide_195" mesh="pd_c_195" type="mesh" class="pd_collision" />
+      <geom name="guide_196" mesh="pd_c_196" type="mesh" class="pd_collision" />
+      <geom name="guide_197" mesh="pd_c_197" type="mesh" class="pd_collision" />
+      <geom name="guide_198" mesh="pd_c_198" type="mesh" class="pd_collision" />
+      <geom name="guide_199" mesh="pd_c_199" type="mesh" class="pd_collision" />
+      <geom name="guide_200" mesh="pd_c_200" type="mesh" class="pd_collision" />
+      <geom name="guide_201" mesh="pd_c_201" type="mesh" class="pd_collision" />
+      <geom name="guide_202" mesh="pd_c_202" type="mesh" class="pd_collision" />
+      <geom name="guide_203" mesh="pd_c_203" type="mesh" class="pd_collision" />
+      <geom name="guide_204" mesh="pd_c_204" type="mesh" class="pd_collision" />
+      <geom name="guide_205" mesh="pd_c_205" type="mesh" class="pd_collision" />
+      <geom name="guide_206" mesh="pd_c_206" type="mesh" class="pd_collision" />
+      <geom name="guide_207" mesh="pd_c_207" type="mesh" class="pd_collision" />
+      <geom name="guide_208" mesh="pd_c_208" type="mesh" class="pd_collision" />
+      <geom name="guide_209" mesh="pd_c_209" type="mesh" class="pd_collision" />
+      <geom name="guide_210" mesh="pd_c_210" type="mesh" class="pd_collision" />
+      <geom name="guide_211" mesh="pd_c_211" type="mesh" class="pd_collision" />
+      <geom name="guide_212" mesh="pd_c_212" type="mesh" class="pd_collision" />
+      <geom name="guide_213" mesh="pd_c_213" type="mesh" class="pd_collision" />
+      <geom name="guide_214" mesh="pd_c_214" type="mesh" class="pd_collision" />
+      <geom name="guide_215" mesh="pd_c_215" type="mesh" class="pd_collision" />
+      <geom name="guide_216" mesh="pd_c_216" type="mesh" class="pd_collision" />
+      <geom name="guide_217" mesh="pd_c_217" type="mesh" class="pd_collision" />
+      <geom name="guide_218" mesh="pd_c_218" type="mesh" class="pd_collision" />
+      <geom name="guide_219" mesh="pd_c_219" type="mesh" class="pd_collision" />
+      <geom name="guide_220" mesh="pd_c_220" type="mesh" class="pd_collision" />
+      <geom name="guide_221" mesh="pd_c_221" type="mesh" class="pd_collision" />
+      <geom name="guide_222" mesh="pd_c_222" type="mesh" class="pd_collision" />
+      <geom name="guide_223" mesh="pd_c_223" type="mesh" class="pd_collision" />
+      <geom name="guide_224" mesh="pd_c_224" type="mesh" class="pd_collision" />
+      <geom name="guide_225" mesh="pd_c_225" type="mesh" class="pd_collision" />
+      <geom name="guide_226" mesh="pd_c_226" type="mesh" class="pd_collision" />
+      <geom name="guide_227" mesh="pd_c_227" type="mesh" class="pd_collision" />
+      <geom name="guide_228" mesh="pd_c_228" type="mesh" class="pd_collision" />
+      <geom name="guide_229" mesh="pd_c_229" type="mesh" class="pd_collision" />
+      <geom name="guide_230" mesh="pd_c_230" type="mesh" class="pd_collision" />
+      <geom name="guide_231" mesh="pd_c_231" type="mesh" class="pd_collision" />
+      <geom name="guide_232" mesh="pd_c_232" type="mesh" class="pd_collision" />
+      <geom name="guide_233" mesh="pd_c_233" type="mesh" class="pd_collision" />
+      <geom name="guide_234" mesh="pd_c_234" type="mesh" class="pd_collision" />
+      <geom name="guide_235" mesh="pd_c_235" type="mesh" class="pd_collision" />
+      <geom name="guide_236" mesh="pd_c_236" type="mesh" class="pd_collision" />
+      <geom name="guide_237" mesh="pd_c_237" type="mesh" class="pd_collision" />
+      <geom name="guide_238" mesh="pd_c_238" type="mesh" class="pd_collision" />
+      <geom name="guide_239" mesh="pd_c_239" type="mesh" class="pd_collision" />
+      <geom name="guide_240" mesh="pd_c_240" type="mesh" class="pd_collision" />
+      <geom name="guide_241" mesh="pd_c_241" type="mesh" class="pd_collision" />
+      <geom name="guide_242" mesh="pd_c_242" type="mesh" class="pd_collision" />
+      <geom name="guide_243" mesh="pd_c_243" type="mesh" class="pd_collision" />
+      <geom name="guide_244" mesh="pd_c_244" type="mesh" class="pd_collision" />
+      <geom name="guide_245" mesh="pd_c_245" type="mesh" class="pd_collision" />
+      <geom name="guide_246" mesh="pd_c_246" type="mesh" class="pd_collision" />
+      <geom name="guide_247" mesh="pd_c_247" type="mesh" class="pd_collision" />
+      <geom name="guide_248" mesh="pd_c_248" type="mesh" class="pd_collision" />
+      <geom name="guide_249" mesh="pd_c_249" type="mesh" class="pd_collision" />
+      <geom name="guide_250" mesh="pd_c_250" type="mesh" class="pd_collision" />
+      <geom name="guide_251" mesh="pd_c_251" type="mesh" class="pd_collision" />
+      <geom name="guide_252" mesh="pd_c_252" type="mesh" class="pd_collision" />
+      <geom name="guide_253" mesh="pd_c_253" type="mesh" class="pd_collision" />
+      <geom name="guide_254" mesh="pd_c_254" type="mesh" class="pd_collision" />
+      <geom name="guide_255" mesh="pd_c_255" type="mesh" class="pd_collision" />
+      <geom name="guide_256" mesh="pd_c_256" type="mesh" class="pd_collision" />
+      <geom name="guide_257" mesh="pd_c_257" type="mesh" class="pd_collision" />
+      <geom name="guide_258" mesh="pd_c_258" type="mesh" class="pd_collision" />
+      <geom name="guide_259" mesh="pd_c_259" type="mesh" class="pd_collision" />
+      <geom name="guide_260" mesh="pd_c_260" type="mesh" class="pd_collision" />
+      <geom name="guide_261" mesh="pd_c_261" type="mesh" class="pd_collision" />
+      <geom name="guide_262" mesh="pd_c_262" type="mesh" class="pd_collision" />
+      <geom name="guide_263" mesh="pd_c_263" type="mesh" class="pd_collision" />
+      <geom name="guide_264" mesh="pd_c_264" type="mesh" class="pd_collision" />
+      <geom name="guide_265" mesh="pd_c_265" type="mesh" class="pd_collision" />
+      <geom name="guide_266" mesh="pd_c_266" type="mesh" class="pd_collision" />
+      <geom name="guide_267" mesh="pd_c_267" type="mesh" class="pd_collision" />
+      <geom name="guide_268" mesh="pd_c_268" type="mesh" class="pd_collision" />
+      <geom name="guide_269" mesh="pd_c_269" type="mesh" class="pd_collision" />
+      <geom name="guide_270" mesh="pd_c_270" type="mesh" class="pd_collision" />
+      <geom name="guide_271" mesh="pd_c_271" type="mesh" class="pd_collision" />
+      <geom name="guide_272" mesh="pd_c_272" type="mesh" class="pd_collision" />
+      <geom name="guide_273" mesh="pd_c_273" type="mesh" class="pd_collision" />
+      <geom name="guide_274" mesh="pd_c_274" type="mesh" class="pd_collision" />
+      <geom name="guide_275" mesh="pd_c_275" type="mesh" class="pd_collision" />
+      <geom name="guide_276" mesh="pd_c_276" type="mesh" class="pd_collision" />
+      <geom name="guide_277" mesh="pd_c_277" type="mesh" class="pd_collision" />
+      <geom name="guide_278" mesh="pd_c_278" type="mesh" class="pd_collision" />
+      <geom name="guide_279" mesh="pd_c_279" type="mesh" class="pd_collision" />
+      <geom name="guide_280" mesh="pd_c_280" type="mesh" class="pd_collision" />
+      <geom name="guide_281" mesh="pd_c_281" type="mesh" class="pd_collision" />
+      <geom name="guide_282" mesh="pd_c_282" type="mesh" class="pd_collision" />
+      <geom name="guide_283" mesh="pd_c_283" type="mesh" class="pd_collision" />
+      <geom name="guide_284" mesh="pd_c_284" type="mesh" class="pd_collision" />
+      <geom name="guide_285" mesh="pd_c_285" type="mesh" class="pd_collision" />
+      <geom name="guide_286" mesh="pd_c_286" type="mesh" class="pd_collision" />
+      <geom name="guide_287" mesh="pd_c_287" type="mesh" class="pd_collision" />
+      <geom name="guide_288" mesh="pd_c_288" type="mesh" class="pd_collision" />
+      <geom name="guide_289" mesh="pd_c_289" type="mesh" class="pd_collision" />
+      <geom name="guide_290" mesh="pd_c_290" type="mesh" class="pd_collision" />
+      <geom name="guide_291" mesh="pd_c_291" type="mesh" class="pd_collision" />
+      <geom name="guide_292" mesh="pd_c_292" type="mesh" class="pd_collision" />
+      <geom name="guide_293" mesh="pd_c_293" type="mesh" class="pd_collision" />
+      <geom name="guide_294" mesh="pd_c_294" type="mesh" class="pd_collision" />
+      <geom name="guide_295" mesh="pd_c_295" type="mesh" class="pd_collision" />
+      <geom name="guide_296" mesh="pd_c_296" type="mesh" class="pd_collision" />
+      <geom name="guide_297" mesh="pd_c_297" type="mesh" class="pd_collision" />
+      <geom name="guide_298" mesh="pd_c_298" type="mesh" class="pd_collision" />
+      <geom name="guide_299" mesh="pd_c_299" type="mesh" class="pd_collision" />
+      <geom name="guide_300" mesh="pd_c_300" type="mesh" class="pd_collision" />
+      <geom name="guide_301" mesh="pd_c_301" type="mesh" class="pd_collision" />
+      <geom name="guide_302" mesh="pd_c_302" type="mesh" class="pd_collision" />
+      <geom name="guide_303" mesh="pd_c_303" type="mesh" class="pd_collision" />
+      <geom name="guide_304" mesh="pd_c_304" type="mesh" class="pd_collision" />
+      <geom name="guide_305" mesh="pd_c_305" type="mesh" class="pd_collision" />
+      <geom name="guide_306" mesh="pd_c_306" type="mesh" class="pd_collision" />
+      <geom name="guide_307" mesh="pd_c_307" type="mesh" class="pd_collision" />
+      <geom name="guide_308" mesh="pd_c_308" type="mesh" class="pd_collision" />
+      <geom name="guide_309" mesh="pd_c_309" type="mesh" class="pd_collision" />
+      <geom name="guide_310" mesh="pd_c_310" type="mesh" class="pd_collision" />
+      <geom name="guide_311" mesh="pd_c_311" type="mesh" class="pd_collision" />
+      <geom name="guide_312" mesh="pd_c_312" type="mesh" class="pd_collision" />
+      <geom name="guide_313" mesh="pd_c_313" type="mesh" class="pd_collision" />
+      <geom name="guide_314" mesh="pd_c_314" type="mesh" class="pd_collision" />
+      <geom name="guide_315" mesh="pd_c_315" type="mesh" class="pd_collision" />
+      <geom name="guide_316" mesh="pd_c_316" type="mesh" class="pd_collision" />
+      <geom name="guide_317" mesh="pd_c_317" type="mesh" class="pd_collision" />
+      <geom name="guide_318" mesh="pd_c_318" type="mesh" class="pd_collision" />
+      <geom name="guide_319" mesh="pd_c_319" type="mesh" class="pd_collision" />
+      <geom name="guide_320" mesh="pd_c_320" type="mesh" class="pd_collision" />
+      <geom name="guide_321" mesh="pd_c_321" type="mesh" class="pd_collision" />
+      <geom name="guide_322" mesh="pd_c_322" type="mesh" class="pd_collision" />
+      <geom name="guide_323" mesh="pd_c_323" type="mesh" class="pd_collision" />
+      <geom name="guide_324" mesh="pd_c_324" type="mesh" class="pd_collision" />
+      <geom name="guide_325" mesh="pd_c_325" type="mesh" class="pd_collision" />
+      <geom name="guide_326" mesh="pd_c_326" type="mesh" class="pd_collision" />
+      <geom name="guide_327" mesh="pd_c_327" type="mesh" class="pd_collision" />
+      <geom name="guide_328" mesh="pd_c_328" type="mesh" class="pd_collision" />
+      <geom name="guide_329" mesh="pd_c_329" type="mesh" class="pd_collision" />
+      <geom name="guide_330" mesh="pd_c_330" type="mesh" class="pd_collision" />
+      <geom name="guide_331" mesh="pd_c_331" type="mesh" class="pd_collision" />
+      <geom name="guide_332" mesh="pd_c_332" type="mesh" class="pd_collision" />
+      <geom name="guide_333" mesh="pd_c_333" type="mesh" class="pd_collision" />
+      <geom name="guide_334" mesh="pd_c_334" type="mesh" class="pd_collision" />
+      <geom name="guide_335" mesh="pd_c_335" type="mesh" class="pd_collision" />
+      <geom name="guide_336" mesh="pd_c_336" type="mesh" class="pd_collision" />
+      <geom name="guide_337" mesh="pd_c_337" type="mesh" class="pd_collision" />
+      <geom name="guide_338" mesh="pd_c_338" type="mesh" class="pd_collision" />
+      <geom name="guide_339" mesh="pd_c_339" type="mesh" class="pd_collision" />
+      <geom name="guide_340" mesh="pd_c_340" type="mesh" class="pd_collision" />
+      <geom name="guide_341" mesh="pd_c_341" type="mesh" class="pd_collision" />
+      <geom name="guide_342" mesh="pd_c_342" type="mesh" class="pd_collision" />
+      <geom name="guide_343" mesh="pd_c_343" type="mesh" class="pd_collision" />
+      <geom name="guide_344" mesh="pd_c_344" type="mesh" class="pd_collision" />
+      <geom name="guide_345" mesh="pd_c_345" type="mesh" class="pd_collision" />
+      <geom name="guide_346" mesh="pd_c_346" type="mesh" class="pd_collision" />
+      <geom name="guide_347" mesh="pd_c_347" type="mesh" class="pd_collision" />
+      <geom name="guide_348" mesh="pd_c_348" type="mesh" class="pd_collision" />
+      <geom name="guide_349" mesh="pd_c_349" type="mesh" class="pd_collision" />
+      <geom name="guide_350" mesh="pd_c_350" type="mesh" class="pd_collision" />
+      <geom name="guide_351" mesh="pd_c_351" type="mesh" class="pd_collision" />
+      <geom name="guide_352" mesh="pd_c_352" type="mesh" class="pd_collision" />
+      <geom name="guide_353" mesh="pd_c_353" type="mesh" class="pd_collision" />
+      <geom name="guide_354" mesh="pd_c_354" type="mesh" class="pd_collision" />
+      <geom name="guide_355" mesh="pd_c_355" type="mesh" class="pd_collision" />
+      <geom name="guide_356" mesh="pd_c_356" type="mesh" class="pd_collision" />
+      <geom name="guide_357" mesh="pd_c_357" type="mesh" class="pd_collision" />
+      <geom name="guide_358" mesh="pd_c_358" type="mesh" class="pd_collision" />
+      <geom name="guide_359" mesh="pd_c_359" type="mesh" class="pd_collision" />
+      <geom name="guide_360" mesh="pd_c_360" type="mesh" class="pd_collision" />
+      <geom name="guide_361" mesh="pd_c_361" type="mesh" class="pd_collision" />
+      <geom name="guide_362" mesh="pd_c_362" type="mesh" class="pd_collision" />
+      <geom name="guide_363" mesh="pd_c_363" type="mesh" class="pd_collision" />
+      <geom name="guide_364" mesh="pd_c_364" type="mesh" class="pd_collision" />
+      <geom name="guide_365" mesh="pd_c_365" type="mesh" class="pd_collision" />
+      <geom name="guide_366" mesh="pd_c_366" type="mesh" class="pd_collision" />
+      <geom name="guide_367" mesh="pd_c_367" type="mesh" class="pd_collision" />
+      <geom name="guide_368" mesh="pd_c_368" type="mesh" class="pd_collision" />
+      <geom name="guide_369" mesh="pd_c_369" type="mesh" class="pd_collision" />
+      <geom name="guide_370" mesh="pd_c_370" type="mesh" class="pd_collision" />
+      <geom name="guide_371" mesh="pd_c_371" type="mesh" class="pd_collision" />
+      <geom name="guide_372" mesh="pd_c_372" type="mesh" class="pd_collision" />
+      <geom name="guide_373" mesh="pd_c_373" type="mesh" class="pd_collision" />
+      <geom name="guide_374" mesh="pd_c_374" type="mesh" class="pd_collision" />
+      <geom name="guide_375" mesh="pd_c_375" type="mesh" class="pd_collision" />
+      <geom name="guide_376" mesh="pd_c_376" type="mesh" class="pd_collision" />
+      <geom name="guide_377" mesh="pd_c_377" type="mesh" class="pd_collision" />
+      <geom name="guide_378" mesh="pd_c_378" type="mesh" class="pd_collision" />
+      <geom name="guide_379" mesh="pd_c_379" type="mesh" class="pd_collision" />
+      <geom name="guide_380" mesh="pd_c_380" type="mesh" class="pd_collision" />
+      <geom name="guide_381" mesh="pd_c_381" type="mesh" class="pd_collision" />
+      <geom name="guide_382" mesh="pd_c_382" type="mesh" class="pd_collision" />
+      <geom name="guide_383" mesh="pd_c_383" type="mesh" class="pd_collision" />
+      <geom name="guide_384" mesh="pd_c_384" type="mesh" class="pd_collision" />
+      <geom name="guide_385" mesh="pd_c_385" type="mesh" class="pd_collision" />
+      <geom name="guide_386" mesh="pd_c_386" type="mesh" class="pd_collision" />
+      <geom name="guide_387" mesh="pd_c_387" type="mesh" class="pd_collision" />
+      <geom name="guide_388" mesh="pd_c_388" type="mesh" class="pd_collision" />
+      <geom name="guide_389" mesh="pd_c_389" type="mesh" class="pd_collision" />
+      <geom name="guide_390" mesh="pd_c_390" type="mesh" class="pd_collision" />
+      <geom name="guide_391" mesh="pd_c_391" type="mesh" class="pd_collision" />
+      <geom name="guide_392" mesh="pd_c_392" type="mesh" class="pd_collision" />
+      <geom name="guide_393" mesh="pd_c_393" type="mesh" class="pd_collision" />
+      <geom name="guide_394" mesh="pd_c_394" type="mesh" class="pd_collision" />
+      <geom name="guide_395" mesh="pd_c_395" type="mesh" class="pd_collision" />
+      <geom name="guide_396" mesh="pd_c_396" type="mesh" class="pd_collision" />
+      <geom name="guide_397" mesh="pd_c_397" type="mesh" class="pd_collision" />
+      <geom name="guide_398" mesh="pd_c_398" type="mesh" class="pd_collision" />
+      <geom name="guide_399" mesh="pd_c_399" type="mesh" class="pd_collision" />
+      <geom name="guide_400" mesh="pd_c_400" type="mesh" class="pd_collision" />
+      <geom name="guide_401" mesh="pd_c_401" type="mesh" class="pd_collision" />
+      <geom name="guide_402" mesh="pd_c_402" type="mesh" class="pd_collision" />
+      <geom name="guide_403" mesh="pd_c_403" type="mesh" class="pd_collision" />
+      <geom name="guide_404" mesh="pd_c_404" type="mesh" class="pd_collision" />
+      <geom name="guide_405" mesh="pd_c_405" type="mesh" class="pd_collision" />
+      <geom name="guide_406" mesh="pd_c_406" type="mesh" class="pd_collision" />
+      <geom name="guide_407" mesh="pd_c_407" type="mesh" class="pd_collision" />
+      <geom name="guide_408" mesh="pd_c_408" type="mesh" class="pd_collision" />
+      <geom name="guide_409" mesh="pd_c_409" type="mesh" class="pd_collision" />
+      <geom name="guide_410" mesh="pd_c_410" type="mesh" class="pd_collision" />
+      <geom name="guide_411" mesh="pd_c_411" type="mesh" class="pd_collision" />
+      <geom name="guide_412" mesh="pd_c_412" type="mesh" class="pd_collision" />
+      <geom name="guide_413" mesh="pd_c_413" type="mesh" class="pd_collision" />
+      <geom name="guide_414" mesh="pd_c_414" type="mesh" class="pd_collision" />
+      <geom name="guide_415" mesh="pd_c_415" type="mesh" class="pd_collision" />
+      <geom name="stop_416" mesh="pd_c_416" type="mesh" class="pd_collision" />
+      <geom name="stop_417" mesh="pd_c_417" type="mesh" class="pd_collision" />
+      <geom name="stop_418" mesh="pd_c_418" type="mesh" class="pd_collision" />
+      <geom name="stop_419" mesh="pd_c_419" type="mesh" class="pd_collision" />
+      <geom name="stop_420" mesh="pd_c_420" type="mesh" class="pd_collision" />
+      <geom name="stop_421" mesh="pd_c_421" type="mesh" class="pd_collision" />
+      <geom name="stop_422" mesh="pd_c_422" type="mesh" class="pd_collision" />
+      <geom name="stop_423" mesh="pd_c_423" type="mesh" class="pd_collision" />
+      <geom name="stop_424" mesh="pd_c_424" type="mesh" class="pd_collision" />
+      <geom name="stop_425" mesh="pd_c_425" type="mesh" class="pd_collision" />
+      <geom name="stop_426" mesh="pd_c_426" type="mesh" class="pd_collision" />
+      <geom name="stop_427" mesh="pd_c_427" type="mesh" class="pd_collision" />
+      <geom name="stop_428" mesh="pd_c_428" type="mesh" class="pd_collision" />
+      <geom name="stop_429" mesh="pd_c_429" type="mesh" class="pd_collision" />
+      <geom name="stop_430" mesh="pd_c_430" type="mesh" class="pd_collision" />
+      <geom name="stop_431" mesh="pd_c_431" type="mesh" class="pd_collision" />
+      <geom name="stop_432" mesh="pd_c_432" type="mesh" class="pd_collision" />
+      <geom name="stop_433" mesh="pd_c_433" type="mesh" class="pd_collision" />
+      <geom name="stop_434" mesh="pd_c_434" type="mesh" class="pd_collision" />
+      <geom name="stop_435" mesh="pd_c_435" type="mesh" class="pd_collision" />
+      <geom name="stop_436" mesh="pd_c_436" type="mesh" class="pd_collision" />
+      <geom name="stop_437" mesh="pd_c_437" type="mesh" class="pd_collision" />
+      <geom name="stop_438" mesh="pd_c_438" type="mesh" class="pd_collision" />
+      <geom name="stop_439" mesh="pd_c_439" type="mesh" class="pd_collision" />
+      <geom name="base_collision" type="mesh" mesh="pd_base_proxy" class="pd_collision" />
+      <geom name="support_collision" type="cylinder" size="0.0315 0.0015" pos="0 0 0.0015" class="pd_collision" />
+      <geom name="pilot_collision" type="cylinder" size="0.015725 0.001" pos="0 0 -0.001" class="pd_collision" />
+      <site name="sensor_site" pos="0 0 0" size="0.002" group="4" rgba="1 0.6 0 1" />
+      <site name="mating" pos="0 0 0.0232" size="0.002" group="4" rgba="0 0.8 0.5 1" />
+      <site name="contact_zone" type="cylinder" group="5" pos="0 0 0.023" size="0.051 0.01" rgba="0 1 0 0.05" />
+    </body>
+  </worldbody>
+</mujoco>

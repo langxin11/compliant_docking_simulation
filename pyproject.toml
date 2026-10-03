@@ -21,6 +21,7 @@ dependencies = [
 ]
 
 [dependency-groups]
+geometry = ["coacd==1.0.14"]
 dev = [
     "mkdocs>=1.6.1",
     "mkdocs-material>=9.7.7",

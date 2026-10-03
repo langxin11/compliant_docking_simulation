@@ -14,7 +14,7 @@ import os
 from importlib.util import module_from_spec, spec_from_file_location
 from pathlib import Path
 
-from compliant_docking.scene import DEFAULT_SCENE_PATH
+from compliant_docking.scene import DEFAULT_SCENE_PATH, load_scene
 
 
 def _load_run_docking():
@@ -31,8 +31,8 @@ def build_parser() -> argparse.ArgumentParser:
         prog="docking",
         description="七自由度机械臂柔顺对接仿真（MuJoCo × Pinocchio，多控制器可切换）",
     )
-    parser.add_argument("--duration", type=float, default=18.0,
-                        help="总仿真时长（秒），默认 18.0")
+    parser.add_argument("--duration", type=float, default=None,
+                        help="总时长；组合对接默认完整轨迹+保持，旧场景默认18秒")
     parser.add_argument("--dt", type=float, default=0.001,
                         help="仿真步长（秒），默认 0.001")
     parser.add_argument("--traj-duration", type=float, default=15.0,
@@ -45,7 +45,7 @@ def build_parser() -> argparse.ArgumentParser:
                         help="是否离屏录帧并导出 MP4（默认 --no-record）")
     parser.add_argument("--quick", action="store_true",
                         help="快速冒烟测试：等价于 --duration 2.0")
-    parser.add_argument("--controller", choices=["impedance", "se3_lie", "hqp"], default="impedance",
+    parser.add_argument("--controller", choices=["impedance", "se3_lie", "hqp"], default=None,
                         help="控制器：impedance=固定增益任务空间阻抗（默认）；"
                              "se3_lie=SE(3) Lie 群阻抗（Kim et al. 2025 T-RO，指数坐标+dexp 全链路）；"
                              "hqp=HQP-AC 约束自适应控制（Ren & Shan 2026 §3.2）")
@@ -57,6 +57,8 @@ def main(argv: list[str] | None = None) -> int:
 
     if args.quick:
         args.duration = 2.0
+    elif args.duration is None and load_scene(args.scene).docking is None:
+        args.duration = 18.0
 
     # 绘图仅落盘不弹窗：在导入 matplotlib 前锁定 Agg 后端 /
     # Figures are only saved to disk; pin the Agg backend before importing matplotlib
@@ -80,6 +82,9 @@ def main(argv: list[str] | None = None) -> int:
     # --quick 的短时运行会由实验层标为 INCOMPLETE，不视为失败。
     tracking_gate = getattr(log, "tracking_gate", None)
     if tracking_gate is not None and tracking_gate.status == "FAIL":
+        return 2
+    docking_gate = getattr(log, "docking_gate", None)
+    if docking_gate is not None and docking_gate["status"] == "FAIL":
         return 2
     return 0
 

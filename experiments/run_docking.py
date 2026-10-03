@@ -31,9 +31,18 @@ import numpy as np
 import pinocchio as pin
 
 from compliant_docking.config import DockingConfig, HQPConfig, ImpedanceConfig, SE3ImpedanceConfig
+from compliant_docking.contact_diagnostics import ContactDiagnostics, summarize_diagnostics
+from compliant_docking.control.contact_yaw import ContactYawSchedule, control_stride
 from compliant_docking.control.hqp_ac import HQPAdaptiveController
 from compliant_docking.control.se3_impedance import SE3LieImpedanceController
 from compliant_docking.control.task_space import TaskSpaceController
+from compliant_docking.docking_task import (
+    build_docking_trajectory,
+    docking_sample,
+    estimated_target_pose,
+    evaluate_docking,
+    target_rotation,
+)
 from compliant_docking.metrics import (
     TrackingThresholds,
     compute_metrics,
@@ -42,7 +51,7 @@ from compliant_docking.metrics import (
     format_metrics,
     format_tracking_gate,
 )
-from compliant_docking.models import load_pin_model
+from compliant_docking.models import load_assembled_pin_model, load_pin_model
 from compliant_docking.planning.kinematics import compute_ik
 from compliant_docking.planning.motion_reference import get_motion_reference
 from compliant_docking.planning.trajectory import (
@@ -50,23 +59,24 @@ from compliant_docking.planning.trajectory import (
     DecoupledQuinticTrajectory,
     TwoPhaseDockingTrajectory,
 )
+from compliant_docking.planning.waypoints import WaypointPoseTrajectory
 from compliant_docking.scene import DEFAULT_SCENE_PATH, Scene, load_scene
 from compliant_docking.simulation.mujoco_env import MujRobot
 from compliant_docking.telemetry import Log
-from compliant_docking.wrench import wrench_to_body
+from compliant_docking.wrench import WrenchSample
 
 
 def run_simulation(muj_robot:MujRobot,
                    task_dynamics:TaskSpaceController | HQPAdaptiveController | SE3LieImpedanceController,
                    trajector_planner: DecoupledQuinticTrajectory
                    | TwoPhaseDockingTrajectory
-                   | CircleFigure8Trajectory,
+                   | CircleFigure8Trajectory | WaypointPoseTrajectory,
                    log:Log,
                    cfg:DockingConfig,
                    q_init:np.ndarray,
                    scene:Scene | None = None,
                    r_des:np.ndarray | None = None,
-                   plot:bool = True):
+                   plot:bool = True, diagnostics:bool | str = False):
     """
     执行主仿真循环：读取轨迹 → 计算任务空间阻抗控制力矩 → MuJoCo 步进 → 记录/绘图 /
     Run the main simulation loop: sample trajectory → compute task-space impedance torque → MuJoCo step → log/plot
@@ -104,11 +114,23 @@ def run_simulation(muj_robot:MujRobot,
         trajector_planner.get_state(sample_t)[0] for sample_t in path_times
     ])
     muj_robot.set_trajectory_visualization(planned_path)
+    docking = scene.docking if scene is not None else None
+    contact_logger = (ContactDiagnostics(muj_robot.model, scene, store_events=diagnostics != "summary")
+                      if docking and diagnostics else None)
+    if docking is not None:
+        frames = {name: pose for name, pose in zip(trajector_planner.names, trajector_planner.poses, strict=True)}
+        frames["target_truth"] = pin.SE3(target_rotation(scene.target), scene.target.pos)
+        frames["target_estimate"] = estimated_target_pose(docking)
+        muj_robot.set_coordinate_frames(frames)
+        tool_geoms = {i for i in range(muj_robot.model.ngeom)
+                      if (mujoco.mj_id2name(muj_robot.model, mujoco.mjtObj.mjOBJ_GEOM, i) or "").startswith(scene.tool.prefix)}
+        target_geoms = {i for i in range(muj_robot.model.ngeom)
+                        if (mujoco.mj_id2name(muj_robot.model, mujoco.mjtObj.mjOBJ_GEOM, i) or "").startswith(scene.target.prefix)}
 
     q = q_init
     v = np.zeros(task_dynamics.model.nv)
 
-    current_pos, current_vel, _ = task_dynamics.get_task_space_state(q, v)
+    current_pos, current_vel, current_ori = task_dynamics.get_task_space_state(q, v)
 
     force_external = np.zeros(3)
     torque_external = np.zeros(3)
@@ -123,6 +145,8 @@ def run_simulation(muj_robot:MujRobot,
     use_se3 = isinstance(task_dynamics, SE3LieImpedanceController)
     sensor_site_id = -1
     F_body = np.zeros(6)
+    stride = 1
+    yaw_schedule = None
     if use_se3:
         if scene is None:
             raise ValueError("se3_lie 控制器需要 scene（提供 sensor_site 名）")
@@ -132,7 +156,30 @@ def run_simulation(muj_robot:MujRobot,
             muj_robot.model, mujoco.mjtObj.mjOBJ_SITE, scene.sensor_site)
         if sensor_site_id < 0:
             raise ValueError(f"组装模型缺少 F/T 传感器 site: {scene.sensor_site!r}")
+        override = scene.se3_impedance
+        stride = control_stride(override.control_period if override else None,
+                                float(muj_robot.model.opt.timestep))
+        if override is not None and override.contact_yaw is not None:
+            if docking is None or not np.allclose(task_dynamics.K, np.diag(np.diag(task_dynamics.K))):
+                raise ValueError("contact_yaw requires waypoint docking and diagonal stiffness")
+            yaw_schedule = ContactYawSchedule(override.contact_yaw, task_dynamics.K[5, 5],
+                                              np.diag(task_dynamics.K)[:2])
+        # A sensor is sampled at the FIRST solve of each control interval and
+        # consumed at the NEXT update. Its causal delay is one control period,
+        # independent of the number of physics substeps. No extra mj_forward
+        # or constraint solve is introduced into the dynamics pipeline.
+        sensor_sample = WrenchSample.from_site(
+            0., np.zeros(3), np.zeros(3),
+            muj_robot.data.site_xpos[sensor_site_id],
+            muj_robot.data.site_xmat[sensor_site_id])
+        log.feedback_convention = dict(
+            control_period_s=stride*float(muj_robot.model.opt.timestep),
+            delay_s=stride*float(muj_robot.model.opt.timestep),
+            sensor_sample="first solve of previous control interval; bootstrap zero at t=0",
+            wrench="world at saved sensor origin, transported to current control body pose",
+            telemetry="pose, F/T and contacts at pre-integration solve t")
 
+    step_index = 0
     while muj_robot.data.time < cfg.duration:
         # while True:
         t = muj_robot.data.time
@@ -144,12 +191,24 @@ def run_simulation(muj_robot:MujRobot,
 
         # 2) 任务空间控制（含平动/姿态阻抗与外力补偿）→ 得到关节力矩 tau /
         # 2) Task-space control (translation/rotation impedance + external force) → joint torques tau
-        if use_se3:
+        control_update = step_index % stride == 0
+        if use_se3 and control_update:
             # SE(3) Lie 阻抗（Kim et al. 2025）：期望 body 运动参考 + body wrench
             T_d, V_d, Vdot_d = get_motion_reference(trajector_planner, t, r_des)
+            control_pose = pin.SE3(current_ori, np.asarray(current_pos))
+            feedback_sample = sensor_sample
+            if feedback_sample.t > t+1e-12:
+                raise ValueError("Future sensor sample cannot be used as feedback")
+            F_body = np.zeros(6) if is_tracking else feedback_sample.at_body(control_pose)
+            if yaw_schedule is not None:
+                task_dynamics.K[5, 5] = yaw_schedule.update(
+                    t, trajector_planner.phase(t), float(F_body[2]))
+                if yaw_schedule.lateral_stiffness is not None:
+                    task_dynamics.K[0, 0], task_dynamics.K[1, 1] = yaw_schedule.lateral_stiffness
+            control_t = float(t)
             tau_unclipped = task_dynamics.compute_control(
                 q, v, T_d, V_d, Vdot_d, F_body)
-        else:
+        elif not use_se3:
             tau_unclipped = task_dynamics.compute_control_task_space_with_orientation_and_imp(
                 q, v, pos_des, vel_des, acc_des, current_pos, current_vel, force_external, torque_external)
 
@@ -160,6 +219,12 @@ def run_simulation(muj_robot:MujRobot,
 
         # 3) 将 tau 写入 MuJoCo，并推进一步物理仿真 /
         # 3) Apply tau to MuJoCo and advance one simulation step
+        if contact_logger is not None or use_se3:
+            q_solve, v_solve = muj_robot.data.qpos.copy(), muj_robot.data.qvel.copy()
+        if use_se3:
+            solve_pos, solve_vel, solve_ori = (np.asarray(current_pos).copy(),
+                                              np.asarray(current_vel).copy(),
+                                              np.asarray(current_ori).copy())
         try:
             q, v, eef_pos = muj_robot.step(tau)
         except Exception as e:
@@ -167,6 +232,10 @@ def run_simulation(muj_robot:MujRobot,
             print(f"Torques: {tau}")
             print(f"Joint positions: {q}")
             raise RuntimeError(f"仿真在 t={t:.3f}s 异常终止") from e
+        if contact_logger is not None:
+            sample, events = contact_logger.capture(muj_robot.data, t, q_solve, v_solve)
+            log.contact_diagnostics.append(sample)
+            log.contact_events.extend(events)
         # 观测器以（步进后状态, 实际施加力矩）推进
         if update_observer is not None:
             update_observer(q, v, tau)
@@ -192,6 +261,16 @@ def run_simulation(muj_robot:MujRobot,
         # Note: direction depends on `current_ori` definition and sensor frame
         measured_force = current_ori @ force_sensor
         measured_torque = current_ori @ torque_sensor
+        if use_se3:
+            solved_sample = WrenchSample.from_site(
+                t, force_sensor, torque_sensor,
+                muj_robot.data.site_xpos[sensor_site_id],
+                muj_robot.data.site_xmat[sensor_site_id])
+            solved_body = solved_sample.at_body(pin.SE3(solve_ori, solve_pos))
+            measured_force = solve_ori @ solved_body[:3]
+            measured_torque = solve_ori @ solved_body[3:]
+            if control_update:
+                sensor_sample = solved_sample
         # 自由空间跟踪是柔顺接触前置门禁：保留传感器遥测，但绝不把 F/T
         # 反馈回控制器，避免偶发噪声或虚假接触污染基础跟踪性能。
         if is_tracking:
@@ -200,18 +279,6 @@ def run_simulation(muj_robot:MujRobot,
         else:
             force_external = measured_force
             torque_external = measured_torque
-
-        # SE(3) Lie 通道：F/T 读数（site 系，含既有负号约定）→ EE body
-        # wrench（与 body Jacobian 同 frame 同参考点；跟踪门禁下同样置零）
-        if use_se3:
-            if is_tracking:
-                F_body = np.zeros(6)
-            else:
-                F_body = wrench_to_body(
-                    force_sensor, torque_sensor,
-                    muj_robot.data.site_xpos[sensor_site_id],
-                    muj_robot.data.site_xmat[sensor_site_id].reshape(3, 3),
-                    pin.SE3(current_ori, np.asarray(current_pos)))
 
         #print('current:',current_pos,"current_ori:",current_ori)
 
@@ -223,15 +290,41 @@ def run_simulation(muj_robot:MujRobot,
         # 7) Log joint/EE/control/external data for plotting/analysis
         #    提供期望姿态 r_des 时同步记录世界系姿态误差 log(R_d R^T)（供 metrics 使用）/
         #    When r_des is given, also log the world-frame orientation error log(R_d R^T)
-        ori_err_vec = pin.log3(r_des @ current_ori.T) if r_des is not None else None
+        reference_rotation = (trajector_planner.get_pose(t).rotation
+                              if use_se3 and hasattr(trajector_planner, "get_pose") else r_des)
+        log_q, log_v = (q_solve, v_solve) if use_se3 else (q, v)
+        log_pos, log_vel, log_ori = ((solve_pos, solve_vel, solve_ori) if use_se3
+                                     else (current_pos, current_vel, current_ori))
+        ori_err_vec = pin.log3(reference_rotation @ log_ori.T) if reference_rotation is not None else None
         log.store_data(
-            t, q, v, current_pos, current_vel,
-            np.linalg.norm(current_pos - pos_des),
+            t, log_q, log_v, log_pos, log_vel,
+            np.linalg.norm(log_pos - pos_des),
             pos_des, vel_des, acc_des, tau,
             measured_force, measured_torque,
             orientation_error=ori_err_vec,
             torque_saturated=torque_saturated,
             contact_count=muj_robot.data.ncon)
+        if docking is not None:
+            # Pose, speed, sensor and contact data all refer to solve t.
+            # Truth enters only evaluation and rendering, never the schedule.
+            J = pin.computeFrameJacobian(task_dynamics.model, task_dynamics.data, q_solve,
+                                         task_dynamics.end_effector_id,
+                                         pin.ReferenceFrame.LOCAL_WORLD_ALIGNED)
+            interface_contacts = sum(
+                (int(contact.geom1) in tool_geoms and int(contact.geom2) in target_geoms)
+                or (int(contact.geom2) in tool_geoms and int(contact.geom1) in target_geoms)
+                for contact in muj_robot.data.contact)
+            log.docking_samples.append(docking_sample(
+                docking, scene.target, t=t, phase=trajector_planner.phase(t),
+                position=solve_pos, rotation=solve_ori, velocity=solve_vel,
+                angular_velocity=J[3:] @ v_solve, force=measured_force,
+                moment=measured_torque, interface_contacts=interface_contacts,
+                other_contacts=muj_robot.data.ncon-interface_contacts))
+            log.docking_joint_limit_violation |= bool(
+                np.any(q < task_dynamics.model.lowerPositionLimit-1e-6)
+                or np.any(q > task_dynamics.model.upperPositionLimit+1e-6))
+            muj_robot.set_coordinate_frames({
+                "desired": T_d, "actual": pin.SE3(current_ori, current_pos)}, replace=False)
         # SE(3) Lie 控制器诊断（标量子集；完整 latest_diagnostics 留在控制器内）
         if use_se3:
             d = task_dynamics.latest_diagnostics
@@ -245,9 +338,21 @@ def run_simulation(muj_robot:MujRobot,
                 "F_body_norm": d["F_body_norm"],
                 "tau_norm": d["tau_norm"],
                 "torque_saturated": torque_saturated,
+                "control_update": control_update,
+                "control_t": control_t,
+                "feedback_t": feedback_sample.t,
+                "feedback_age_s": control_t-feedback_sample.t,
+                "feedback_body": F_body.copy(),
+                "feedback_origin": feedback_sample.origin.copy(),
+                "feedback_world_at_origin": feedback_sample.world.copy(),
+                "control_position": control_pose.translation.copy(),
+                "control_rotation": control_pose.rotation.copy(),
+                "yaw_stiffness": float(task_dynamics.K[5, 5]),
+                "lateral_stiffness": np.diag(task_dynamics.K)[:2].copy(),
+                "filtered_axial_force_N": yaw_schedule.filtered_force_N if yaw_schedule else 0.,
+                "yaw_trigger_t": yaw_schedule.trigger_t if yaw_schedule and yaw_schedule.trigger_t is not None else -1.,
             })
-
-
+        step_index += 1
     if plot:
         log.plot_results(save_path="figure/",
                          scene_name=scene.name if scene is not None else None)
@@ -271,9 +376,9 @@ def run_simulation(muj_robot:MujRobot,
 
 
 
-def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
-         scene_path: str | Path = DEFAULT_SCENE_PATH, controller: str = "impedance",
-         scene: Scene | None = None, plot: bool = True):
+def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=None,
+         scene_path: str | Path = DEFAULT_SCENE_PATH, controller: str | None = None,
+         scene: Scene | None = None, plot: bool = True, diagnostics: bool | str = False):
     """
     Main function that sets up and runs the robot control simulation.
 
@@ -299,6 +404,15 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
     # Load scene from YAML, or accept a pre-built Scene (batch experiments
     # build config variants via dataclasses.replace)
     scene = scene if scene is not None else load_scene(scene_path)
+    controller = controller or scene.controller
+    docking_trajectory = None
+    if scene.docking is not None:
+        if controller != "se3_lie":
+            raise ValueError("waypoint docking requires se3_lie for moving attitude and axial compliance")
+        docking_trajectory = build_docking_trajectory(scene.task, scene.docking, scene.trajectory)
+    if duration is None:
+        duration = (docking_trajectory.total_duration + scene.docking.hold_s
+                    if docking_trajectory is not None else 20.0)
 
     # 参数集中管理：函数入参覆盖 DockingConfig 默认值 /
     # Centralized params: function args override DockingConfig defaults
@@ -319,7 +433,8 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
             "tool_com": inertia.com,
             "tool_diaginertia": inertia.diaginertia,
         }
-    pin_model = load_pin_model(scene.robot.pin_model, **pin_kwargs)
+    pin_model = (load_assembled_pin_model(scene) if scene.robot.pin_model is None
+                 else load_pin_model(scene.robot.pin_model, **pin_kwargs))
     pin_data = pin_model.createData()
 
     # 任务初始条件（先于控制器构建提取，供 IK 与 HQP 期望姿态使用） /
@@ -374,7 +489,8 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
                 se3_cfg = replace(se3_cfg, **se3_kwargs)
                 print(f"SE(3) 阻抗覆盖: {se3_kwargs}")
         task_dynamics = SE3LieImpedanceController(
-            pin_model, cfg.dt, se3_cfg, ee_frame=scene.robot.ee_frame,
+            pin_model, ov.control_period if ov and ov.control_period else cfg.dt,
+            se3_cfg, ee_frame=scene.robot.ee_frame,
             frictionloss=frictionloss, damping=damping,
             friction_mode=scene.friction_comp)
         print("控制器: SE(3) Lie 群阻抗（Kim et al. 2025 T-RO，T̃/λ/dexp/γ 全链路；"
@@ -415,7 +531,22 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
                                  ee_frame=scene.robot.ee_frame)
 
     if not success:
+        if scene.docking is not None:
+            raise ValueError("Initial docking pose is unreachable; refusing to start from failed IK")
         print("Warning: IK did not converge perfectly, but continuing with best solution found.")
+    if docking_trajectory is not None:
+        # Check a continuous IK branch through the commanded path. Collision
+        # acceptance remains based on the actual rollout, including link contacts.
+        from contextlib import redirect_stdout
+        from io import StringIO
+        q_check = q_init.copy()
+        with redirect_stdout(StringIO()):
+            for sample_t in np.linspace(0, docking_trajectory.total_duration, 80):
+                q_check, reachable = compute_ik(
+                    pin_model, pin_data, docking_trajectory.get_pose(sample_t),
+                    initial_q=q_check, max_iters=200, ee_frame=scene.robot.ee_frame)
+                if not reachable:
+                    raise ValueError(f"Docking waypoint path is unreachable at t={sample_t:.3f}s")
 
     #步进 Pinocchio 以更新数据 /
     # Step Pinocchio to update data
@@ -436,7 +567,8 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
     # Target = initial position + docking stroke (from scene)
     # 跟踪测试分支下目标位置即初始位置（MujRobot 构造仍需要 target_pos） /
     # In tracking mode target_pos = init_pos (MujRobot construction still needs it)
-    target_pos = init_pos if is_tracking else init_pos + scene.task.stroke
+    target_pos = (docking_trajectory.poses[-1].translation.copy() if docking_trajectory is not None
+                  else init_pos if is_tracking else init_pos + scene.task.stroke)
     print(f"Target position: {target_pos}")
 
     # Initialize robot simulation with parameters
@@ -463,7 +595,11 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
     #    trajectory (cfg.traj_duration ignored); trajectory section (default
     #    twophase) → two-phase docking trajectory; else the legacy quintic
     # SE(3)-TOPP 分发（置于最前；论文 §3.1 的实现）
-    if scene.trajectory is not None and scene.trajectory.type == "se3topp":
+    if docking_trajectory is not None:
+        trajector_planner = docking_trajectory
+        print(f"轨迹: 侧方接近/上方路点/下降/柔顺插入，运动 {trajector_planner.total_duration:.3f}s，"
+              f"保持 {scene.docking.hold_s:.3f}s")
+    elif scene.trajectory is not None and scene.trajectory.type == "se3topp":
         from compliant_docking.planning.se3_topp import SE3ToppTrajectory
         traj_spec = scene.trajectory
         # 当前内置对接场景姿态恒定；规划器仍按步输出完整 T_d/V_d/Vdot_d，
@@ -530,6 +666,7 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
         scene=scene,
         r_des=init_ori,
         plot=plot,
+        diagnostics=diagnostics,
     )
 
     # 4) 性能指标输出：
@@ -555,10 +692,20 @@ def main(render=True, record=True, dt=0.001, traj_duration=15.0, duration=20.0,
         log.tracking_gate = tracking_gate
         print(format_tracking_gate(tracking_gate))
     else:
-        axis = scene.task.stroke / np.linalg.norm(scene.task.stroke)
+        axis = (np.array([0., 0., -1.]) if docking_trajectory is not None
+                else scene.task.stroke / np.linalg.norm(scene.task.stroke))
         metrics = compute_metrics(log, pin_model, axis=axis, ee_frame=scene.robot.ee_frame)
         print(format_metrics(metrics))
+    if docking_trajectory is not None:
+        log.docking_gate = evaluate_docking(log, scene.docking, docking_trajectory, cfg.dt)
+        log.docking_trajectory = docking_trajectory
+        if diagnostics:
+            log.contact_summary = summarize_diagnostics(log.contact_diagnostics, log.contact_events,
+                                                        target_rotation(scene.target))
+        print(f"[insertion gate] {log.docking_gate}")
 
+    log.simulation_warnings = {str(mujoco.mjtWarning(i)).split(".")[-1]: int(w.number)
+                               for i, w in enumerate(muj_robot.data.warning) if w.number}
     return log
 
 if __name__ == '__main__':

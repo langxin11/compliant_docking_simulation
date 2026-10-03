@@ -1,0 +1,96 @@
+{
+  "name": "PetalDock100",
+  "version": "3.0-simulation-narrow",
+  "mjcf_units": "m",
+  "origin": "robot flange mounting face",
+  "approach_axis": "+Z",
+  "mating_site_z_m": 0.0232,
+  "nominal_flange_separation_m": 0.0464,
+  "mating_relative_quaternion_wxyz": [
+    0,
+    0.9238795325112867,
+    0.3826834323650898,
+    0
+  ],
+  "body_mass_kg": 0.3916909444741654,
+  "body_com_m": [
+    4.739132537560084e-05,
+    8.742036369009432e-08,
+    0.012481414650446863
+  ],
+  "body_inertia_about_com_kg_m2": [
+    [
+      0.0002704220805020104,
+      -5.05851233181671e-10,
+      1.2511029078384798e-07
+    ],
+    [
+      -5.05851233183413e-10,
+      0.0002708892676306518,
+      -3.846111144377178e-10
+    ],
+    [
+      1.2511029078384808e-07,
+      -3.846111144377178e-10,
+      0.0004999960906469103
+    ]
+  ],
+  "guide_convex_cells": 464,
+  "stop_convex_cells": 24,
+  "robot_bolt_angles_deg": [
+    45.0,
+    90.0,
+    135.0,
+    180.0,
+    225.0,
+    270.0,
+    315.0
+  ],
+  "hole_clocking_note": "index_angle_deg is configurable; verify your media flange drawing before manufacture",
+  "collision_note": "Direct convex guide cells; original stops/base preserved. No new STEP export.",
+  "parameters": {
+    "outer_diameter_mm": 100.0,
+    "adapter_thickness_mm": 8.0,
+    "flange_support_diameter_mm": 63.0,
+    "back_relief_mm": 3.0,
+    "pilot_diameter_mm": 31.45,
+    "pilot_length_mm": 2.0,
+    "center_bore_diameter_mm": 12.0,
+    "robot_bolt_pcd_mm": 50.0,
+    "robot_bolt_clearance_mm": 6.6,
+    "robot_counterbore_diameter_mm": 11.0,
+    "robot_counterbore_depth_mm": 4.0,
+    "index_angle_deg": 0.0,
+    "index_clearance_mm": 6.2,
+    "head_thickness_mm": 6.0,
+    "head_bolt_pcd_mm": 82.0,
+    "head_bolt_clearance_mm": 4.5,
+    "head_adapter_tap_drill_mm": 3.3,
+    "head_counterbore_diameter_mm": 8.0,
+    "head_counterbore_depth_mm": 4.0,
+    "guide_inner_diameter_mm": 64.0,
+    "guide_height_mm": 18.0,
+    "guide_segments": 512,
+    "guide_tip_half_angle_deg": 4.21875,
+    "guide_axial_clearance_mm": 0.4,
+    "stop_outer_diameter_mm": 44.0,
+    "stop_collision_segments": 24,
+    "density_kg_m3": 2700.0,
+    "guide_profile": "rounded_linear",
+    "guide_edge_round_mm": 1.0,
+    "guide_cad_sections": 53,
+    "stop_round_mm": 1.5,
+    "guide_blend_fraction": 0.1,
+    "radial_blend_fraction": 0.1,
+    "radial_lead_width_mm": 0.0,
+    "radial_crest_drop_mm": 0.0
+  },
+  "manufacturing_cad_generated": false,
+  "inertia_method": "original assembly plus oriented guide-mesh delta",
+  "inertia_convergence": {
+    "mass_delta_kg": 1.6264759931244877e-06,
+    "first_moment_delta_kg_m": 5.8332608763277116e-08,
+    "inertia_at_origin_delta_kg_m2": 3.7991963324781296e-09,
+    "mesh_mass_positive": true
+  }
+}
