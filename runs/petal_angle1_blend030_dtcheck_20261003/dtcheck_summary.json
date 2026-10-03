@@ -1,0 +1,72 @@
+{
+ "pairs": {
+  "A_combo_ny6_p15_0p25_vs_0p125": {
+   "status": "SENSITIVE",
+   "differences": {
+    "lateral_mm": 0.0005627809616216193,
+    "axial_gap_mm": 6.217248937900877e-11,
+    "phase_deg": 0.0007045813092858566,
+    "peak_force_N": 3.706890304592907,
+    "peak_axial_moment_Nm": 0.0489399855626495
+   },
+   "baseline": {
+    "status": "CANDIDATE_PASS",
+    "reasons": [],
+    "locking_verified": false
+   },
+   "half_dt": {
+    "status": "CANDIDATE_PASS",
+    "reasons": [],
+    "locking_verified": false
+   }
+  },
+  "A_combo_py6_n15_0p25_vs_0p125": {
+   "status": "SENSITIVE",
+   "differences": {
+    "lateral_mm": 0.007344784817090045,
+    "axial_gap_mm": 1.1862177906607485e-09,
+    "phase_deg": 0.00874253810423653,
+    "peak_force_N": 1.9758192888230681,
+    "peak_axial_moment_Nm": 0.06106514299135868
+   },
+   "baseline": {
+    "status": "CANDIDATE_PASS",
+    "reasons": [],
+    "locking_verified": false
+   },
+   "half_dt": {
+    "status": "CANDIDATE_PASS",
+    "reasons": [],
+    "locking_verified": false
+   }
+  },
+  "B_nx6_0p125_vs_0p0625": {
+   "status": "STABLE_IN_TWO_STEPS",
+   "differences": {
+    "lateral_mm": 0.010593585390421212,
+    "axial_gap_mm": 2.951194844058591e-09,
+    "phase_deg": 0.008635887392777875,
+    "peak_force_N": 0.004627390665513431,
+    "peak_axial_moment_Nm": 0.004110766165448587
+   },
+   "baseline": {
+    "status": "CANDIDATE_PASS",
+    "reasons": [],
+    "locking_verified": false
+   },
+   "half_dt": {
+    "status": "CANDIDATE_PASS",
+    "reasons": [],
+    "locking_verified": false
+   }
+  }
+ },
+ "statuses": {
+  "A_combo_ny6_p15_0p25_vs_0p125": "SENSITIVE",
+  "A_combo_py6_n15_0p25_vs_0p125": "SENSITIVE",
+  "B_nx6_0p125_vs_0p0625": "STABLE_IN_TWO_STEPS"
+ },
+ "decision": "KEEP_CANDIDATE_NOT_PROMOTED",
+ "decision_rule": "promote iff all three pairs STABLE_IN_TWO_STEPS (sensitivity localised as a 0.25 ms marginal effect)",
+ "wall_seconds": 1429.5016520969948
+}

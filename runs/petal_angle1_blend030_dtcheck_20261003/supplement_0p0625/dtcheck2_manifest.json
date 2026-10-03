@@ -1,0 +1,14 @@
+{
+ "purpose": "attribute combo-point peak-force SENSITIVE: 0.125 vs 0.0625 ms",
+ "preresistered_verdict_unchanged": "KEEP_CANDIDATE_NOT_PROMOTED",
+ "base_scene": "../iiwa14_petal_insertion_dt00025.yaml, dt_quarter setting => 0.0625 ms",
+ "sources": {
+  "experiments/petal_selected_study.py": "646e0cc0256f50e563a013b5ece4e7d068b277f29fb923c8811feb865ba968a7",
+  "experiments/petal_guidance_study.py": "eb61728838ef7bf86a440034932188be1471bdf28c15b41502a16c5e6d608e2a",
+  "experiments/petal_insertion_suite.py": "328b347782f954f2b45d4845f0f32799be79074d7d584ed2c6e444b1d6db788f",
+  "experiments/petal_capture_grid.py": "5119a1ce16f2ffcf1290c0793e265f77b48d5f65e117e53376acbb94aacae28c",
+  "experiments/insertion_suite.py": "de1d80c30fb3ce5077706465b5e8af67ae88aedb7938f8682a7087969b53e4cb",
+  "experiments/run_docking.py": "e648fe946b848779aa52a82f2865a64d46fda0a97c6966261a6c9a681025c36f",
+  "scenes/iiwa14_petal_insertion.yaml": "89046325c5cdc082b2096a9294e41a0e1d08605b19d4636838cc57009fafa87c"
+ }
+}
