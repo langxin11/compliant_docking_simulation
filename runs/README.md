@@ -15,6 +15,8 @@
 | `petal_angle1_blend030_20261003/` | 256M | 当前候选轮廓完整证据；被 `results/petal_stage_closeout_20261003.json` 逐文件 SHA-256 钉死，**一个字节都不能动** |
 | `hexframe_main_integration_20261003/` | 29M | HexFrame 正式接入验收（活跃主线）；最终数据在 `full_assembly_cad_precision/`，audit PASS |
 | `petal_angle1_blend030_dtcheck_20261003/` | 288M | 步长复核（含 `supplement_0p0625/`）：预注册判定**不晋升**，0.125 ms 三点收敛；报告 `results/petal_angle1_blend030_dtcheck_20261003.md`，JSON 证据已入库，NPZ（core 遥测）留本地 |
+| `hexframe_halfstep_20261003/` | 9.4M | P0 半步长验证：PASS + 审计 PASS，结论对步长不敏感；入口 `experiments/hexframe_validation/run_halfstep.py` |
+| `hexframe_grid_20261003/` | 74M | P1 误差网格 12 组：全 PASS（pick ±10 mm / seed ±4 mm 内）；入口 `experiments/hexframe_validation/run_grid.py` |
 | `compliant_insertion/` | 36M | `insertion_suite.py` 默认输出目录（会被同名更新覆盖，历史用带日期 `--out`） |
 | `petal_iiwa14_validation/` | 23M | 初版失败记录（沿用旧增益未落座）；报告声明保留，有效数据在 `_20261002` |
 | `collision_comparison_20261002/`、`convex_geometry_20261002/`、`petal_model_review_20261002/` | <1M | 小体积，整体保留 |
