@@ -41,7 +41,20 @@ uv run python experiments/hexframe_validation/run_grid.py --jobs 3
 uv run python experiments/hexframe_validation/run_grid.py --only seed_x_m4  # 单组
 ```
 
-结果见 `runs/hexframe_grid_20261003/grid_summary.json`。
+2026-10-03 结果（runs/hexframe_grid_20261003/，12 组 + 名义基线）：
+**12/12 PASS，独立审计全部 PASS**。峰值轴向力 1.849–1.910 N（限值 10 N），
+穿透 ≤0.0022 mm（限值 0.3 mm），终态模块误差 ≤0.006 mm（限值 1 mm）。
+
+| 组 | 锁定时刻 | 峰值力 N | 备注 |
+|---|---|---|---|
+| pick_x ±10 mm | 36.611 s | 1.850–1.856 | 与名义一致 |
+| pick_y_m10 / _p10 | 38.876 / 36.611 s | 1.910 / 1.857 | m10 需额外 2.3 s 就位 |
+| seed_x ±2 / ±4 mm | 36.611–39.670 s | 1.851–1.860 | +x 偏差延迟就位 2–3 s |
+| seed_y ±2 / ±4 mm | 36.611–36.761 s | 1.849–1.887 | 与名义一致 |
+
+结论：±10 mm 抓取偏差与 ±4 mm 配合偏差内，导纳 + 导向止挡都能在接触窗内
+持续就位；y 向抓取偏差和 x 向配合偏差主要表现为就位时间延长而非失败。
+连续捕获区域仍未验证（网格是离散点），yaw/tilt 误差待模型级注入。
 
 ## 测试
 
