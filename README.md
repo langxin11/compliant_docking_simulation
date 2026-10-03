@@ -242,7 +242,7 @@ SE(3)-TOPP 已能按步输出完整位姿和 body 运动参考，并已接入 `s
 │   ├── plotting.py                 # 统一 IEEE 绘图样式
 │   └── telemetry.py                # 时序与 SE(3) 诊断记录
 ├── experiments/
-│   ├── run_docking.py              # 主仿真编排
+│   ├── run_docking.py              # 兼容薄壳 → src/…/orchestration/run_docking.py
 │   ├── compare_frameworks.py       # 2x2 框架对比
 │   ├── se3_free_space.py           # SE(3) 自由空间验收
 │   └── se3_free_space_plots.py     # SE(3) 验证图生成

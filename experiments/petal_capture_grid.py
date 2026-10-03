@@ -181,8 +181,14 @@ def reusable_sources(previous, current, directory):
     if previous["assets"] != current["assets"] or any(previous[k] != current[k] for k in
                                                        ("mujoco_version", "pinocchio_version")):
         return False
+    # run_docking.py 迁入 src/compliant_docking/orchestration 后，旧清单里的
+    # experiments/run_docking.py 键以相同哈希出现在新路径；两者任一匹配即可。
+    moved = {"experiments/run_docking.py": "src/compliant_docking/orchestration/run_docking.py"}
     for name, digest in previous["sources"].items():
-        if name != "experiments/petal_insertion_suite.py" and current["sources"].get(name) != digest:
+        if name == "experiments/petal_insertion_suite.py":
+            continue
+        if not any(path and current["sources"].get(path) == digest
+                   for path in (name, moved.get(name))):
             return False
     old_tree = ast.parse((directory/"source_snapshot/experiments/petal_insertion_suite.py").read_text())
     new_tree = ast.parse((REPO_ROOT/"experiments/petal_insertion_suite.py").read_text())

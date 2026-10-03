@@ -14,7 +14,7 @@
         │                     ▲                          │
         │  运动参考            │ τ（限幅后）                 │ q, v, F/T
         └────────▶ 主循环 ◀───┘          ▲───────────────┘
-                  (experiments/run_docking.run_simulation)
+                  (compliant_docking.orchestration.run_docking.run_simulation)
                               │
                               ▼
                     telemetry.Log（时序记录）
@@ -44,7 +44,7 @@
 | `telemetry` | 时序记录 | `store_data(...)` 存副本；`plot_results()` 委托 plotting |
 | `plotting` | 出图 | SciencePlots IEEE 中文，PNG+PDF，`figure/<场景>/` 归档 |
 | `metrics` | Table 10 指标 | `compute_metrics`（对接三层指标）、`tracking_summary`（分段跟踪）、`evaluate_tracking_gate`（PASS/FAIL 门禁） |
-| `experiments.run_docking` | 主入口 | `main(scene=…, controller=…, plot=…)`；观测器按步更新；tracking 模式隔离 F/T 反馈 |
+| `compliant_docking.orchestration.run_docking` | 主入口（`experiments/run_docking.py` 为兼容薄壳） | `main(scene=…, controller=…, plot=…)`；观测器按步更新；tracking 模式隔离 F/T 反馈 |
 
 ## SE(3) body-frame 数据流
 

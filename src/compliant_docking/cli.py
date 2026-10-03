@@ -1,7 +1,8 @@
 """docking 命令行入口：参数化运行七自由度机械臂柔顺对接仿真实验。
 
-仅使用标准库 argparse；实验编排逻辑唯一来源于 experiments/run_docking.py
-（通过文件路径按 importlib 规范加载，避免复制粘贴第二份实现）。
+仅使用标准库 argparse；实验编排逻辑唯一来源于
+src/compliant_docking/orchestration/run_docking.py（experiments/run_docking.py
+保留为兼容薄壳），惰性导入以保持启动时的环境变量设置顺序。
 
 用法示例 / Examples:
     docking --quick                 # 2 秒快速冒烟（无渲染、无录帧）
@@ -11,19 +12,14 @@
 """
 import argparse
 import os
-from importlib.util import module_from_spec, spec_from_file_location
-from pathlib import Path
 
 from compliant_docking.scene import DEFAULT_SCENE_PATH, load_scene
 
 
 def _load_run_docking():
-    """按文件路径加载实验编排模块（experiments/ 不属于包内模块）。"""
-    path = Path(__file__).resolve().parents[2] / "experiments" / "run_docking.py"
-    spec = spec_from_file_location("run_docking", path)
-    mod = module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    return mod
+    """加载主仿真编排模块（保持惰性导入，避免影响 MuJoCo/GL 环境变量）。"""
+    from compliant_docking.orchestration import run_docking
+    return run_docking
 
 
 def build_parser() -> argparse.ArgumentParser:
