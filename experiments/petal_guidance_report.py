@@ -4,27 +4,31 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import sys
 from collections import Counter
 from dataclasses import asdict, replace
 from importlib.metadata import version
 from pathlib import Path
+
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 os.environ.setdefault("MUJOCO_GL", "egl")
 os.environ.setdefault("MPLBACKEND", "Agg")
 
 import matplotlib.pyplot as plt
 import numpy as np
-import petal_capture_grid as grid
-import petal_guidance_study as study
-import petal_insertion_suite as suite
-from petal_guidance_geometry import DIRECTORIES
-from petal_lateral_study import POINTS
 
+import experiments.petal_capture_grid as grid
+import experiments.petal_guidance_study as study
+import experiments.petal_insertion_suite as suite
 from compliant_docking.contact_diagnostics import evaluate_contact_load
 from compliant_docking.docking_task import target_rotation
 from compliant_docking.petal_geometry import evaluate_petal_seating
 from compliant_docking.plotting import apply_style
+from compliant_docking.research.cases import POINTS
 from compliant_docking.scene import REPO_ROOT, load_scene
+from experiments.petal_guidance_geometry import DIRECTORIES
 
 LABELS = {"original": "原轮廓", "narrow": "窄平顶 + 角向斜坡", "radial": "角向 + 径向导面"}
 COLORS = {"original": "#666666", "narrow": "#009E73", "radial": "#D55E00"}
@@ -159,7 +163,7 @@ def save_figure(fig,out,name):
 
 
 def profile_figures(out):
-    import prepare_petal_guidance as generate
+    import experiments.prepare_petal_guidance as generate
     apply_style("report",cjk_first=True)
     fig,axes = plt.subplots(1,2,figsize=(12.5,4.8),constrained_layout=True)
     angle,radius = np.linspace(-45.,45.,2001),np.linspace(32.,50.,1201)

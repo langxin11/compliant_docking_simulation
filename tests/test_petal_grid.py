@@ -88,16 +88,16 @@ def test_half_step_requires_equal_status_and_original_peak_limits():
 def test_reuse_checks_controller_sources_and_entire_assessment_body(tmp_path):
     base=load_scene("scenes/iiwa14_petal_insertion.yaml")
     current=grid.source_manifest(base)
-    snapshot=tmp_path/'source_snapshot/experiments'
+    snapshot=tmp_path/'source_snapshot/src/compliant_docking/research'
     snapshot.mkdir(parents=True)
     import shutil
-    shutil.copy2(grid.REPO_ROOT/'experiments/petal_insertion_suite.py',snapshot/'petal_insertion_suite.py')
+    shutil.copy2(grid.REPO_ROOT/'src/compliant_docking/research/petal_trials.py',snapshot/'petal_trials.py')
     assert grid.reusable_sources(current,current,tmp_path)
     changed=dict(current,sources=dict(current["sources"]))
     changed["sources"]["src/compliant_docking/control/contact_yaw.py"]="changed"
     assert not grid.reusable_sources(current,changed,tmp_path)
     import ast
-    source=snapshot/'petal_insertion_suite.py'
+    source=snapshot/'petal_trials.py'
     tree=ast.parse(source.read_text())
     run=next(f for f in tree.body if isinstance(f,ast.FunctionDef) and f.name=='run_case')
     run.body.append(ast.Pass())

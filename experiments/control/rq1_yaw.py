@@ -1,0 +1,75 @@
+"""RQ1: matched yaw stiffness policies on the fixed original Petal baseline."""
+from __future__ import annotations
+
+import argparse
+import json
+import shutil
+from concurrent.futures import ProcessPoolExecutor
+from pathlib import Path
+
+from compliant_docking.research.petal_trials import preflight, run_case, summarize
+from compliant_docking.research.protocols import source_manifest, write_json
+from compliant_docking.research.rollout import CASES
+from compliant_docking.scene import REPO_ROOT, load_scene
+
+DEFAULT_OUT = REPO_ROOT / "runs/rq1_yaw_current"
+PROFILES = ("stiff", "compliant", "released")
+
+def build_parser():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--case", nargs="+", choices=CASES, default=list(CASES))
+    parser.add_argument("--profile", nargs="+", choices=PROFILES, default=list(PROFILES))
+    parser.add_argument("--setting", nargs="+", choices=("baseline", "dt_half", "dt_quarter"), default=["baseline"])
+    parser.add_argument("--telemetry", choices=("auto", "full", "core"), default="auto")
+    parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
+    parser.add_argument("--preview", action="store_true")
+    parser.add_argument("--resume", action="store_true")
+    parser.add_argument("--jobs", type=int, choices=(1, 2, 3), default=1)
+    return parser
+
+def run_matrix(args, *, legacy=False):
+    base = load_scene("scenes/iiwa14_petal_insertion.yaml")
+    manifest = source_manifest(base)
+    plan = dict(cases=args.case, profiles=args.profile, settings=args.setting,
+                model="original PetalDock100 V2", primary_factor="yaw stiffness policy",
+                fixed_control_period_s=base.se3_impedance.control_period)
+    if legacy:
+        plan = dict(protocol="legacy-default matrix", model="original PetalDock100 V2",
+                    profile_selection="legacy CLI retains historical profiles and incremental runs")
+    args.out.mkdir(parents=True, exist_ok=True)
+    for filename, value in (("source_manifest.json", manifest), ("study_plan.json", plan)):
+        path = args.out / filename
+        if path.exists() and json.loads(path.read_text()) != value:
+            raise ValueError("Sources or RQ1 plan changed; select a new output directory")
+        write_json(path, value)
+    for name in manifest["sources"]:
+        snapshot = args.out / "source_snapshot" / name
+        snapshot.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(REPO_ROOT / name, snapshot)
+    write_json(args.out / "preflight.json", preflight(base))
+    pending = []
+    for case in args.case:
+        for profile in args.profile:
+            for setting in args.setting:
+                name = f"{case}_{profile}" + ("" if setting == "baseline" else "_" + setting)
+                if args.resume and (args.out / f"{name}.json").exists():
+                    continue
+                pending.append((case, profile, setting))
+    # Keyword telemetry preserves the run_case error slot, including workers.
+    if args.jobs == 1:
+        for case, profile, setting in pending:
+            run_case(args.out, base, case, profile, setting,
+                     preview=args.preview, telemetry=args.telemetry)
+    else:
+        with ProcessPoolExecutor(max_workers=args.jobs) as executor:
+            futures = [executor.submit(run_case, args.out, base, case, profile, setting,
+                       preview=args.preview, telemetry=args.telemetry) for case, profile, setting in pending]
+            for future in futures:
+                future.result()
+    summarize(args.out)
+
+def main(argv=None):
+    run_matrix(build_parser().parse_args(argv))
+
+if __name__ == "__main__":
+    main()

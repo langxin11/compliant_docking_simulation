@@ -4,13 +4,17 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import sys
 from pathlib import Path
+
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 import matplotlib.pyplot as plt
 import numpy as np
-import petal_selected_study as selected
-import prepare_petal_guidance as geometry
 
+import experiments.petal_selected_study as selected
+import experiments.prepare_petal_guidance as geometry
 from compliant_docking.plotting import apply_style
 from compliant_docking.scene import REPO_ROOT
 
