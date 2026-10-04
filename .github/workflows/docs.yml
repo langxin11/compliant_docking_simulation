@@ -33,7 +33,7 @@ jobs:
         run: uv python install 3.12
 
       - name: Sync documentation dependencies
-        run: uv sync --dev
+        run: uv sync --frozen --dev
 
       - name: Build documentation
         run: uv run mkdocs build --strict

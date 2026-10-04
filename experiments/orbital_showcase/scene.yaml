@@ -1,0 +1,97 @@
+scene:
+  name: orbital_side_docking
+  runner: side_docking.py
+  controller: se3_lie
+target:
+  contact_port: 1
+  pos:
+  - 0.0
+  - 1.0
+  - 0.6
+  quat:
+  - 0.0
+  - 0.0
+  - 0.7071067811865476
+  - -0.7071067811865475
+module1:
+  robot_port: 1
+  docking_port: 4
+  mass_kg: 2.0
+  radius_m: 0.115
+  height_m: 0.16
+  flange_to_port1_m: 0.015
+  port1_to_port4_m: 0.1991858428704209
+module2:
+  docking_port: 1
+  fixed: true
+task:
+  init_pos:
+  - -0.09
+  - 0.76
+  - 0.63
+  init_ori:
+  - - -1.0
+    - 0.0
+    - 0.0
+  - - 0.0
+    - 0.0
+    - 1.0
+  - - 0.0
+    - 1.0
+    - 0.0
+  ik_guess:
+  - 0.83567448
+  - 0.26176348
+  - 1.11070619
+  - -1.80861519
+  - 0.70674746
+  - -0.55862481
+  - 0.69454423
+se3_impedance:
+  a_diag:
+  - 10.0
+  - 10.0
+  - 10.0
+  - 1.0
+  - 1.0
+  - 1.0
+  d_diag:
+  - 120.0
+  - 120.0
+  - 160.0
+  - 18.0
+  - 18.0
+  - 20.0
+  k_diag:
+  - 80.0
+  - 80.0
+  - 200.0
+  - 25.0
+  - 25.0
+  - 0.5
+  null_damping: 10.0
+docking:
+  estimate_pos:
+  - 0.0
+  - 1.0
+  - 0.6
+  estimate_yaw_deg: 0.0
+  entry_height: 0.07
+  clearance: 0.06
+  command_depth: 0.04
+  insertion_speed: 0.01
+  insertion_acceleration: 0.03
+  hold_s: 8.0
+  min_depth: 0.017
+  max_lateral: 0.004
+  max_tilt_deg: 5.0
+  max_force: 40.0
+  max_axial_moment: 2.0
+  max_linear_speed: 0.003
+  max_angular_speed_deg: 2.0
+  max_torque_saturation_ratio: 0.01
+assets:
+  robot: assets/arm.xml
+  pin_model: assets/side_arm.urdf
+  module1: assets/side_tool.xml
+  module2: assets/side_target.xml

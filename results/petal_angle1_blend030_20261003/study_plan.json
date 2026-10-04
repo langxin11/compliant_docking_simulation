@@ -1,0 +1,25 @@
+{
+  "jobs": [
+    [
+      "nx6",
+      "dt_quarter"
+    ],
+    [
+      "nx6",
+      "dt_half"
+    ],
+    [
+      "combo_ny6_p15",
+      "dt_half"
+    ],
+    [
+      "combo_py6_n15",
+      "dt_half"
+    ]
+  ],
+  "controls_and_gates_unchanged": true,
+  "selected_angle_deg": 1.0,
+  "selected_blend": 0.3,
+  "baseline_policy": "archived, verified; not rerun",
+  "numerical_selection": "fixed nx6 check, selected before observing outcomes"
+}

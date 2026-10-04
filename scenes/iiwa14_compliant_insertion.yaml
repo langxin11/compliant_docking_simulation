@@ -1,0 +1,63 @@
+# One combined task: side approach, above-target waypoint, XY/yaw estimation
+# error and contact-induced twist. The tool's original internal 40 deg mounting
+# phase remains in male_cone.xml; estimate_yaw_deg is ADDITIONAL uncertainty.
+scene:
+  name: iiwa14_compliant_insertion
+  controller: se3_lie
+robot:
+  mjcf: assets/iiwa14/iiwa14_arm.xml
+  pin_model: assets/iiwa14/iiwa14_dock.urdf
+  ee_site: attachment_site
+  ee_frame: cylinder_link
+tool:
+  mjcf: assets/interfaces/male_cone.xml
+  prefix: tool_
+  pose: {pos: [0.0, 0.0, 0.015], quat: [1.0, 0.0, 0.0, 0.0]}
+target:
+  mjcf: assets/interfaces/female_socket.xml
+  prefix: target_
+  pos: [0.0, 0.5, 0.35]
+  quat: [1.0, 0.0, 0.0, 0.0]
+physics:
+  timestep: 0.001
+  gravity: [0.0, 0.0, 0.0]
+  integrator: implicitfast
+  cone: elliptic
+  sdf_iterations: 10
+  sdf_initpoints: 40
+task:
+  init_pos: [-0.12, 0.40, 0.55]
+  init_ori: [[1, 0, 0], [0, -1, 0], [0, 0, -1]]
+  ik_guess: [0.0, 0.5, 0.0, -1.0, 0.0, 1.5, 0.0]
+trajectory:
+  type: waypoints
+  v_max_approach: 0.10
+  a_max_approach: 0.20
+  v_max_docking: 0.02
+  a_max_docking: 0.05
+docking:
+  # Controller estimate, independent of target.pos (physical truth).
+  estimate_pos: [0.002, 0.498, 0.35]
+  estimate_yaw_deg: 5.0
+  # Heights refer to cylinder_link relative to the socket root, in metres.
+  entry_height: 0.070
+  clearance: 0.060
+  command_depth: 0.040
+  insertion_speed: 0.010
+  insertion_acceleration: 0.030
+  hold_s: 8.0
+  # Declared insertion/settling benchmark, not a calibrated CAD seated pose.
+  min_depth: 0.017
+  max_lateral: 0.004
+  max_tilt_deg: 5.0
+  max_force: 40.0
+  max_axial_moment: 2.0
+  max_linear_speed: 0.003
+  max_angular_speed_deg: 2.0
+se3_impedance:
+  # EE body z is parallel to the insertion axis (world -Z).
+  # Keep tilt constrained and allow contact torque to turn the crown about z.
+  a_diag: [10.0, 10.0, 10.0, 1.0, 1.0, 1.0]
+  d_diag: [80.0, 80.0, 90.0, 10.0, 10.0, 10.0]
+  k_diag: [80.0, 80.0, 200.0, 25.0, 25.0, 0.5]
+  null_damping: 10.0

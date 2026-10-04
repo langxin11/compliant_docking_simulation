@@ -31,6 +31,9 @@ extra_javascript:
   - javascripts/mathjax.js
   - https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js
 
+hooks:
+  - docs/_repository_reports.py
+
 plugins:
   - search
   - mkdocstrings:
@@ -59,6 +62,11 @@ nav:
       - SE(3) Lie 群阻抗控制器: theory/se3_lie_impedance.md
       - 主仿真理论与数据流: theory/simulation_flow.md
   - 实验复现手册: experiments.md
+  - 接口交互调形: petal_designer.md
+  - 接口阶段收尾: stage_closeout_20261003.md
+  - 本地 Git 阶段整理: git_stage_closeout_20261003.md
+  - HexFrame 正式组装场景: hexframe_assembly.md
+  - 完善方案与组合对接: development_plan.md
   - API 参考:
       - 控制器与力学工具: api/control.md
       - 轨迹与运动参考: api/planning.md

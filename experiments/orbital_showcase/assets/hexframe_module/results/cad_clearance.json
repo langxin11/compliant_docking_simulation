@@ -1,0 +1,8 @@
+{
+  "frame_head_intersection_mm3": 0.0,
+  "frame_connected_solids": 1,
+  "glb_scene_geometries": 37,
+  "glb_nodes": 37,
+  "glb_bounds_error_m": 1.5199184411063271e-09,
+  "blender_axis_convention": "GLB Y-up; engineering/CAD/MuJoCo Z-up"
+}

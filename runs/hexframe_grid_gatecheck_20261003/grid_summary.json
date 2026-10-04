@@ -1,0 +1,147 @@
+{
+ "seating_gate": "filtered_debounce",
+ "nominal_baseline": {
+  "status": "PASS",
+  "lock_time_s": 36.611000000000004,
+  "peak_axial_force_n": 1.8550067626648206,
+  "max_penetration_mm": 0.002164953330996348,
+  "final_module_error_mm": 0.005054356134462048
+ },
+ "paired_raw_strict_grid": "runs/hexframe_grid_20261003/grid_summary.json",
+ "results": [
+  {
+   "label": "pick_x_m10",
+   "status": "PASS",
+   "audit": "PASS",
+   "seating_gate": "filtered_debounce",
+   "first_contact_s": 35.113,
+   "lock_time_s": 36.613,
+   "peak_axial_force_n": 1.8560268401607878,
+   "max_penetration_mm": 0.002195897483736793,
+   "final_module_error_mm": 0.005304804915723111
+  },
+  {
+   "label": "pick_x_p10",
+   "status": "PASS",
+   "audit": "PASS",
+   "seating_gate": "filtered_debounce",
+   "first_contact_s": 35.113,
+   "lock_time_s": 36.612,
+   "peak_axial_force_n": 1.849607335725087,
+   "max_penetration_mm": 0.002219119063840169,
+   "final_module_error_mm": 0.005465040959199867
+  },
+  {
+   "label": "pick_y_m10",
+   "status": "PASS",
+   "audit": "PASS",
+   "seating_gate": "filtered_debounce",
+   "first_contact_s": 35.113,
+   "lock_time_s": 36.618,
+   "peak_axial_force_n": 1.910350088624193,
+   "max_penetration_mm": 0.0021587514162369915,
+   "final_module_error_mm": 0.004680612328603492
+  },
+  {
+   "label": "pick_y_p10",
+   "status": "PASS",
+   "audit": "PASS",
+   "seating_gate": "filtered_debounce",
+   "first_contact_s": 35.113,
+   "lock_time_s": 36.616,
+   "peak_axial_force_n": 1.8571444338714431,
+   "max_penetration_mm": 0.0021849170402932533,
+   "final_module_error_mm": 0.004909854728169774
+  },
+  {
+   "label": "seed_x_m2",
+   "status": "PASS",
+   "audit": "PASS",
+   "seating_gate": "filtered_debounce",
+   "first_contact_s": 35.113,
+   "lock_time_s": 36.612,
+   "peak_axial_force_n": 1.8569209137282607,
+   "max_penetration_mm": 0.0022034051032074563,
+   "final_module_error_mm": 0.005304128246329471
+  },
+  {
+   "label": "seed_x_p2",
+   "status": "PASS",
+   "audit": "PASS",
+   "seating_gate": "filtered_debounce",
+   "first_contact_s": 35.113,
+   "lock_time_s": 36.622,
+   "peak_axial_force_n": 1.8539959215882604,
+   "max_penetration_mm": 0.00220540138728994,
+   "final_module_error_mm": 0.004282680486625525
+  },
+  {
+   "label": "seed_x_m4",
+   "status": "PASS",
+   "audit": "PASS",
+   "seating_gate": "filtered_debounce",
+   "first_contact_s": 35.113,
+   "lock_time_s": 36.612,
+   "peak_axial_force_n": 1.8598480724678514,
+   "max_penetration_mm": 0.0022459858152748756,
+   "final_module_error_mm": 0.005080786048783867
+  },
+  {
+   "label": "seed_x_p4",
+   "status": "PASS",
+   "audit": "PASS",
+   "seating_gate": "filtered_debounce",
+   "first_contact_s": 35.113,
+   "lock_time_s": 36.612,
+   "peak_axial_force_n": 1.8514545183914108,
+   "max_penetration_mm": 0.0021424544366931584,
+   "final_module_error_mm": 0.005159531573133458
+  },
+  {
+   "label": "seed_y_m2",
+   "status": "PASS",
+   "audit": "PASS",
+   "seating_gate": "filtered_debounce",
+   "first_contact_s": 35.113,
+   "lock_time_s": 36.614,
+   "peak_axial_force_n": 1.8486915902464003,
+   "max_penetration_mm": 0.00220677506002106,
+   "final_module_error_mm": 0.0048436345148956915
+  },
+  {
+   "label": "seed_y_p2",
+   "status": "PASS",
+   "audit": "PASS",
+   "seating_gate": "filtered_debounce",
+   "first_contact_s": 35.113,
+   "lock_time_s": 36.614,
+   "peak_axial_force_n": 1.857002846628589,
+   "max_penetration_mm": 0.002191340455981515,
+   "final_module_error_mm": 0.0054574191172903795
+  },
+  {
+   "label": "seed_y_m4",
+   "status": "PASS",
+   "audit": "PASS",
+   "seating_gate": "filtered_debounce",
+   "first_contact_s": 35.113,
+   "lock_time_s": 36.612,
+   "peak_axial_force_n": 1.886972620354787,
+   "max_penetration_mm": 0.002074425980991333,
+   "final_module_error_mm": 0.00522580279069042
+  },
+  {
+   "label": "seed_y_p4",
+   "status": "PASS",
+   "audit": "PASS",
+   "seating_gate": "filtered_debounce",
+   "first_contact_s": 35.113,
+   "lock_time_s": 36.612,
+   "peak_axial_force_n": 1.8591438450579545,
+   "max_penetration_mm": 0.002218627266792438,
+   "final_module_error_mm": 0.005567863447727453
+  }
+ ],
+ "passes": 12,
+ "total": 12
+}

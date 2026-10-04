@@ -4,9 +4,27 @@
 仅为向后兼容的默认值。
 """
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import numpy as np
 import pinocchio as pin
+
+
+def load_assembled_pin_model(scene):
+    """Read a flattened assembled MJCF, preserving fixed-tool full inertia.
+
+    Pinocchio's MJCF reader does not expand the attached include hierarchy in
+    this model. MjSpec serialization resolves it before parsing; no URDF tool
+    or additional inertia is appended to this shared description.
+    """
+    if scene.tool.pin_inertia is not None:
+        raise ValueError("assembled Pinocchio model already contains tool inertia")
+    with TemporaryDirectory(prefix="docking-pin-") as temporary:
+        path = Path(temporary) / "assembled.xml"
+        path.write_text(scene.build_mjspec().to_xml(), encoding="utf-8")
+        model = load_pin_model(path)
+    model.gravity.linear = np.asarray(scene.physics.gravity, dtype=float)
+    return model
 
 ASSETS_DIR = Path(__file__).resolve().parents[2] / "assets" / "iiwa14"
 PIN_URDF = ASSETS_DIR / "iiwa14_dock.urdf"

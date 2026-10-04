@@ -1,0 +1,80 @@
+{
+ "jobs": [
+  {
+   "label": "rs_s20_seed1",
+   "gate": "raw_strict",
+   "sigma_n": 0.02,
+   "seed": 1
+  },
+  {
+   "label": "gd_s20_seed1",
+   "gate": "filtered_debounce",
+   "sigma_n": 0.02,
+   "seed": 1
+  },
+  {
+   "label": "rs_s20_seed2",
+   "gate": "raw_strict",
+   "sigma_n": 0.02,
+   "seed": 2
+  },
+  {
+   "label": "gd_s20_seed2",
+   "gate": "filtered_debounce",
+   "sigma_n": 0.02,
+   "seed": 2
+  },
+  {
+   "label": "rs_s20_seed3",
+   "gate": "raw_strict",
+   "sigma_n": 0.02,
+   "seed": 3
+  },
+  {
+   "label": "gd_s20_seed3",
+   "gate": "filtered_debounce",
+   "sigma_n": 0.02,
+   "seed": 3
+  },
+  {
+   "label": "rs_s50_seed1",
+   "gate": "raw_strict",
+   "sigma_n": 0.05,
+   "seed": 1
+  },
+  {
+   "label": "gd_s50_seed1",
+   "gate": "filtered_debounce",
+   "sigma_n": 0.05,
+   "seed": 1
+  },
+  {
+   "label": "rs_s50_seed2",
+   "gate": "raw_strict",
+   "sigma_n": 0.05,
+   "seed": 2
+  },
+  {
+   "label": "gd_s50_seed2",
+   "gate": "filtered_debounce",
+   "sigma_n": 0.05,
+   "seed": 2
+  },
+  {
+   "label": "rs_s50_seed3",
+   "gate": "raw_strict",
+   "sigma_n": 0.05,
+   "seed": 3
+  },
+  {
+   "label": "gd_s50_seed3",
+   "gate": "filtered_debounce",
+   "sigma_n": 0.05,
+   "seed": 3
+  }
+ ],
+ "baseline": "runs/hexframe_main_integration_20261003/full_assembly_cad_precision",
+ "measurement": "axial force, seeded Gaussian",
+ "force_window_and_gates_unchanged": true,
+ "timestep_s": 0.001
+}

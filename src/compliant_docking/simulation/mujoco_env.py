@@ -70,6 +70,8 @@ class MujRobot:
         self.model_source = model
         self.dt = dt
         self.target_pos = np.asarray(target_pos, dtype=float)
+        self.coordinate_frames = {}
+        self.coordinate_frame_labels = True
 
         # 名称参数（默认值 = 历史硬编码名称，保证旧调用行为不变）
         self.eef_body_name = eef_body
@@ -128,7 +130,8 @@ class MujRobot:
             self.model = mujoco.MjModel.from_xml_path(str(self.model_source))
 
         # 设置一些求解器容差参数（较小的容差有助于控制稳定）
-        self.model.opt.tolerance = 0.001
+        if not isinstance(self.model_source, mujoco.MjModel):
+            self.model.opt.tolerance = 0.001
 
         # 为该模型创建运行时数据结构
         self.data = mujoco.MjData(self.model)
@@ -244,6 +247,36 @@ class MujRobot:
             raise ValueError("期望位置包含非有限值")
         self.desired_pos = position.copy()
 
+    def set_coordinate_frames(self, frames, *, replace=True):
+        """SE(3) diagnostic frames shared by the native viewer and recorded video."""
+        checked = {}
+        for name, pose in frames.items():
+            position, rotation = np.array(pose.translation), np.array(pose.rotation)
+            if (position.shape != (3,) or rotation.shape != (3, 3)
+                    or not np.all(np.isfinite(position)) or not np.all(np.isfinite(rotation))
+                    or not np.allclose(rotation.T @ rotation, np.eye(3), atol=1e-6)
+                    or not np.isclose(np.linalg.det(rotation), 1.0, atol=1e-6)):
+                raise ValueError(f"Invalid coordinate frame: {name}")
+            checked[str(name)] = (position.copy(), rotation.copy())
+        if replace:
+            self.coordinate_frames = checked
+        else:
+            self.coordinate_frames.update(checked)
+
+    def _add_coordinate_frames(self, scene):
+        for name, (position, rotation) in self.coordinate_frames.items():
+            for axis, color in enumerate(np.eye(3)):
+                if scene.ngeom >= scene.maxgeom:
+                    return
+                geom = scene.geoms[scene.ngeom]
+                mujoco.mjv_initGeom(geom, mujoco.mjtGeom.mjGEOM_ARROW, np.ones(3),
+                                    position, np.eye(3).ravel(), np.r_[color, 0.95])
+                mujoco.mjv_connector(geom, mujoco.mjtGeom.mjGEOM_ARROW, 0.0012,
+                                    position, position + 0.035*rotation[:, axis])
+                if axis == 0 and self.coordinate_frame_labels:
+                    geom.label = name
+                scene.ngeom += 1
+
     @staticmethod
     def _append_marker(scene: mujoco.MjvScene, point: np.ndarray,
                        rgba: np.ndarray, radius: float) -> None:
@@ -265,6 +298,8 @@ class MujRobot:
         """绘制规划路径、实际尾迹和当前期望点。"""
         if reset_scene:
             scene.ngeom = 0
+
+        self._add_coordinate_frames(scene)
 
         for point in self.planned_path:
             self._append_marker(scene, point, [0.10, 0.85, 1.00, 0.95], 0.0025)

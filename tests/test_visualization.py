@@ -4,6 +4,7 @@ from pathlib import Path
 
 import mujoco
 import numpy as np
+import pinocchio as pin
 import pytest
 
 from compliant_docking.scene import load_scene
@@ -56,3 +57,18 @@ def test_trajectory_overlay_rejects_invalid_paths(bad_path):
     robot = _fr3_robot()
     with pytest.raises(ValueError):
         robot.set_trajectory_visualization(bad_path)
+
+
+def test_coordinate_frames_preserve_physics_and_follow_rotation():
+    robot = _fr3_robot()
+    position = np.array([.1, .2, .3])
+    rotation = pin.exp3(np.array([0., 0., np.pi/2]))
+    before = robot.model.ngeom
+    robot.set_coordinate_frames({"waypoint": pin.SE3(rotation, position)})
+    scene = mujoco.MjvScene(robot.model, maxgeom=32)
+    robot._add_trajectory_overlays(scene)
+    assert robot.model.ngeom == before
+    assert scene.ngeom == 3
+    assert scene.geoms[0].label == "waypoint"
+    # mjv_connector aligns each arrow's local Z with the requested world axis.
+    np.testing.assert_allclose(scene.geoms[0].mat.reshape(3, 3)[:, 2], rotation[:, 0], atol=1e-7)

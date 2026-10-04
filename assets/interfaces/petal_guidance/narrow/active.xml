@@ -1,0 +1,1018 @@
+<?xml version='1.0' encoding='utf-8'?>
+<mujoco model="PetalDock100_guidance_narrow_active">
+  <compiler angle="radian" />
+  <default>
+    <default class="pd_visual">
+      <geom contype="0" conaffinity="0" group="2" density="0" />
+    </default>
+    <default class="pd_collision">
+      <geom contype="1" conaffinity="1" group="3" rgba="0.35 0.65 0.85 0.3" condim="3" friction="0.15 0.003 0.0001" margin="0" gap="0" density="0" solref="0.003 1" solimp="0.95 0.99 0.0002" />
+    </default>
+  </default>
+  <asset>
+    <material name="pd_dark" rgba=".20 .24 .30 1" specular="0.35" shininess="0.35" />
+    <material name="pd_blue" rgba=".34 .48 .64 1" specular="0.35" shininess="0.35" />
+    <material name="pd_silver" rgba=".68 .74 .81 1" specular="0.35" shininess="0.35" />
+    <mesh name="pd_base_proxy" file="meshes/collision/base_proxy.obj" />
+    <mesh name="pd_v_petal_2" file="meshes/visual/petal_2.obj" />
+    <mesh name="pd_v_head_plate" file="meshes/visual/head_plate.obj" />
+    <mesh name="pd_v_petal_0" file="meshes/visual/petal_0.obj" />
+    <mesh name="pd_v_petal_1" file="meshes/visual/petal_1.obj" />
+    <mesh name="pd_v_stop_land" file="meshes/visual/stop_land.obj" />
+    <mesh name="pd_v_adapter" file="meshes/visual/adapter.obj" />
+    <mesh name="pd_v_petal_3" file="meshes/visual/petal_3.obj" />
+    <mesh name="pd_guide_0000" file="meshes/collision/guide_0000.obj" />
+    <mesh name="pd_guide_0001" file="meshes/collision/guide_0001.obj" />
+    <mesh name="pd_guide_0002" file="meshes/collision/guide_0002.obj" />
+    <mesh name="pd_guide_0003" file="meshes/collision/guide_0003.obj" />
+    <mesh name="pd_guide_0004" file="meshes/collision/guide_0004.obj" />
+    <mesh name="pd_guide_0005" file="meshes/collision/guide_0005.obj" />
+    <mesh name="pd_guide_0006" file="meshes/collision/guide_0006.obj" />
+    <mesh name="pd_guide_0007" file="meshes/collision/guide_0007.obj" />
+    <mesh name="pd_guide_0008" file="meshes/collision/guide_0008.obj" />
+    <mesh name="pd_guide_0009" file="meshes/collision/guide_0009.obj" />
+    <mesh name="pd_guide_0010" file="meshes/collision/guide_0010.obj" />
+    <mesh name="pd_guide_0011" file="meshes/collision/guide_0011.obj" />
+    <mesh name="pd_guide_0012" file="meshes/collision/guide_0012.obj" />
+    <mesh name="pd_guide_0013" file="meshes/collision/guide_0013.obj" />
+    <mesh name="pd_guide_0014" file="meshes/collision/guide_0014.obj" />
+    <mesh name="pd_guide_0015" file="meshes/collision/guide_0015.obj" />
+    <mesh name="pd_guide_0016" file="meshes/collision/guide_0016.obj" />
+    <mesh name="pd_guide_0017" file="meshes/collision/guide_0017.obj" />
+    <mesh name="pd_guide_0018" file="meshes/collision/guide_0018.obj" />
+    <mesh name="pd_guide_0019" file="meshes/collision/guide_0019.obj" />
+    <mesh name="pd_guide_0020" file="meshes/collision/guide_0020.obj" />
+    <mesh name="pd_guide_0021" file="meshes/collision/guide_0021.obj" />
+    <mesh name="pd_guide_0022" file="meshes/collision/guide_0022.obj" />
+    <mesh name="pd_guide_0023" file="meshes/collision/guide_0023.obj" />
+    <mesh name="pd_guide_0024" file="meshes/collision/guide_0024.obj" />
+    <mesh name="pd_guide_0025" file="meshes/collision/guide_0025.obj" />
+    <mesh name="pd_guide_0026" file="meshes/collision/guide_0026.obj" />
+    <mesh name="pd_guide_0027" file="meshes/collision/guide_0027.obj" />
+    <mesh name="pd_guide_0028" file="meshes/collision/guide_0028.obj" />
+    <mesh name="pd_guide_0029" file="meshes/collision/guide_0029.obj" />
+    <mesh name="pd_guide_0030" file="meshes/collision/guide_0030.obj" />
+    <mesh name="pd_guide_0031" file="meshes/collision/guide_0031.obj" />
+    <mesh name="pd_guide_0032" file="meshes/collision/guide_0032.obj" />
+    <mesh name="pd_guide_0033" file="meshes/collision/guide_0033.obj" />
+    <mesh name="pd_guide_0034" file="meshes/collision/guide_0034.obj" />
+    <mesh name="pd_guide_0035" file="meshes/collision/guide_0035.obj" />
+    <mesh name="pd_guide_0036" file="meshes/collision/guide_0036.obj" />
+    <mesh name="pd_guide_0037" file="meshes/collision/guide_0037.obj" />
+    <mesh name="pd_guide_0038" file="meshes/collision/guide_0038.obj" />
+    <mesh name="pd_guide_0039" file="meshes/collision/guide_0039.obj" />
+    <mesh name="pd_guide_0040" file="meshes/collision/guide_0040.obj" />
+    <mesh name="pd_guide_0041" file="meshes/collision/guide_0041.obj" />
+    <mesh name="pd_guide_0042" file="meshes/collision/guide_0042.obj" />
+    <mesh name="pd_guide_0043" file="meshes/collision/guide_0043.obj" />
+    <mesh name="pd_guide_0044" file="meshes/collision/guide_0044.obj" />
+    <mesh name="pd_guide_0045" file="meshes/collision/guide_0045.obj" />
+    <mesh name="pd_guide_0046" file="meshes/collision/guide_0046.obj" />
+    <mesh name="pd_guide_0047" file="meshes/collision/guide_0047.obj" />
+    <mesh name="pd_guide_0048" file="meshes/collision/guide_0048.obj" />
+    <mesh name="pd_guide_0049" file="meshes/collision/guide_0049.obj" />
+    <mesh name="pd_guide_0050" file="meshes/collision/guide_0050.obj" />
+    <mesh name="pd_guide_0051" file="meshes/collision/guide_0051.obj" />
+    <mesh name="pd_guide_0052" file="meshes/collision/guide_0052.obj" />
+    <mesh name="pd_guide_0053" file="meshes/collision/guide_0053.obj" />
+    <mesh name="pd_guide_0054" file="meshes/collision/guide_0054.obj" />
+    <mesh name="pd_guide_0055" file="meshes/collision/guide_0055.obj" />
+    <mesh name="pd_guide_0056" file="meshes/collision/guide_0056.obj" />
+    <mesh name="pd_guide_0057" file="meshes/collision/guide_0057.obj" />
+    <mesh name="pd_guide_0058" file="meshes/collision/guide_0058.obj" />
+    <mesh name="pd_guide_0059" file="meshes/collision/guide_0059.obj" />
+    <mesh name="pd_guide_0060" file="meshes/collision/guide_0060.obj" />
+    <mesh name="pd_guide_0061" file="meshes/collision/guide_0061.obj" />
+    <mesh name="pd_guide_0062" file="meshes/collision/guide_0062.obj" />
+    <mesh name="pd_guide_0063" file="meshes/collision/guide_0063.obj" />
+    <mesh name="pd_guide_0064" file="meshes/collision/guide_0064.obj" />
+    <mesh name="pd_guide_0065" file="meshes/collision/guide_0065.obj" />
+    <mesh name="pd_guide_0066" file="meshes/collision/guide_0066.obj" />
+    <mesh name="pd_guide_0067" file="meshes/collision/guide_0067.obj" />
+    <mesh name="pd_guide_0068" file="meshes/collision/guide_0068.obj" />
+    <mesh name="pd_guide_0069" file="meshes/collision/guide_0069.obj" />
+    <mesh name="pd_guide_0070" file="meshes/collision/guide_0070.obj" />
+    <mesh name="pd_guide_0071" file="meshes/collision/guide_0071.obj" />
+    <mesh name="pd_guide_0072" file="meshes/collision/guide_0072.obj" />
+    <mesh name="pd_guide_0073" file="meshes/collision/guide_0073.obj" />
+    <mesh name="pd_guide_0074" file="meshes/collision/guide_0074.obj" />
+    <mesh name="pd_guide_0075" file="meshes/collision/guide_0075.obj" />
+    <mesh name="pd_guide_0076" file="meshes/collision/guide_0076.obj" />
+    <mesh name="pd_guide_0077" file="meshes/collision/guide_0077.obj" />
+    <mesh name="pd_guide_0078" file="meshes/collision/guide_0078.obj" />
+    <mesh name="pd_guide_0079" file="meshes/collision/guide_0079.obj" />
+    <mesh name="pd_guide_0080" file="meshes/collision/guide_0080.obj" />
+    <mesh name="pd_guide_0081" file="meshes/collision/guide_0081.obj" />
+    <mesh name="pd_guide_0082" file="meshes/collision/guide_0082.obj" />
+    <mesh name="pd_guide_0083" file="meshes/collision/guide_0083.obj" />
+    <mesh name="pd_guide_0084" file="meshes/collision/guide_0084.obj" />
+    <mesh name="pd_guide_0085" file="meshes/collision/guide_0085.obj" />
+    <mesh name="pd_guide_0086" file="meshes/collision/guide_0086.obj" />
+    <mesh name="pd_guide_0087" file="meshes/collision/guide_0087.obj" />
+    <mesh name="pd_guide_0088" file="meshes/collision/guide_0088.obj" />
+    <mesh name="pd_guide_0089" file="meshes/collision/guide_0089.obj" />
+    <mesh name="pd_guide_0090" file="meshes/collision/guide_0090.obj" />
+    <mesh name="pd_guide_0091" file="meshes/collision/guide_0091.obj" />
+    <mesh name="pd_guide_0092" file="meshes/collision/guide_0092.obj" />
+    <mesh name="pd_guide_0093" file="meshes/collision/guide_0093.obj" />
+    <mesh name="pd_guide_0094" file="meshes/collision/guide_0094.obj" />
+    <mesh name="pd_guide_0095" file="meshes/collision/guide_0095.obj" />
+    <mesh name="pd_guide_0096" file="meshes/collision/guide_0096.obj" />
+    <mesh name="pd_guide_0097" file="meshes/collision/guide_0097.obj" />
+    <mesh name="pd_guide_0098" file="meshes/collision/guide_0098.obj" />
+    <mesh name="pd_guide_0099" file="meshes/collision/guide_0099.obj" />
+    <mesh name="pd_guide_0100" file="meshes/collision/guide_0100.obj" />
+    <mesh name="pd_guide_0101" file="meshes/collision/guide_0101.obj" />
+    <mesh name="pd_guide_0102" file="meshes/collision/guide_0102.obj" />
+    <mesh name="pd_guide_0103" file="meshes/collision/guide_0103.obj" />
+    <mesh name="pd_guide_0104" file="meshes/collision/guide_0104.obj" />
+    <mesh name="pd_guide_0105" file="meshes/collision/guide_0105.obj" />
+    <mesh name="pd_guide_0106" file="meshes/collision/guide_0106.obj" />
+    <mesh name="pd_guide_0107" file="meshes/collision/guide_0107.obj" />
+    <mesh name="pd_guide_0108" file="meshes/collision/guide_0108.obj" />
+    <mesh name="pd_guide_0109" file="meshes/collision/guide_0109.obj" />
+    <mesh name="pd_guide_0110" file="meshes/collision/guide_0110.obj" />
+    <mesh name="pd_guide_0111" file="meshes/collision/guide_0111.obj" />
+    <mesh name="pd_guide_0112" file="meshes/collision/guide_0112.obj" />
+    <mesh name="pd_guide_0113" file="meshes/collision/guide_0113.obj" />
+    <mesh name="pd_guide_0114" file="meshes/collision/guide_0114.obj" />
+    <mesh name="pd_guide_0115" file="meshes/collision/guide_0115.obj" />
+    <mesh name="pd_guide_0116" file="meshes/collision/guide_0116.obj" />
+    <mesh name="pd_guide_0117" file="meshes/collision/guide_0117.obj" />
+    <mesh name="pd_guide_0118" file="meshes/collision/guide_0118.obj" />
+    <mesh name="pd_guide_0119" file="meshes/collision/guide_0119.obj" />
+    <mesh name="pd_guide_0120" file="meshes/collision/guide_0120.obj" />
+    <mesh name="pd_guide_0121" file="meshes/collision/guide_0121.obj" />
+    <mesh name="pd_guide_0122" file="meshes/collision/guide_0122.obj" />
+    <mesh name="pd_guide_0123" file="meshes/collision/guide_0123.obj" />
+    <mesh name="pd_guide_0124" file="meshes/collision/guide_0124.obj" />
+    <mesh name="pd_guide_0125" file="meshes/collision/guide_0125.obj" />
+    <mesh name="pd_guide_0126" file="meshes/collision/guide_0126.obj" />
+    <mesh name="pd_guide_0127" file="meshes/collision/guide_0127.obj" />
+    <mesh name="pd_guide_0128" file="meshes/collision/guide_0128.obj" />
+    <mesh name="pd_guide_0129" file="meshes/collision/guide_0129.obj" />
+    <mesh name="pd_guide_0130" file="meshes/collision/guide_0130.obj" />
+    <mesh name="pd_guide_0131" file="meshes/collision/guide_0131.obj" />
+    <mesh name="pd_guide_0132" file="meshes/collision/guide_0132.obj" />
+    <mesh name="pd_guide_0133" file="meshes/collision/guide_0133.obj" />
+    <mesh name="pd_guide_0134" file="meshes/collision/guide_0134.obj" />
+    <mesh name="pd_guide_0135" file="meshes/collision/guide_0135.obj" />
+    <mesh name="pd_guide_0136" file="meshes/collision/guide_0136.obj" />
+    <mesh name="pd_guide_0137" file="meshes/collision/guide_0137.obj" />
+    <mesh name="pd_guide_0138" file="meshes/collision/guide_0138.obj" />
+    <mesh name="pd_guide_0139" file="meshes/collision/guide_0139.obj" />
+    <mesh name="pd_guide_0140" file="meshes/collision/guide_0140.obj" />
+    <mesh name="pd_guide_0141" file="meshes/collision/guide_0141.obj" />
+    <mesh name="pd_guide_0142" file="meshes/collision/guide_0142.obj" />
+    <mesh name="pd_guide_0143" file="meshes/collision/guide_0143.obj" />
+    <mesh name="pd_guide_0144" file="meshes/collision/guide_0144.obj" />
+    <mesh name="pd_guide_0145" file="meshes/collision/guide_0145.obj" />
+    <mesh name="pd_guide_0146" file="meshes/collision/guide_0146.obj" />
+    <mesh name="pd_guide_0147" file="meshes/collision/guide_0147.obj" />
+    <mesh name="pd_guide_0148" file="meshes/collision/guide_0148.obj" />
+    <mesh name="pd_guide_0149" file="meshes/collision/guide_0149.obj" />
+    <mesh name="pd_guide_0150" file="meshes/collision/guide_0150.obj" />
+    <mesh name="pd_guide_0151" file="meshes/collision/guide_0151.obj" />
+    <mesh name="pd_guide_0152" file="meshes/collision/guide_0152.obj" />
+    <mesh name="pd_guide_0153" file="meshes/collision/guide_0153.obj" />
+    <mesh name="pd_guide_0154" file="meshes/collision/guide_0154.obj" />
+    <mesh name="pd_guide_0155" file="meshes/collision/guide_0155.obj" />
+    <mesh name="pd_guide_0156" file="meshes/collision/guide_0156.obj" />
+    <mesh name="pd_guide_0157" file="meshes/collision/guide_0157.obj" />
+    <mesh name="pd_guide_0158" file="meshes/collision/guide_0158.obj" />
+    <mesh name="pd_guide_0159" file="meshes/collision/guide_0159.obj" />
+    <mesh name="pd_guide_0160" file="meshes/collision/guide_0160.obj" />
+    <mesh name="pd_guide_0161" file="meshes/collision/guide_0161.obj" />
+    <mesh name="pd_guide_0162" file="meshes/collision/guide_0162.obj" />
+    <mesh name="pd_guide_0163" file="meshes/collision/guide_0163.obj" />
+    <mesh name="pd_guide_0164" file="meshes/collision/guide_0164.obj" />
+    <mesh name="pd_guide_0165" file="meshes/collision/guide_0165.obj" />
+    <mesh name="pd_guide_0166" file="meshes/collision/guide_0166.obj" />
+    <mesh name="pd_guide_0167" file="meshes/collision/guide_0167.obj" />
+    <mesh name="pd_guide_0168" file="meshes/collision/guide_0168.obj" />
+    <mesh name="pd_guide_0169" file="meshes/collision/guide_0169.obj" />
+    <mesh name="pd_guide_0170" file="meshes/collision/guide_0170.obj" />
+    <mesh name="pd_guide_0171" file="meshes/collision/guide_0171.obj" />
+    <mesh name="pd_guide_0172" file="meshes/collision/guide_0172.obj" />
+    <mesh name="pd_guide_0173" file="meshes/collision/guide_0173.obj" />
+    <mesh name="pd_guide_0174" file="meshes/collision/guide_0174.obj" />
+    <mesh name="pd_guide_0175" file="meshes/collision/guide_0175.obj" />
+    <mesh name="pd_guide_0176" file="meshes/collision/guide_0176.obj" />
+    <mesh name="pd_guide_0177" file="meshes/collision/guide_0177.obj" />
+    <mesh name="pd_guide_0178" file="meshes/collision/guide_0178.obj" />
+    <mesh name="pd_guide_0179" file="meshes/collision/guide_0179.obj" />
+    <mesh name="pd_guide_0180" file="meshes/collision/guide_0180.obj" />
+    <mesh name="pd_guide_0181" file="meshes/collision/guide_0181.obj" />
+    <mesh name="pd_guide_0182" file="meshes/collision/guide_0182.obj" />
+    <mesh name="pd_guide_0183" file="meshes/collision/guide_0183.obj" />
+    <mesh name="pd_guide_0184" file="meshes/collision/guide_0184.obj" />
+    <mesh name="pd_guide_0185" file="meshes/collision/guide_0185.obj" />
+    <mesh name="pd_guide_0186" file="meshes/collision/guide_0186.obj" />
+    <mesh name="pd_guide_0187" file="meshes/collision/guide_0187.obj" />
+    <mesh name="pd_guide_0188" file="meshes/collision/guide_0188.obj" />
+    <mesh name="pd_guide_0189" file="meshes/collision/guide_0189.obj" />
+    <mesh name="pd_guide_0190" file="meshes/collision/guide_0190.obj" />
+    <mesh name="pd_guide_0191" file="meshes/collision/guide_0191.obj" />
+    <mesh name="pd_guide_0192" file="meshes/collision/guide_0192.obj" />
+    <mesh name="pd_guide_0193" file="meshes/collision/guide_0193.obj" />
+    <mesh name="pd_guide_0194" file="meshes/collision/guide_0194.obj" />
+    <mesh name="pd_guide_0195" file="meshes/collision/guide_0195.obj" />
+    <mesh name="pd_guide_0196" file="meshes/collision/guide_0196.obj" />
+    <mesh name="pd_guide_0197" file="meshes/collision/guide_0197.obj" />
+    <mesh name="pd_guide_0198" file="meshes/collision/guide_0198.obj" />
+    <mesh name="pd_guide_0199" file="meshes/collision/guide_0199.obj" />
+    <mesh name="pd_guide_0200" file="meshes/collision/guide_0200.obj" />
+    <mesh name="pd_guide_0201" file="meshes/collision/guide_0201.obj" />
+    <mesh name="pd_guide_0202" file="meshes/collision/guide_0202.obj" />
+    <mesh name="pd_guide_0203" file="meshes/collision/guide_0203.obj" />
+    <mesh name="pd_guide_0204" file="meshes/collision/guide_0204.obj" />
+    <mesh name="pd_guide_0205" file="meshes/collision/guide_0205.obj" />
+    <mesh name="pd_guide_0206" file="meshes/collision/guide_0206.obj" />
+    <mesh name="pd_guide_0207" file="meshes/collision/guide_0207.obj" />
+    <mesh name="pd_guide_0208" file="meshes/collision/guide_0208.obj" />
+    <mesh name="pd_guide_0209" file="meshes/collision/guide_0209.obj" />
+    <mesh name="pd_guide_0210" file="meshes/collision/guide_0210.obj" />
+    <mesh name="pd_guide_0211" file="meshes/collision/guide_0211.obj" />
+    <mesh name="pd_guide_0212" file="meshes/collision/guide_0212.obj" />
+    <mesh name="pd_guide_0213" file="meshes/collision/guide_0213.obj" />
+    <mesh name="pd_guide_0214" file="meshes/collision/guide_0214.obj" />
+    <mesh name="pd_guide_0215" file="meshes/collision/guide_0215.obj" />
+    <mesh name="pd_guide_0216" file="meshes/collision/guide_0216.obj" />
+    <mesh name="pd_guide_0217" file="meshes/collision/guide_0217.obj" />
+    <mesh name="pd_guide_0218" file="meshes/collision/guide_0218.obj" />
+    <mesh name="pd_guide_0219" file="meshes/collision/guide_0219.obj" />
+    <mesh name="pd_guide_0220" file="meshes/collision/guide_0220.obj" />
+    <mesh name="pd_guide_0221" file="meshes/collision/guide_0221.obj" />
+    <mesh name="pd_guide_0222" file="meshes/collision/guide_0222.obj" />
+    <mesh name="pd_guide_0223" file="meshes/collision/guide_0223.obj" />
+    <mesh name="pd_guide_0224" file="meshes/collision/guide_0224.obj" />
+    <mesh name="pd_guide_0225" file="meshes/collision/guide_0225.obj" />
+    <mesh name="pd_guide_0226" file="meshes/collision/guide_0226.obj" />
+    <mesh name="pd_guide_0227" file="meshes/collision/guide_0227.obj" />
+    <mesh name="pd_guide_0228" file="meshes/collision/guide_0228.obj" />
+    <mesh name="pd_guide_0229" file="meshes/collision/guide_0229.obj" />
+    <mesh name="pd_guide_0230" file="meshes/collision/guide_0230.obj" />
+    <mesh name="pd_guide_0231" file="meshes/collision/guide_0231.obj" />
+    <mesh name="pd_guide_0232" file="meshes/collision/guide_0232.obj" />
+    <mesh name="pd_guide_0233" file="meshes/collision/guide_0233.obj" />
+    <mesh name="pd_guide_0234" file="meshes/collision/guide_0234.obj" />
+    <mesh name="pd_guide_0235" file="meshes/collision/guide_0235.obj" />
+    <mesh name="pd_guide_0236" file="meshes/collision/guide_0236.obj" />
+    <mesh name="pd_guide_0237" file="meshes/collision/guide_0237.obj" />
+    <mesh name="pd_guide_0238" file="meshes/collision/guide_0238.obj" />
+    <mesh name="pd_guide_0239" file="meshes/collision/guide_0239.obj" />
+    <mesh name="pd_guide_0240" file="meshes/collision/guide_0240.obj" />
+    <mesh name="pd_guide_0241" file="meshes/collision/guide_0241.obj" />
+    <mesh name="pd_guide_0242" file="meshes/collision/guide_0242.obj" />
+    <mesh name="pd_guide_0243" file="meshes/collision/guide_0243.obj" />
+    <mesh name="pd_guide_0244" file="meshes/collision/guide_0244.obj" />
+    <mesh name="pd_guide_0245" file="meshes/collision/guide_0245.obj" />
+    <mesh name="pd_guide_0246" file="meshes/collision/guide_0246.obj" />
+    <mesh name="pd_guide_0247" file="meshes/collision/guide_0247.obj" />
+    <mesh name="pd_guide_0248" file="meshes/collision/guide_0248.obj" />
+    <mesh name="pd_guide_0249" file="meshes/collision/guide_0249.obj" />
+    <mesh name="pd_guide_0250" file="meshes/collision/guide_0250.obj" />
+    <mesh name="pd_guide_0251" file="meshes/collision/guide_0251.obj" />
+    <mesh name="pd_guide_0252" file="meshes/collision/guide_0252.obj" />
+    <mesh name="pd_guide_0253" file="meshes/collision/guide_0253.obj" />
+    <mesh name="pd_guide_0254" file="meshes/collision/guide_0254.obj" />
+    <mesh name="pd_guide_0255" file="meshes/collision/guide_0255.obj" />
+    <mesh name="pd_guide_0256" file="meshes/collision/guide_0256.obj" />
+    <mesh name="pd_guide_0257" file="meshes/collision/guide_0257.obj" />
+    <mesh name="pd_guide_0258" file="meshes/collision/guide_0258.obj" />
+    <mesh name="pd_guide_0259" file="meshes/collision/guide_0259.obj" />
+    <mesh name="pd_guide_0260" file="meshes/collision/guide_0260.obj" />
+    <mesh name="pd_guide_0261" file="meshes/collision/guide_0261.obj" />
+    <mesh name="pd_guide_0262" file="meshes/collision/guide_0262.obj" />
+    <mesh name="pd_guide_0263" file="meshes/collision/guide_0263.obj" />
+    <mesh name="pd_guide_0264" file="meshes/collision/guide_0264.obj" />
+    <mesh name="pd_guide_0265" file="meshes/collision/guide_0265.obj" />
+    <mesh name="pd_guide_0266" file="meshes/collision/guide_0266.obj" />
+    <mesh name="pd_guide_0267" file="meshes/collision/guide_0267.obj" />
+    <mesh name="pd_guide_0268" file="meshes/collision/guide_0268.obj" />
+    <mesh name="pd_guide_0269" file="meshes/collision/guide_0269.obj" />
+    <mesh name="pd_guide_0270" file="meshes/collision/guide_0270.obj" />
+    <mesh name="pd_guide_0271" file="meshes/collision/guide_0271.obj" />
+    <mesh name="pd_guide_0272" file="meshes/collision/guide_0272.obj" />
+    <mesh name="pd_guide_0273" file="meshes/collision/guide_0273.obj" />
+    <mesh name="pd_guide_0274" file="meshes/collision/guide_0274.obj" />
+    <mesh name="pd_guide_0275" file="meshes/collision/guide_0275.obj" />
+    <mesh name="pd_guide_0276" file="meshes/collision/guide_0276.obj" />
+    <mesh name="pd_guide_0277" file="meshes/collision/guide_0277.obj" />
+    <mesh name="pd_guide_0278" file="meshes/collision/guide_0278.obj" />
+    <mesh name="pd_guide_0279" file="meshes/collision/guide_0279.obj" />
+    <mesh name="pd_guide_0280" file="meshes/collision/guide_0280.obj" />
+    <mesh name="pd_guide_0281" file="meshes/collision/guide_0281.obj" />
+    <mesh name="pd_guide_0282" file="meshes/collision/guide_0282.obj" />
+    <mesh name="pd_guide_0283" file="meshes/collision/guide_0283.obj" />
+    <mesh name="pd_guide_0284" file="meshes/collision/guide_0284.obj" />
+    <mesh name="pd_guide_0285" file="meshes/collision/guide_0285.obj" />
+    <mesh name="pd_guide_0286" file="meshes/collision/guide_0286.obj" />
+    <mesh name="pd_guide_0287" file="meshes/collision/guide_0287.obj" />
+    <mesh name="pd_guide_0288" file="meshes/collision/guide_0288.obj" />
+    <mesh name="pd_guide_0289" file="meshes/collision/guide_0289.obj" />
+    <mesh name="pd_guide_0290" file="meshes/collision/guide_0290.obj" />
+    <mesh name="pd_guide_0291" file="meshes/collision/guide_0291.obj" />
+    <mesh name="pd_guide_0292" file="meshes/collision/guide_0292.obj" />
+    <mesh name="pd_guide_0293" file="meshes/collision/guide_0293.obj" />
+    <mesh name="pd_guide_0294" file="meshes/collision/guide_0294.obj" />
+    <mesh name="pd_guide_0295" file="meshes/collision/guide_0295.obj" />
+    <mesh name="pd_guide_0296" file="meshes/collision/guide_0296.obj" />
+    <mesh name="pd_guide_0297" file="meshes/collision/guide_0297.obj" />
+    <mesh name="pd_guide_0298" file="meshes/collision/guide_0298.obj" />
+    <mesh name="pd_guide_0299" file="meshes/collision/guide_0299.obj" />
+    <mesh name="pd_guide_0300" file="meshes/collision/guide_0300.obj" />
+    <mesh name="pd_guide_0301" file="meshes/collision/guide_0301.obj" />
+    <mesh name="pd_guide_0302" file="meshes/collision/guide_0302.obj" />
+    <mesh name="pd_guide_0303" file="meshes/collision/guide_0303.obj" />
+    <mesh name="pd_guide_0304" file="meshes/collision/guide_0304.obj" />
+    <mesh name="pd_guide_0305" file="meshes/collision/guide_0305.obj" />
+    <mesh name="pd_guide_0306" file="meshes/collision/guide_0306.obj" />
+    <mesh name="pd_guide_0307" file="meshes/collision/guide_0307.obj" />
+    <mesh name="pd_guide_0308" file="meshes/collision/guide_0308.obj" />
+    <mesh name="pd_guide_0309" file="meshes/collision/guide_0309.obj" />
+    <mesh name="pd_guide_0310" file="meshes/collision/guide_0310.obj" />
+    <mesh name="pd_guide_0311" file="meshes/collision/guide_0311.obj" />
+    <mesh name="pd_guide_0312" file="meshes/collision/guide_0312.obj" />
+    <mesh name="pd_guide_0313" file="meshes/collision/guide_0313.obj" />
+    <mesh name="pd_guide_0314" file="meshes/collision/guide_0314.obj" />
+    <mesh name="pd_guide_0315" file="meshes/collision/guide_0315.obj" />
+    <mesh name="pd_guide_0316" file="meshes/collision/guide_0316.obj" />
+    <mesh name="pd_guide_0317" file="meshes/collision/guide_0317.obj" />
+    <mesh name="pd_guide_0318" file="meshes/collision/guide_0318.obj" />
+    <mesh name="pd_guide_0319" file="meshes/collision/guide_0319.obj" />
+    <mesh name="pd_guide_0320" file="meshes/collision/guide_0320.obj" />
+    <mesh name="pd_guide_0321" file="meshes/collision/guide_0321.obj" />
+    <mesh name="pd_guide_0322" file="meshes/collision/guide_0322.obj" />
+    <mesh name="pd_guide_0323" file="meshes/collision/guide_0323.obj" />
+    <mesh name="pd_guide_0324" file="meshes/collision/guide_0324.obj" />
+    <mesh name="pd_guide_0325" file="meshes/collision/guide_0325.obj" />
+    <mesh name="pd_guide_0326" file="meshes/collision/guide_0326.obj" />
+    <mesh name="pd_guide_0327" file="meshes/collision/guide_0327.obj" />
+    <mesh name="pd_guide_0328" file="meshes/collision/guide_0328.obj" />
+    <mesh name="pd_guide_0329" file="meshes/collision/guide_0329.obj" />
+    <mesh name="pd_guide_0330" file="meshes/collision/guide_0330.obj" />
+    <mesh name="pd_guide_0331" file="meshes/collision/guide_0331.obj" />
+    <mesh name="pd_guide_0332" file="meshes/collision/guide_0332.obj" />
+    <mesh name="pd_guide_0333" file="meshes/collision/guide_0333.obj" />
+    <mesh name="pd_guide_0334" file="meshes/collision/guide_0334.obj" />
+    <mesh name="pd_guide_0335" file="meshes/collision/guide_0335.obj" />
+    <mesh name="pd_guide_0336" file="meshes/collision/guide_0336.obj" />
+    <mesh name="pd_guide_0337" file="meshes/collision/guide_0337.obj" />
+    <mesh name="pd_guide_0338" file="meshes/collision/guide_0338.obj" />
+    <mesh name="pd_guide_0339" file="meshes/collision/guide_0339.obj" />
+    <mesh name="pd_guide_0340" file="meshes/collision/guide_0340.obj" />
+    <mesh name="pd_guide_0341" file="meshes/collision/guide_0341.obj" />
+    <mesh name="pd_guide_0342" file="meshes/collision/guide_0342.obj" />
+    <mesh name="pd_guide_0343" file="meshes/collision/guide_0343.obj" />
+    <mesh name="pd_guide_0344" file="meshes/collision/guide_0344.obj" />
+    <mesh name="pd_guide_0345" file="meshes/collision/guide_0345.obj" />
+    <mesh name="pd_guide_0346" file="meshes/collision/guide_0346.obj" />
+    <mesh name="pd_guide_0347" file="meshes/collision/guide_0347.obj" />
+    <mesh name="pd_guide_0348" file="meshes/collision/guide_0348.obj" />
+    <mesh name="pd_guide_0349" file="meshes/collision/guide_0349.obj" />
+    <mesh name="pd_guide_0350" file="meshes/collision/guide_0350.obj" />
+    <mesh name="pd_guide_0351" file="meshes/collision/guide_0351.obj" />
+    <mesh name="pd_guide_0352" file="meshes/collision/guide_0352.obj" />
+    <mesh name="pd_guide_0353" file="meshes/collision/guide_0353.obj" />
+    <mesh name="pd_guide_0354" file="meshes/collision/guide_0354.obj" />
+    <mesh name="pd_guide_0355" file="meshes/collision/guide_0355.obj" />
+    <mesh name="pd_guide_0356" file="meshes/collision/guide_0356.obj" />
+    <mesh name="pd_guide_0357" file="meshes/collision/guide_0357.obj" />
+    <mesh name="pd_guide_0358" file="meshes/collision/guide_0358.obj" />
+    <mesh name="pd_guide_0359" file="meshes/collision/guide_0359.obj" />
+    <mesh name="pd_guide_0360" file="meshes/collision/guide_0360.obj" />
+    <mesh name="pd_guide_0361" file="meshes/collision/guide_0361.obj" />
+    <mesh name="pd_guide_0362" file="meshes/collision/guide_0362.obj" />
+    <mesh name="pd_guide_0363" file="meshes/collision/guide_0363.obj" />
+    <mesh name="pd_guide_0364" file="meshes/collision/guide_0364.obj" />
+    <mesh name="pd_guide_0365" file="meshes/collision/guide_0365.obj" />
+    <mesh name="pd_guide_0366" file="meshes/collision/guide_0366.obj" />
+    <mesh name="pd_guide_0367" file="meshes/collision/guide_0367.obj" />
+    <mesh name="pd_guide_0368" file="meshes/collision/guide_0368.obj" />
+    <mesh name="pd_guide_0369" file="meshes/collision/guide_0369.obj" />
+    <mesh name="pd_guide_0370" file="meshes/collision/guide_0370.obj" />
+    <mesh name="pd_guide_0371" file="meshes/collision/guide_0371.obj" />
+    <mesh name="pd_guide_0372" file="meshes/collision/guide_0372.obj" />
+    <mesh name="pd_guide_0373" file="meshes/collision/guide_0373.obj" />
+    <mesh name="pd_guide_0374" file="meshes/collision/guide_0374.obj" />
+    <mesh name="pd_guide_0375" file="meshes/collision/guide_0375.obj" />
+    <mesh name="pd_guide_0376" file="meshes/collision/guide_0376.obj" />
+    <mesh name="pd_guide_0377" file="meshes/collision/guide_0377.obj" />
+    <mesh name="pd_guide_0378" file="meshes/collision/guide_0378.obj" />
+    <mesh name="pd_guide_0379" file="meshes/collision/guide_0379.obj" />
+    <mesh name="pd_guide_0380" file="meshes/collision/guide_0380.obj" />
+    <mesh name="pd_guide_0381" file="meshes/collision/guide_0381.obj" />
+    <mesh name="pd_guide_0382" file="meshes/collision/guide_0382.obj" />
+    <mesh name="pd_guide_0383" file="meshes/collision/guide_0383.obj" />
+    <mesh name="pd_guide_0384" file="meshes/collision/guide_0384.obj" />
+    <mesh name="pd_guide_0385" file="meshes/collision/guide_0385.obj" />
+    <mesh name="pd_guide_0386" file="meshes/collision/guide_0386.obj" />
+    <mesh name="pd_guide_0387" file="meshes/collision/guide_0387.obj" />
+    <mesh name="pd_guide_0388" file="meshes/collision/guide_0388.obj" />
+    <mesh name="pd_guide_0389" file="meshes/collision/guide_0389.obj" />
+    <mesh name="pd_guide_0390" file="meshes/collision/guide_0390.obj" />
+    <mesh name="pd_guide_0391" file="meshes/collision/guide_0391.obj" />
+    <mesh name="pd_guide_0392" file="meshes/collision/guide_0392.obj" />
+    <mesh name="pd_guide_0393" file="meshes/collision/guide_0393.obj" />
+    <mesh name="pd_guide_0394" file="meshes/collision/guide_0394.obj" />
+    <mesh name="pd_guide_0395" file="meshes/collision/guide_0395.obj" />
+    <mesh name="pd_guide_0396" file="meshes/collision/guide_0396.obj" />
+    <mesh name="pd_guide_0397" file="meshes/collision/guide_0397.obj" />
+    <mesh name="pd_guide_0398" file="meshes/collision/guide_0398.obj" />
+    <mesh name="pd_guide_0399" file="meshes/collision/guide_0399.obj" />
+    <mesh name="pd_guide_0400" file="meshes/collision/guide_0400.obj" />
+    <mesh name="pd_guide_0401" file="meshes/collision/guide_0401.obj" />
+    <mesh name="pd_guide_0402" file="meshes/collision/guide_0402.obj" />
+    <mesh name="pd_guide_0403" file="meshes/collision/guide_0403.obj" />
+    <mesh name="pd_guide_0404" file="meshes/collision/guide_0404.obj" />
+    <mesh name="pd_guide_0405" file="meshes/collision/guide_0405.obj" />
+    <mesh name="pd_guide_0406" file="meshes/collision/guide_0406.obj" />
+    <mesh name="pd_guide_0407" file="meshes/collision/guide_0407.obj" />
+    <mesh name="pd_guide_0408" file="meshes/collision/guide_0408.obj" />
+    <mesh name="pd_guide_0409" file="meshes/collision/guide_0409.obj" />
+    <mesh name="pd_guide_0410" file="meshes/collision/guide_0410.obj" />
+    <mesh name="pd_guide_0411" file="meshes/collision/guide_0411.obj" />
+    <mesh name="pd_guide_0412" file="meshes/collision/guide_0412.obj" />
+    <mesh name="pd_guide_0413" file="meshes/collision/guide_0413.obj" />
+    <mesh name="pd_guide_0414" file="meshes/collision/guide_0414.obj" />
+    <mesh name="pd_guide_0415" file="meshes/collision/guide_0415.obj" />
+    <mesh name="pd_guide_0416" file="meshes/collision/guide_0416.obj" />
+    <mesh name="pd_guide_0417" file="meshes/collision/guide_0417.obj" />
+    <mesh name="pd_guide_0418" file="meshes/collision/guide_0418.obj" />
+    <mesh name="pd_guide_0419" file="meshes/collision/guide_0419.obj" />
+    <mesh name="pd_guide_0420" file="meshes/collision/guide_0420.obj" />
+    <mesh name="pd_guide_0421" file="meshes/collision/guide_0421.obj" />
+    <mesh name="pd_guide_0422" file="meshes/collision/guide_0422.obj" />
+    <mesh name="pd_guide_0423" file="meshes/collision/guide_0423.obj" />
+    <mesh name="pd_guide_0424" file="meshes/collision/guide_0424.obj" />
+    <mesh name="pd_guide_0425" file="meshes/collision/guide_0425.obj" />
+    <mesh name="pd_guide_0426" file="meshes/collision/guide_0426.obj" />
+    <mesh name="pd_guide_0427" file="meshes/collision/guide_0427.obj" />
+    <mesh name="pd_guide_0428" file="meshes/collision/guide_0428.obj" />
+    <mesh name="pd_guide_0429" file="meshes/collision/guide_0429.obj" />
+    <mesh name="pd_guide_0430" file="meshes/collision/guide_0430.obj" />
+    <mesh name="pd_guide_0431" file="meshes/collision/guide_0431.obj" />
+    <mesh name="pd_guide_0432" file="meshes/collision/guide_0432.obj" />
+    <mesh name="pd_guide_0433" file="meshes/collision/guide_0433.obj" />
+    <mesh name="pd_guide_0434" file="meshes/collision/guide_0434.obj" />
+    <mesh name="pd_guide_0435" file="meshes/collision/guide_0435.obj" />
+    <mesh name="pd_guide_0436" file="meshes/collision/guide_0436.obj" />
+    <mesh name="pd_guide_0437" file="meshes/collision/guide_0437.obj" />
+    <mesh name="pd_guide_0438" file="meshes/collision/guide_0438.obj" />
+    <mesh name="pd_guide_0439" file="meshes/collision/guide_0439.obj" />
+    <mesh name="pd_guide_0440" file="meshes/collision/guide_0440.obj" />
+    <mesh name="pd_guide_0441" file="meshes/collision/guide_0441.obj" />
+    <mesh name="pd_guide_0442" file="meshes/collision/guide_0442.obj" />
+    <mesh name="pd_guide_0443" file="meshes/collision/guide_0443.obj" />
+    <mesh name="pd_guide_0444" file="meshes/collision/guide_0444.obj" />
+    <mesh name="pd_guide_0445" file="meshes/collision/guide_0445.obj" />
+    <mesh name="pd_guide_0446" file="meshes/collision/guide_0446.obj" />
+    <mesh name="pd_guide_0447" file="meshes/collision/guide_0447.obj" />
+    <mesh name="pd_guide_0448" file="meshes/collision/guide_0448.obj" />
+    <mesh name="pd_guide_0449" file="meshes/collision/guide_0449.obj" />
+    <mesh name="pd_guide_0450" file="meshes/collision/guide_0450.obj" />
+    <mesh name="pd_guide_0451" file="meshes/collision/guide_0451.obj" />
+    <mesh name="pd_guide_0452" file="meshes/collision/guide_0452.obj" />
+    <mesh name="pd_guide_0453" file="meshes/collision/guide_0453.obj" />
+    <mesh name="pd_guide_0454" file="meshes/collision/guide_0454.obj" />
+    <mesh name="pd_guide_0455" file="meshes/collision/guide_0455.obj" />
+    <mesh name="pd_guide_0456" file="meshes/collision/guide_0456.obj" />
+    <mesh name="pd_guide_0457" file="meshes/collision/guide_0457.obj" />
+    <mesh name="pd_guide_0458" file="meshes/collision/guide_0458.obj" />
+    <mesh name="pd_guide_0459" file="meshes/collision/guide_0459.obj" />
+    <mesh name="pd_guide_0460" file="meshes/collision/guide_0460.obj" />
+    <mesh name="pd_guide_0461" file="meshes/collision/guide_0461.obj" />
+    <mesh name="pd_guide_0462" file="meshes/collision/guide_0462.obj" />
+    <mesh name="pd_guide_0463" file="meshes/collision/guide_0463.obj" />
+    <mesh name="pd_stop_000" file="meshes/collision/stop_000.obj" />
+    <mesh name="pd_stop_001" file="meshes/collision/stop_001.obj" />
+    <mesh name="pd_stop_002" file="meshes/collision/stop_002.obj" />
+    <mesh name="pd_stop_003" file="meshes/collision/stop_003.obj" />
+    <mesh name="pd_stop_004" file="meshes/collision/stop_004.obj" />
+    <mesh name="pd_stop_005" file="meshes/collision/stop_005.obj" />
+    <mesh name="pd_stop_006" file="meshes/collision/stop_006.obj" />
+    <mesh name="pd_stop_007" file="meshes/collision/stop_007.obj" />
+    <mesh name="pd_stop_008" file="meshes/collision/stop_008.obj" />
+    <mesh name="pd_stop_009" file="meshes/collision/stop_009.obj" />
+    <mesh name="pd_stop_010" file="meshes/collision/stop_010.obj" />
+    <mesh name="pd_stop_011" file="meshes/collision/stop_011.obj" />
+    <mesh name="pd_stop_012" file="meshes/collision/stop_012.obj" />
+    <mesh name="pd_stop_013" file="meshes/collision/stop_013.obj" />
+    <mesh name="pd_stop_014" file="meshes/collision/stop_014.obj" />
+    <mesh name="pd_stop_015" file="meshes/collision/stop_015.obj" />
+    <mesh name="pd_stop_016" file="meshes/collision/stop_016.obj" />
+    <mesh name="pd_stop_017" file="meshes/collision/stop_017.obj" />
+    <mesh name="pd_stop_018" file="meshes/collision/stop_018.obj" />
+    <mesh name="pd_stop_019" file="meshes/collision/stop_019.obj" />
+    <mesh name="pd_stop_020" file="meshes/collision/stop_020.obj" />
+    <mesh name="pd_stop_021" file="meshes/collision/stop_021.obj" />
+    <mesh name="pd_stop_022" file="meshes/collision/stop_022.obj" />
+    <mesh name="pd_stop_023" file="meshes/collision/stop_023.obj" />
+  </asset>
+  <worldbody>
+    <body name="dock">
+      <inertial mass="0.3916909444741654" pos="4.739132537560084e-05 8.742036369009432e-08 0.01248141465044686" fullinertia="0.0002704220805020104 0.0002708892676306518 0.0004999960906469103 -5.05851233181671e-10 1.25110290783848e-07 -3.846111144377178e-10" />
+      <geom name="petal_2_visual" mesh="pd_v_petal_2" type="mesh" class="pd_visual" material="pd_blue" />
+      <geom name="head_plate_visual" mesh="pd_v_head_plate" type="mesh" class="pd_visual" material="pd_blue" />
+      <geom name="petal_0_visual" mesh="pd_v_petal_0" type="mesh" class="pd_visual" material="pd_blue" />
+      <geom name="petal_1_visual" mesh="pd_v_petal_1" type="mesh" class="pd_visual" material="pd_blue" />
+      <geom name="adapter_visual" mesh="pd_v_adapter" type="mesh" class="pd_visual" material="pd_dark" />
+      <geom name="petal_3_visual" mesh="pd_v_petal_3" type="mesh" class="pd_visual" material="pd_blue" />
+      <geom name="base_collision" type="mesh" mesh="pd_base_proxy" class="pd_collision" />
+      <geom name="support_collision" type="cylinder" size="0.0315 0.0015" pos="0 0 0.0015" class="pd_collision" />
+      <geom name="pilot_collision" type="cylinder" size="0.015725 0.001" pos="0 0 -0.001" class="pd_collision" />
+      <site name="sensor_site" pos="0 0 0" size="0.002" group="4" rgba="1 0.6 0 1" />
+      <site name="mating" pos="0 0 0.0232" size="0.002" group="4" rgba="0 0.8 0.5 1" />
+      <site name="contact_zone" type="cylinder" group="5" pos="0 0 0.023" size="0.051 0.01" rgba="0 1 0 0.05" />
+      <geom name="guide_0000" mesh="pd_guide_0000" type="mesh" class="pd_collision" />
+      <geom name="guide_0001" mesh="pd_guide_0001" type="mesh" class="pd_collision" />
+      <geom name="guide_0002" mesh="pd_guide_0002" type="mesh" class="pd_collision" />
+      <geom name="guide_0003" mesh="pd_guide_0003" type="mesh" class="pd_collision" />
+      <geom name="guide_0004" mesh="pd_guide_0004" type="mesh" class="pd_collision" />
+      <geom name="guide_0005" mesh="pd_guide_0005" type="mesh" class="pd_collision" />
+      <geom name="guide_0006" mesh="pd_guide_0006" type="mesh" class="pd_collision" />
+      <geom name="guide_0007" mesh="pd_guide_0007" type="mesh" class="pd_collision" />
+      <geom name="guide_0008" mesh="pd_guide_0008" type="mesh" class="pd_collision" />
+      <geom name="guide_0009" mesh="pd_guide_0009" type="mesh" class="pd_collision" />
+      <geom name="guide_0010" mesh="pd_guide_0010" type="mesh" class="pd_collision" />
+      <geom name="guide_0011" mesh="pd_guide_0011" type="mesh" class="pd_collision" />
+      <geom name="guide_0012" mesh="pd_guide_0012" type="mesh" class="pd_collision" />
+      <geom name="guide_0013" mesh="pd_guide_0013" type="mesh" class="pd_collision" />
+      <geom name="guide_0014" mesh="pd_guide_0014" type="mesh" class="pd_collision" />
+      <geom name="guide_0015" mesh="pd_guide_0015" type="mesh" class="pd_collision" />
+      <geom name="guide_0016" mesh="pd_guide_0016" type="mesh" class="pd_collision" />
+      <geom name="guide_0017" mesh="pd_guide_0017" type="mesh" class="pd_collision" />
+      <geom name="guide_0018" mesh="pd_guide_0018" type="mesh" class="pd_collision" />
+      <geom name="guide_0019" mesh="pd_guide_0019" type="mesh" class="pd_collision" />
+      <geom name="guide_0020" mesh="pd_guide_0020" type="mesh" class="pd_collision" />
+      <geom name="guide_0021" mesh="pd_guide_0021" type="mesh" class="pd_collision" />
+      <geom name="guide_0022" mesh="pd_guide_0022" type="mesh" class="pd_collision" />
+      <geom name="guide_0023" mesh="pd_guide_0023" type="mesh" class="pd_collision" />
+      <geom name="guide_0024" mesh="pd_guide_0024" type="mesh" class="pd_collision" />
+      <geom name="guide_0025" mesh="pd_guide_0025" type="mesh" class="pd_collision" />
+      <geom name="guide_0026" mesh="pd_guide_0026" type="mesh" class="pd_collision" />
+      <geom name="guide_0027" mesh="pd_guide_0027" type="mesh" class="pd_collision" />
+      <geom name="guide_0028" mesh="pd_guide_0028" type="mesh" class="pd_collision" />
+      <geom name="guide_0029" mesh="pd_guide_0029" type="mesh" class="pd_collision" />
+      <geom name="guide_0030" mesh="pd_guide_0030" type="mesh" class="pd_collision" />
+      <geom name="guide_0031" mesh="pd_guide_0031" type="mesh" class="pd_collision" />
+      <geom name="guide_0032" mesh="pd_guide_0032" type="mesh" class="pd_collision" />
+      <geom name="guide_0033" mesh="pd_guide_0033" type="mesh" class="pd_collision" />
+      <geom name="guide_0034" mesh="pd_guide_0034" type="mesh" class="pd_collision" />
+      <geom name="guide_0035" mesh="pd_guide_0035" type="mesh" class="pd_collision" />
+      <geom name="guide_0036" mesh="pd_guide_0036" type="mesh" class="pd_collision" />
+      <geom name="guide_0037" mesh="pd_guide_0037" type="mesh" class="pd_collision" />
+      <geom name="guide_0038" mesh="pd_guide_0038" type="mesh" class="pd_collision" />
+      <geom name="guide_0039" mesh="pd_guide_0039" type="mesh" class="pd_collision" />
+      <geom name="guide_0040" mesh="pd_guide_0040" type="mesh" class="pd_collision" />
+      <geom name="guide_0041" mesh="pd_guide_0041" type="mesh" class="pd_collision" />
+      <geom name="guide_0042" mesh="pd_guide_0042" type="mesh" class="pd_collision" />
+      <geom name="guide_0043" mesh="pd_guide_0043" type="mesh" class="pd_collision" />
+      <geom name="guide_0044" mesh="pd_guide_0044" type="mesh" class="pd_collision" />
+      <geom name="guide_0045" mesh="pd_guide_0045" type="mesh" class="pd_collision" />
+      <geom name="guide_0046" mesh="pd_guide_0046" type="mesh" class="pd_collision" />
+      <geom name="guide_0047" mesh="pd_guide_0047" type="mesh" class="pd_collision" />
+      <geom name="guide_0048" mesh="pd_guide_0048" type="mesh" class="pd_collision" />
+      <geom name="guide_0049" mesh="pd_guide_0049" type="mesh" class="pd_collision" />
+      <geom name="guide_0050" mesh="pd_guide_0050" type="mesh" class="pd_collision" />
+      <geom name="guide_0051" mesh="pd_guide_0051" type="mesh" class="pd_collision" />
+      <geom name="guide_0052" mesh="pd_guide_0052" type="mesh" class="pd_collision" />
+      <geom name="guide_0053" mesh="pd_guide_0053" type="mesh" class="pd_collision" />
+      <geom name="guide_0054" mesh="pd_guide_0054" type="mesh" class="pd_collision" />
+      <geom name="guide_0055" mesh="pd_guide_0055" type="mesh" class="pd_collision" />
+      <geom name="guide_0056" mesh="pd_guide_0056" type="mesh" class="pd_collision" />
+      <geom name="guide_0057" mesh="pd_guide_0057" type="mesh" class="pd_collision" />
+      <geom name="guide_0058" mesh="pd_guide_0058" type="mesh" class="pd_collision" />
+      <geom name="guide_0059" mesh="pd_guide_0059" type="mesh" class="pd_collision" />
+      <geom name="guide_0060" mesh="pd_guide_0060" type="mesh" class="pd_collision" />
+      <geom name="guide_0061" mesh="pd_guide_0061" type="mesh" class="pd_collision" />
+      <geom name="guide_0062" mesh="pd_guide_0062" type="mesh" class="pd_collision" />
+      <geom name="guide_0063" mesh="pd_guide_0063" type="mesh" class="pd_collision" />
+      <geom name="guide_0064" mesh="pd_guide_0064" type="mesh" class="pd_collision" />
+      <geom name="guide_0065" mesh="pd_guide_0065" type="mesh" class="pd_collision" />
+      <geom name="guide_0066" mesh="pd_guide_0066" type="mesh" class="pd_collision" />
+      <geom name="guide_0067" mesh="pd_guide_0067" type="mesh" class="pd_collision" />
+      <geom name="guide_0068" mesh="pd_guide_0068" type="mesh" class="pd_collision" />
+      <geom name="guide_0069" mesh="pd_guide_0069" type="mesh" class="pd_collision" />
+      <geom name="guide_0070" mesh="pd_guide_0070" type="mesh" class="pd_collision" />
+      <geom name="guide_0071" mesh="pd_guide_0071" type="mesh" class="pd_collision" />
+      <geom name="guide_0072" mesh="pd_guide_0072" type="mesh" class="pd_collision" />
+      <geom name="guide_0073" mesh="pd_guide_0073" type="mesh" class="pd_collision" />
+      <geom name="guide_0074" mesh="pd_guide_0074" type="mesh" class="pd_collision" />
+      <geom name="guide_0075" mesh="pd_guide_0075" type="mesh" class="pd_collision" />
+      <geom name="guide_0076" mesh="pd_guide_0076" type="mesh" class="pd_collision" />
+      <geom name="guide_0077" mesh="pd_guide_0077" type="mesh" class="pd_collision" />
+      <geom name="guide_0078" mesh="pd_guide_0078" type="mesh" class="pd_collision" />
+      <geom name="guide_0079" mesh="pd_guide_0079" type="mesh" class="pd_collision" />
+      <geom name="guide_0080" mesh="pd_guide_0080" type="mesh" class="pd_collision" />
+      <geom name="guide_0081" mesh="pd_guide_0081" type="mesh" class="pd_collision" />
+      <geom name="guide_0082" mesh="pd_guide_0082" type="mesh" class="pd_collision" />
+      <geom name="guide_0083" mesh="pd_guide_0083" type="mesh" class="pd_collision" />
+      <geom name="guide_0084" mesh="pd_guide_0084" type="mesh" class="pd_collision" />
+      <geom name="guide_0085" mesh="pd_guide_0085" type="mesh" class="pd_collision" />
+      <geom name="guide_0086" mesh="pd_guide_0086" type="mesh" class="pd_collision" />
+      <geom name="guide_0087" mesh="pd_guide_0087" type="mesh" class="pd_collision" />
+      <geom name="guide_0088" mesh="pd_guide_0088" type="mesh" class="pd_collision" />
+      <geom name="guide_0089" mesh="pd_guide_0089" type="mesh" class="pd_collision" />
+      <geom name="guide_0090" mesh="pd_guide_0090" type="mesh" class="pd_collision" />
+      <geom name="guide_0091" mesh="pd_guide_0091" type="mesh" class="pd_collision" />
+      <geom name="guide_0092" mesh="pd_guide_0092" type="mesh" class="pd_collision" />
+      <geom name="guide_0093" mesh="pd_guide_0093" type="mesh" class="pd_collision" />
+      <geom name="guide_0094" mesh="pd_guide_0094" type="mesh" class="pd_collision" />
+      <geom name="guide_0095" mesh="pd_guide_0095" type="mesh" class="pd_collision" />
+      <geom name="guide_0096" mesh="pd_guide_0096" type="mesh" class="pd_collision" />
+      <geom name="guide_0097" mesh="pd_guide_0097" type="mesh" class="pd_collision" />
+      <geom name="guide_0098" mesh="pd_guide_0098" type="mesh" class="pd_collision" />
+      <geom name="guide_0099" mesh="pd_guide_0099" type="mesh" class="pd_collision" />
+      <geom name="guide_0100" mesh="pd_guide_0100" type="mesh" class="pd_collision" />
+      <geom name="guide_0101" mesh="pd_guide_0101" type="mesh" class="pd_collision" />
+      <geom name="guide_0102" mesh="pd_guide_0102" type="mesh" class="pd_collision" />
+      <geom name="guide_0103" mesh="pd_guide_0103" type="mesh" class="pd_collision" />
+      <geom name="guide_0104" mesh="pd_guide_0104" type="mesh" class="pd_collision" />
+      <geom name="guide_0105" mesh="pd_guide_0105" type="mesh" class="pd_collision" />
+      <geom name="guide_0106" mesh="pd_guide_0106" type="mesh" class="pd_collision" />
+      <geom name="guide_0107" mesh="pd_guide_0107" type="mesh" class="pd_collision" />
+      <geom name="guide_0108" mesh="pd_guide_0108" type="mesh" class="pd_collision" />
+      <geom name="guide_0109" mesh="pd_guide_0109" type="mesh" class="pd_collision" />
+      <geom name="guide_0110" mesh="pd_guide_0110" type="mesh" class="pd_collision" />
+      <geom name="guide_0111" mesh="pd_guide_0111" type="mesh" class="pd_collision" />
+      <geom name="guide_0112" mesh="pd_guide_0112" type="mesh" class="pd_collision" />
+      <geom name="guide_0113" mesh="pd_guide_0113" type="mesh" class="pd_collision" />
+      <geom name="guide_0114" mesh="pd_guide_0114" type="mesh" class="pd_collision" />
+      <geom name="guide_0115" mesh="pd_guide_0115" type="mesh" class="pd_collision" />
+      <geom name="guide_0116" mesh="pd_guide_0116" type="mesh" class="pd_collision" />
+      <geom name="guide_0117" mesh="pd_guide_0117" type="mesh" class="pd_collision" />
+      <geom name="guide_0118" mesh="pd_guide_0118" type="mesh" class="pd_collision" />
+      <geom name="guide_0119" mesh="pd_guide_0119" type="mesh" class="pd_collision" />
+      <geom name="guide_0120" mesh="pd_guide_0120" type="mesh" class="pd_collision" />
+      <geom name="guide_0121" mesh="pd_guide_0121" type="mesh" class="pd_collision" />
+      <geom name="guide_0122" mesh="pd_guide_0122" type="mesh" class="pd_collision" />
+      <geom name="guide_0123" mesh="pd_guide_0123" type="mesh" class="pd_collision" />
+      <geom name="guide_0124" mesh="pd_guide_0124" type="mesh" class="pd_collision" />
+      <geom name="guide_0125" mesh="pd_guide_0125" type="mesh" class="pd_collision" />
+      <geom name="guide_0126" mesh="pd_guide_0126" type="mesh" class="pd_collision" />
+      <geom name="guide_0127" mesh="pd_guide_0127" type="mesh" class="pd_collision" />
+      <geom name="guide_0128" mesh="pd_guide_0128" type="mesh" class="pd_collision" />
+      <geom name="guide_0129" mesh="pd_guide_0129" type="mesh" class="pd_collision" />
+      <geom name="guide_0130" mesh="pd_guide_0130" type="mesh" class="pd_collision" />
+      <geom name="guide_0131" mesh="pd_guide_0131" type="mesh" class="pd_collision" />
+      <geom name="guide_0132" mesh="pd_guide_0132" type="mesh" class="pd_collision" />
+      <geom name="guide_0133" mesh="pd_guide_0133" type="mesh" class="pd_collision" />
+      <geom name="guide_0134" mesh="pd_guide_0134" type="mesh" class="pd_collision" />
+      <geom name="guide_0135" mesh="pd_guide_0135" type="mesh" class="pd_collision" />
+      <geom name="guide_0136" mesh="pd_guide_0136" type="mesh" class="pd_collision" />
+      <geom name="guide_0137" mesh="pd_guide_0137" type="mesh" class="pd_collision" />
+      <geom name="guide_0138" mesh="pd_guide_0138" type="mesh" class="pd_collision" />
+      <geom name="guide_0139" mesh="pd_guide_0139" type="mesh" class="pd_collision" />
+      <geom name="guide_0140" mesh="pd_guide_0140" type="mesh" class="pd_collision" />
+      <geom name="guide_0141" mesh="pd_guide_0141" type="mesh" class="pd_collision" />
+      <geom name="guide_0142" mesh="pd_guide_0142" type="mesh" class="pd_collision" />
+      <geom name="guide_0143" mesh="pd_guide_0143" type="mesh" class="pd_collision" />
+      <geom name="guide_0144" mesh="pd_guide_0144" type="mesh" class="pd_collision" />
+      <geom name="guide_0145" mesh="pd_guide_0145" type="mesh" class="pd_collision" />
+      <geom name="guide_0146" mesh="pd_guide_0146" type="mesh" class="pd_collision" />
+      <geom name="guide_0147" mesh="pd_guide_0147" type="mesh" class="pd_collision" />
+      <geom name="guide_0148" mesh="pd_guide_0148" type="mesh" class="pd_collision" />
+      <geom name="guide_0149" mesh="pd_guide_0149" type="mesh" class="pd_collision" />
+      <geom name="guide_0150" mesh="pd_guide_0150" type="mesh" class="pd_collision" />
+      <geom name="guide_0151" mesh="pd_guide_0151" type="mesh" class="pd_collision" />
+      <geom name="guide_0152" mesh="pd_guide_0152" type="mesh" class="pd_collision" />
+      <geom name="guide_0153" mesh="pd_guide_0153" type="mesh" class="pd_collision" />
+      <geom name="guide_0154" mesh="pd_guide_0154" type="mesh" class="pd_collision" />
+      <geom name="guide_0155" mesh="pd_guide_0155" type="mesh" class="pd_collision" />
+      <geom name="guide_0156" mesh="pd_guide_0156" type="mesh" class="pd_collision" />
+      <geom name="guide_0157" mesh="pd_guide_0157" type="mesh" class="pd_collision" />
+      <geom name="guide_0158" mesh="pd_guide_0158" type="mesh" class="pd_collision" />
+      <geom name="guide_0159" mesh="pd_guide_0159" type="mesh" class="pd_collision" />
+      <geom name="guide_0160" mesh="pd_guide_0160" type="mesh" class="pd_collision" />
+      <geom name="guide_0161" mesh="pd_guide_0161" type="mesh" class="pd_collision" />
+      <geom name="guide_0162" mesh="pd_guide_0162" type="mesh" class="pd_collision" />
+      <geom name="guide_0163" mesh="pd_guide_0163" type="mesh" class="pd_collision" />
+      <geom name="guide_0164" mesh="pd_guide_0164" type="mesh" class="pd_collision" />
+      <geom name="guide_0165" mesh="pd_guide_0165" type="mesh" class="pd_collision" />
+      <geom name="guide_0166" mesh="pd_guide_0166" type="mesh" class="pd_collision" />
+      <geom name="guide_0167" mesh="pd_guide_0167" type="mesh" class="pd_collision" />
+      <geom name="guide_0168" mesh="pd_guide_0168" type="mesh" class="pd_collision" />
+      <geom name="guide_0169" mesh="pd_guide_0169" type="mesh" class="pd_collision" />
+      <geom name="guide_0170" mesh="pd_guide_0170" type="mesh" class="pd_collision" />
+      <geom name="guide_0171" mesh="pd_guide_0171" type="mesh" class="pd_collision" />
+      <geom name="guide_0172" mesh="pd_guide_0172" type="mesh" class="pd_collision" />
+      <geom name="guide_0173" mesh="pd_guide_0173" type="mesh" class="pd_collision" />
+      <geom name="guide_0174" mesh="pd_guide_0174" type="mesh" class="pd_collision" />
+      <geom name="guide_0175" mesh="pd_guide_0175" type="mesh" class="pd_collision" />
+      <geom name="guide_0176" mesh="pd_guide_0176" type="mesh" class="pd_collision" />
+      <geom name="guide_0177" mesh="pd_guide_0177" type="mesh" class="pd_collision" />
+      <geom name="guide_0178" mesh="pd_guide_0178" type="mesh" class="pd_collision" />
+      <geom name="guide_0179" mesh="pd_guide_0179" type="mesh" class="pd_collision" />
+      <geom name="guide_0180" mesh="pd_guide_0180" type="mesh" class="pd_collision" />
+      <geom name="guide_0181" mesh="pd_guide_0181" type="mesh" class="pd_collision" />
+      <geom name="guide_0182" mesh="pd_guide_0182" type="mesh" class="pd_collision" />
+      <geom name="guide_0183" mesh="pd_guide_0183" type="mesh" class="pd_collision" />
+      <geom name="guide_0184" mesh="pd_guide_0184" type="mesh" class="pd_collision" />
+      <geom name="guide_0185" mesh="pd_guide_0185" type="mesh" class="pd_collision" />
+      <geom name="guide_0186" mesh="pd_guide_0186" type="mesh" class="pd_collision" />
+      <geom name="guide_0187" mesh="pd_guide_0187" type="mesh" class="pd_collision" />
+      <geom name="guide_0188" mesh="pd_guide_0188" type="mesh" class="pd_collision" />
+      <geom name="guide_0189" mesh="pd_guide_0189" type="mesh" class="pd_collision" />
+      <geom name="guide_0190" mesh="pd_guide_0190" type="mesh" class="pd_collision" />
+      <geom name="guide_0191" mesh="pd_guide_0191" type="mesh" class="pd_collision" />
+      <geom name="guide_0192" mesh="pd_guide_0192" type="mesh" class="pd_collision" />
+      <geom name="guide_0193" mesh="pd_guide_0193" type="mesh" class="pd_collision" />
+      <geom name="guide_0194" mesh="pd_guide_0194" type="mesh" class="pd_collision" />
+      <geom name="guide_0195" mesh="pd_guide_0195" type="mesh" class="pd_collision" />
+      <geom name="guide_0196" mesh="pd_guide_0196" type="mesh" class="pd_collision" />
+      <geom name="guide_0197" mesh="pd_guide_0197" type="mesh" class="pd_collision" />
+      <geom name="guide_0198" mesh="pd_guide_0198" type="mesh" class="pd_collision" />
+      <geom name="guide_0199" mesh="pd_guide_0199" type="mesh" class="pd_collision" />
+      <geom name="guide_0200" mesh="pd_guide_0200" type="mesh" class="pd_collision" />
+      <geom name="guide_0201" mesh="pd_guide_0201" type="mesh" class="pd_collision" />
+      <geom name="guide_0202" mesh="pd_guide_0202" type="mesh" class="pd_collision" />
+      <geom name="guide_0203" mesh="pd_guide_0203" type="mesh" class="pd_collision" />
+      <geom name="guide_0204" mesh="pd_guide_0204" type="mesh" class="pd_collision" />
+      <geom name="guide_0205" mesh="pd_guide_0205" type="mesh" class="pd_collision" />
+      <geom name="guide_0206" mesh="pd_guide_0206" type="mesh" class="pd_collision" />
+      <geom name="guide_0207" mesh="pd_guide_0207" type="mesh" class="pd_collision" />
+      <geom name="guide_0208" mesh="pd_guide_0208" type="mesh" class="pd_collision" />
+      <geom name="guide_0209" mesh="pd_guide_0209" type="mesh" class="pd_collision" />
+      <geom name="guide_0210" mesh="pd_guide_0210" type="mesh" class="pd_collision" />
+      <geom name="guide_0211" mesh="pd_guide_0211" type="mesh" class="pd_collision" />
+      <geom name="guide_0212" mesh="pd_guide_0212" type="mesh" class="pd_collision" />
+      <geom name="guide_0213" mesh="pd_guide_0213" type="mesh" class="pd_collision" />
+      <geom name="guide_0214" mesh="pd_guide_0214" type="mesh" class="pd_collision" />
+      <geom name="guide_0215" mesh="pd_guide_0215" type="mesh" class="pd_collision" />
+      <geom name="guide_0216" mesh="pd_guide_0216" type="mesh" class="pd_collision" />
+      <geom name="guide_0217" mesh="pd_guide_0217" type="mesh" class="pd_collision" />
+      <geom name="guide_0218" mesh="pd_guide_0218" type="mesh" class="pd_collision" />
+      <geom name="guide_0219" mesh="pd_guide_0219" type="mesh" class="pd_collision" />
+      <geom name="guide_0220" mesh="pd_guide_0220" type="mesh" class="pd_collision" />
+      <geom name="guide_0221" mesh="pd_guide_0221" type="mesh" class="pd_collision" />
+      <geom name="guide_0222" mesh="pd_guide_0222" type="mesh" class="pd_collision" />
+      <geom name="guide_0223" mesh="pd_guide_0223" type="mesh" class="pd_collision" />
+      <geom name="guide_0224" mesh="pd_guide_0224" type="mesh" class="pd_collision" />
+      <geom name="guide_0225" mesh="pd_guide_0225" type="mesh" class="pd_collision" />
+      <geom name="guide_0226" mesh="pd_guide_0226" type="mesh" class="pd_collision" />
+      <geom name="guide_0227" mesh="pd_guide_0227" type="mesh" class="pd_collision" />
+      <geom name="guide_0228" mesh="pd_guide_0228" type="mesh" class="pd_collision" />
+      <geom name="guide_0229" mesh="pd_guide_0229" type="mesh" class="pd_collision" />
+      <geom name="guide_0230" mesh="pd_guide_0230" type="mesh" class="pd_collision" />
+      <geom name="guide_0231" mesh="pd_guide_0231" type="mesh" class="pd_collision" />
+      <geom name="guide_0232" mesh="pd_guide_0232" type="mesh" class="pd_collision" />
+      <geom name="guide_0233" mesh="pd_guide_0233" type="mesh" class="pd_collision" />
+      <geom name="guide_0234" mesh="pd_guide_0234" type="mesh" class="pd_collision" />
+      <geom name="guide_0235" mesh="pd_guide_0235" type="mesh" class="pd_collision" />
+      <geom name="guide_0236" mesh="pd_guide_0236" type="mesh" class="pd_collision" />
+      <geom name="guide_0237" mesh="pd_guide_0237" type="mesh" class="pd_collision" />
+      <geom name="guide_0238" mesh="pd_guide_0238" type="mesh" class="pd_collision" />
+      <geom name="guide_0239" mesh="pd_guide_0239" type="mesh" class="pd_collision" />
+      <geom name="guide_0240" mesh="pd_guide_0240" type="mesh" class="pd_collision" />
+      <geom name="guide_0241" mesh="pd_guide_0241" type="mesh" class="pd_collision" />
+      <geom name="guide_0242" mesh="pd_guide_0242" type="mesh" class="pd_collision" />
+      <geom name="guide_0243" mesh="pd_guide_0243" type="mesh" class="pd_collision" />
+      <geom name="guide_0244" mesh="pd_guide_0244" type="mesh" class="pd_collision" />
+      <geom name="guide_0245" mesh="pd_guide_0245" type="mesh" class="pd_collision" />
+      <geom name="guide_0246" mesh="pd_guide_0246" type="mesh" class="pd_collision" />
+      <geom name="guide_0247" mesh="pd_guide_0247" type="mesh" class="pd_collision" />
+      <geom name="guide_0248" mesh="pd_guide_0248" type="mesh" class="pd_collision" />
+      <geom name="guide_0249" mesh="pd_guide_0249" type="mesh" class="pd_collision" />
+      <geom name="guide_0250" mesh="pd_guide_0250" type="mesh" class="pd_collision" />
+      <geom name="guide_0251" mesh="pd_guide_0251" type="mesh" class="pd_collision" />
+      <geom name="guide_0252" mesh="pd_guide_0252" type="mesh" class="pd_collision" />
+      <geom name="guide_0253" mesh="pd_guide_0253" type="mesh" class="pd_collision" />
+      <geom name="guide_0254" mesh="pd_guide_0254" type="mesh" class="pd_collision" />
+      <geom name="guide_0255" mesh="pd_guide_0255" type="mesh" class="pd_collision" />
+      <geom name="guide_0256" mesh="pd_guide_0256" type="mesh" class="pd_collision" />
+      <geom name="guide_0257" mesh="pd_guide_0257" type="mesh" class="pd_collision" />
+      <geom name="guide_0258" mesh="pd_guide_0258" type="mesh" class="pd_collision" />
+      <geom name="guide_0259" mesh="pd_guide_0259" type="mesh" class="pd_collision" />
+      <geom name="guide_0260" mesh="pd_guide_0260" type="mesh" class="pd_collision" />
+      <geom name="guide_0261" mesh="pd_guide_0261" type="mesh" class="pd_collision" />
+      <geom name="guide_0262" mesh="pd_guide_0262" type="mesh" class="pd_collision" />
+      <geom name="guide_0263" mesh="pd_guide_0263" type="mesh" class="pd_collision" />
+      <geom name="guide_0264" mesh="pd_guide_0264" type="mesh" class="pd_collision" />
+      <geom name="guide_0265" mesh="pd_guide_0265" type="mesh" class="pd_collision" />
+      <geom name="guide_0266" mesh="pd_guide_0266" type="mesh" class="pd_collision" />
+      <geom name="guide_0267" mesh="pd_guide_0267" type="mesh" class="pd_collision" />
+      <geom name="guide_0268" mesh="pd_guide_0268" type="mesh" class="pd_collision" />
+      <geom name="guide_0269" mesh="pd_guide_0269" type="mesh" class="pd_collision" />
+      <geom name="guide_0270" mesh="pd_guide_0270" type="mesh" class="pd_collision" />
+      <geom name="guide_0271" mesh="pd_guide_0271" type="mesh" class="pd_collision" />
+      <geom name="guide_0272" mesh="pd_guide_0272" type="mesh" class="pd_collision" />
+      <geom name="guide_0273" mesh="pd_guide_0273" type="mesh" class="pd_collision" />
+      <geom name="guide_0274" mesh="pd_guide_0274" type="mesh" class="pd_collision" />
+      <geom name="guide_0275" mesh="pd_guide_0275" type="mesh" class="pd_collision" />
+      <geom name="guide_0276" mesh="pd_guide_0276" type="mesh" class="pd_collision" />
+      <geom name="guide_0277" mesh="pd_guide_0277" type="mesh" class="pd_collision" />
+      <geom name="guide_0278" mesh="pd_guide_0278" type="mesh" class="pd_collision" />
+      <geom name="guide_0279" mesh="pd_guide_0279" type="mesh" class="pd_collision" />
+      <geom name="guide_0280" mesh="pd_guide_0280" type="mesh" class="pd_collision" />
+      <geom name="guide_0281" mesh="pd_guide_0281" type="mesh" class="pd_collision" />
+      <geom name="guide_0282" mesh="pd_guide_0282" type="mesh" class="pd_collision" />
+      <geom name="guide_0283" mesh="pd_guide_0283" type="mesh" class="pd_collision" />
+      <geom name="guide_0284" mesh="pd_guide_0284" type="mesh" class="pd_collision" />
+      <geom name="guide_0285" mesh="pd_guide_0285" type="mesh" class="pd_collision" />
+      <geom name="guide_0286" mesh="pd_guide_0286" type="mesh" class="pd_collision" />
+      <geom name="guide_0287" mesh="pd_guide_0287" type="mesh" class="pd_collision" />
+      <geom name="guide_0288" mesh="pd_guide_0288" type="mesh" class="pd_collision" />
+      <geom name="guide_0289" mesh="pd_guide_0289" type="mesh" class="pd_collision" />
+      <geom name="guide_0290" mesh="pd_guide_0290" type="mesh" class="pd_collision" />
+      <geom name="guide_0291" mesh="pd_guide_0291" type="mesh" class="pd_collision" />
+      <geom name="guide_0292" mesh="pd_guide_0292" type="mesh" class="pd_collision" />
+      <geom name="guide_0293" mesh="pd_guide_0293" type="mesh" class="pd_collision" />
+      <geom name="guide_0294" mesh="pd_guide_0294" type="mesh" class="pd_collision" />
+      <geom name="guide_0295" mesh="pd_guide_0295" type="mesh" class="pd_collision" />
+      <geom name="guide_0296" mesh="pd_guide_0296" type="mesh" class="pd_collision" />
+      <geom name="guide_0297" mesh="pd_guide_0297" type="mesh" class="pd_collision" />
+      <geom name="guide_0298" mesh="pd_guide_0298" type="mesh" class="pd_collision" />
+      <geom name="guide_0299" mesh="pd_guide_0299" type="mesh" class="pd_collision" />
+      <geom name="guide_0300" mesh="pd_guide_0300" type="mesh" class="pd_collision" />
+      <geom name="guide_0301" mesh="pd_guide_0301" type="mesh" class="pd_collision" />
+      <geom name="guide_0302" mesh="pd_guide_0302" type="mesh" class="pd_collision" />
+      <geom name="guide_0303" mesh="pd_guide_0303" type="mesh" class="pd_collision" />
+      <geom name="guide_0304" mesh="pd_guide_0304" type="mesh" class="pd_collision" />
+      <geom name="guide_0305" mesh="pd_guide_0305" type="mesh" class="pd_collision" />
+      <geom name="guide_0306" mesh="pd_guide_0306" type="mesh" class="pd_collision" />
+      <geom name="guide_0307" mesh="pd_guide_0307" type="mesh" class="pd_collision" />
+      <geom name="guide_0308" mesh="pd_guide_0308" type="mesh" class="pd_collision" />
+      <geom name="guide_0309" mesh="pd_guide_0309" type="mesh" class="pd_collision" />
+      <geom name="guide_0310" mesh="pd_guide_0310" type="mesh" class="pd_collision" />
+      <geom name="guide_0311" mesh="pd_guide_0311" type="mesh" class="pd_collision" />
+      <geom name="guide_0312" mesh="pd_guide_0312" type="mesh" class="pd_collision" />
+      <geom name="guide_0313" mesh="pd_guide_0313" type="mesh" class="pd_collision" />
+      <geom name="guide_0314" mesh="pd_guide_0314" type="mesh" class="pd_collision" />
+      <geom name="guide_0315" mesh="pd_guide_0315" type="mesh" class="pd_collision" />
+      <geom name="guide_0316" mesh="pd_guide_0316" type="mesh" class="pd_collision" />
+      <geom name="guide_0317" mesh="pd_guide_0317" type="mesh" class="pd_collision" />
+      <geom name="guide_0318" mesh="pd_guide_0318" type="mesh" class="pd_collision" />
+      <geom name="guide_0319" mesh="pd_guide_0319" type="mesh" class="pd_collision" />
+      <geom name="guide_0320" mesh="pd_guide_0320" type="mesh" class="pd_collision" />
+      <geom name="guide_0321" mesh="pd_guide_0321" type="mesh" class="pd_collision" />
+      <geom name="guide_0322" mesh="pd_guide_0322" type="mesh" class="pd_collision" />
+      <geom name="guide_0323" mesh="pd_guide_0323" type="mesh" class="pd_collision" />
+      <geom name="guide_0324" mesh="pd_guide_0324" type="mesh" class="pd_collision" />
+      <geom name="guide_0325" mesh="pd_guide_0325" type="mesh" class="pd_collision" />
+      <geom name="guide_0326" mesh="pd_guide_0326" type="mesh" class="pd_collision" />
+      <geom name="guide_0327" mesh="pd_guide_0327" type="mesh" class="pd_collision" />
+      <geom name="guide_0328" mesh="pd_guide_0328" type="mesh" class="pd_collision" />
+      <geom name="guide_0329" mesh="pd_guide_0329" type="mesh" class="pd_collision" />
+      <geom name="guide_0330" mesh="pd_guide_0330" type="mesh" class="pd_collision" />
+      <geom name="guide_0331" mesh="pd_guide_0331" type="mesh" class="pd_collision" />
+      <geom name="guide_0332" mesh="pd_guide_0332" type="mesh" class="pd_collision" />
+      <geom name="guide_0333" mesh="pd_guide_0333" type="mesh" class="pd_collision" />
+      <geom name="guide_0334" mesh="pd_guide_0334" type="mesh" class="pd_collision" />
+      <geom name="guide_0335" mesh="pd_guide_0335" type="mesh" class="pd_collision" />
+      <geom name="guide_0336" mesh="pd_guide_0336" type="mesh" class="pd_collision" />
+      <geom name="guide_0337" mesh="pd_guide_0337" type="mesh" class="pd_collision" />
+      <geom name="guide_0338" mesh="pd_guide_0338" type="mesh" class="pd_collision" />
+      <geom name="guide_0339" mesh="pd_guide_0339" type="mesh" class="pd_collision" />
+      <geom name="guide_0340" mesh="pd_guide_0340" type="mesh" class="pd_collision" />
+      <geom name="guide_0341" mesh="pd_guide_0341" type="mesh" class="pd_collision" />
+      <geom name="guide_0342" mesh="pd_guide_0342" type="mesh" class="pd_collision" />
+      <geom name="guide_0343" mesh="pd_guide_0343" type="mesh" class="pd_collision" />
+      <geom name="guide_0344" mesh="pd_guide_0344" type="mesh" class="pd_collision" />
+      <geom name="guide_0345" mesh="pd_guide_0345" type="mesh" class="pd_collision" />
+      <geom name="guide_0346" mesh="pd_guide_0346" type="mesh" class="pd_collision" />
+      <geom name="guide_0347" mesh="pd_guide_0347" type="mesh" class="pd_collision" />
+      <geom name="guide_0348" mesh="pd_guide_0348" type="mesh" class="pd_collision" />
+      <geom name="guide_0349" mesh="pd_guide_0349" type="mesh" class="pd_collision" />
+      <geom name="guide_0350" mesh="pd_guide_0350" type="mesh" class="pd_collision" />
+      <geom name="guide_0351" mesh="pd_guide_0351" type="mesh" class="pd_collision" />
+      <geom name="guide_0352" mesh="pd_guide_0352" type="mesh" class="pd_collision" />
+      <geom name="guide_0353" mesh="pd_guide_0353" type="mesh" class="pd_collision" />
+      <geom name="guide_0354" mesh="pd_guide_0354" type="mesh" class="pd_collision" />
+      <geom name="guide_0355" mesh="pd_guide_0355" type="mesh" class="pd_collision" />
+      <geom name="guide_0356" mesh="pd_guide_0356" type="mesh" class="pd_collision" />
+      <geom name="guide_0357" mesh="pd_guide_0357" type="mesh" class="pd_collision" />
+      <geom name="guide_0358" mesh="pd_guide_0358" type="mesh" class="pd_collision" />
+      <geom name="guide_0359" mesh="pd_guide_0359" type="mesh" class="pd_collision" />
+      <geom name="guide_0360" mesh="pd_guide_0360" type="mesh" class="pd_collision" />
+      <geom name="guide_0361" mesh="pd_guide_0361" type="mesh" class="pd_collision" />
+      <geom name="guide_0362" mesh="pd_guide_0362" type="mesh" class="pd_collision" />
+      <geom name="guide_0363" mesh="pd_guide_0363" type="mesh" class="pd_collision" />
+      <geom name="guide_0364" mesh="pd_guide_0364" type="mesh" class="pd_collision" />
+      <geom name="guide_0365" mesh="pd_guide_0365" type="mesh" class="pd_collision" />
+      <geom name="guide_0366" mesh="pd_guide_0366" type="mesh" class="pd_collision" />
+      <geom name="guide_0367" mesh="pd_guide_0367" type="mesh" class="pd_collision" />
+      <geom name="guide_0368" mesh="pd_guide_0368" type="mesh" class="pd_collision" />
+      <geom name="guide_0369" mesh="pd_guide_0369" type="mesh" class="pd_collision" />
+      <geom name="guide_0370" mesh="pd_guide_0370" type="mesh" class="pd_collision" />
+      <geom name="guide_0371" mesh="pd_guide_0371" type="mesh" class="pd_collision" />
+      <geom name="guide_0372" mesh="pd_guide_0372" type="mesh" class="pd_collision" />
+      <geom name="guide_0373" mesh="pd_guide_0373" type="mesh" class="pd_collision" />
+      <geom name="guide_0374" mesh="pd_guide_0374" type="mesh" class="pd_collision" />
+      <geom name="guide_0375" mesh="pd_guide_0375" type="mesh" class="pd_collision" />
+      <geom name="guide_0376" mesh="pd_guide_0376" type="mesh" class="pd_collision" />
+      <geom name="guide_0377" mesh="pd_guide_0377" type="mesh" class="pd_collision" />
+      <geom name="guide_0378" mesh="pd_guide_0378" type="mesh" class="pd_collision" />
+      <geom name="guide_0379" mesh="pd_guide_0379" type="mesh" class="pd_collision" />
+      <geom name="guide_0380" mesh="pd_guide_0380" type="mesh" class="pd_collision" />
+      <geom name="guide_0381" mesh="pd_guide_0381" type="mesh" class="pd_collision" />
+      <geom name="guide_0382" mesh="pd_guide_0382" type="mesh" class="pd_collision" />
+      <geom name="guide_0383" mesh="pd_guide_0383" type="mesh" class="pd_collision" />
+      <geom name="guide_0384" mesh="pd_guide_0384" type="mesh" class="pd_collision" />
+      <geom name="guide_0385" mesh="pd_guide_0385" type="mesh" class="pd_collision" />
+      <geom name="guide_0386" mesh="pd_guide_0386" type="mesh" class="pd_collision" />
+      <geom name="guide_0387" mesh="pd_guide_0387" type="mesh" class="pd_collision" />
+      <geom name="guide_0388" mesh="pd_guide_0388" type="mesh" class="pd_collision" />
+      <geom name="guide_0389" mesh="pd_guide_0389" type="mesh" class="pd_collision" />
+      <geom name="guide_0390" mesh="pd_guide_0390" type="mesh" class="pd_collision" />
+      <geom name="guide_0391" mesh="pd_guide_0391" type="mesh" class="pd_collision" />
+      <geom name="guide_0392" mesh="pd_guide_0392" type="mesh" class="pd_collision" />
+      <geom name="guide_0393" mesh="pd_guide_0393" type="mesh" class="pd_collision" />
+      <geom name="guide_0394" mesh="pd_guide_0394" type="mesh" class="pd_collision" />
+      <geom name="guide_0395" mesh="pd_guide_0395" type="mesh" class="pd_collision" />
+      <geom name="guide_0396" mesh="pd_guide_0396" type="mesh" class="pd_collision" />
+      <geom name="guide_0397" mesh="pd_guide_0397" type="mesh" class="pd_collision" />
+      <geom name="guide_0398" mesh="pd_guide_0398" type="mesh" class="pd_collision" />
+      <geom name="guide_0399" mesh="pd_guide_0399" type="mesh" class="pd_collision" />
+      <geom name="guide_0400" mesh="pd_guide_0400" type="mesh" class="pd_collision" />
+      <geom name="guide_0401" mesh="pd_guide_0401" type="mesh" class="pd_collision" />
+      <geom name="guide_0402" mesh="pd_guide_0402" type="mesh" class="pd_collision" />
+      <geom name="guide_0403" mesh="pd_guide_0403" type="mesh" class="pd_collision" />
+      <geom name="guide_0404" mesh="pd_guide_0404" type="mesh" class="pd_collision" />
+      <geom name="guide_0405" mesh="pd_guide_0405" type="mesh" class="pd_collision" />
+      <geom name="guide_0406" mesh="pd_guide_0406" type="mesh" class="pd_collision" />
+      <geom name="guide_0407" mesh="pd_guide_0407" type="mesh" class="pd_collision" />
+      <geom name="guide_0408" mesh="pd_guide_0408" type="mesh" class="pd_collision" />
+      <geom name="guide_0409" mesh="pd_guide_0409" type="mesh" class="pd_collision" />
+      <geom name="guide_0410" mesh="pd_guide_0410" type="mesh" class="pd_collision" />
+      <geom name="guide_0411" mesh="pd_guide_0411" type="mesh" class="pd_collision" />
+      <geom name="guide_0412" mesh="pd_guide_0412" type="mesh" class="pd_collision" />
+      <geom name="guide_0413" mesh="pd_guide_0413" type="mesh" class="pd_collision" />
+      <geom name="guide_0414" mesh="pd_guide_0414" type="mesh" class="pd_collision" />
+      <geom name="guide_0415" mesh="pd_guide_0415" type="mesh" class="pd_collision" />
+      <geom name="guide_0416" mesh="pd_guide_0416" type="mesh" class="pd_collision" />
+      <geom name="guide_0417" mesh="pd_guide_0417" type="mesh" class="pd_collision" />
+      <geom name="guide_0418" mesh="pd_guide_0418" type="mesh" class="pd_collision" />
+      <geom name="guide_0419" mesh="pd_guide_0419" type="mesh" class="pd_collision" />
+      <geom name="guide_0420" mesh="pd_guide_0420" type="mesh" class="pd_collision" />
+      <geom name="guide_0421" mesh="pd_guide_0421" type="mesh" class="pd_collision" />
+      <geom name="guide_0422" mesh="pd_guide_0422" type="mesh" class="pd_collision" />
+      <geom name="guide_0423" mesh="pd_guide_0423" type="mesh" class="pd_collision" />
+      <geom name="guide_0424" mesh="pd_guide_0424" type="mesh" class="pd_collision" />
+      <geom name="guide_0425" mesh="pd_guide_0425" type="mesh" class="pd_collision" />
+      <geom name="guide_0426" mesh="pd_guide_0426" type="mesh" class="pd_collision" />
+      <geom name="guide_0427" mesh="pd_guide_0427" type="mesh" class="pd_collision" />
+      <geom name="guide_0428" mesh="pd_guide_0428" type="mesh" class="pd_collision" />
+      <geom name="guide_0429" mesh="pd_guide_0429" type="mesh" class="pd_collision" />
+      <geom name="guide_0430" mesh="pd_guide_0430" type="mesh" class="pd_collision" />
+      <geom name="guide_0431" mesh="pd_guide_0431" type="mesh" class="pd_collision" />
+      <geom name="guide_0432" mesh="pd_guide_0432" type="mesh" class="pd_collision" />
+      <geom name="guide_0433" mesh="pd_guide_0433" type="mesh" class="pd_collision" />
+      <geom name="guide_0434" mesh="pd_guide_0434" type="mesh" class="pd_collision" />
+      <geom name="guide_0435" mesh="pd_guide_0435" type="mesh" class="pd_collision" />
+      <geom name="guide_0436" mesh="pd_guide_0436" type="mesh" class="pd_collision" />
+      <geom name="guide_0437" mesh="pd_guide_0437" type="mesh" class="pd_collision" />
+      <geom name="guide_0438" mesh="pd_guide_0438" type="mesh" class="pd_collision" />
+      <geom name="guide_0439" mesh="pd_guide_0439" type="mesh" class="pd_collision" />
+      <geom name="guide_0440" mesh="pd_guide_0440" type="mesh" class="pd_collision" />
+      <geom name="guide_0441" mesh="pd_guide_0441" type="mesh" class="pd_collision" />
+      <geom name="guide_0442" mesh="pd_guide_0442" type="mesh" class="pd_collision" />
+      <geom name="guide_0443" mesh="pd_guide_0443" type="mesh" class="pd_collision" />
+      <geom name="guide_0444" mesh="pd_guide_0444" type="mesh" class="pd_collision" />
+      <geom name="guide_0445" mesh="pd_guide_0445" type="mesh" class="pd_collision" />
+      <geom name="guide_0446" mesh="pd_guide_0446" type="mesh" class="pd_collision" />
+      <geom name="guide_0447" mesh="pd_guide_0447" type="mesh" class="pd_collision" />
+      <geom name="guide_0448" mesh="pd_guide_0448" type="mesh" class="pd_collision" />
+      <geom name="guide_0449" mesh="pd_guide_0449" type="mesh" class="pd_collision" />
+      <geom name="guide_0450" mesh="pd_guide_0450" type="mesh" class="pd_collision" />
+      <geom name="guide_0451" mesh="pd_guide_0451" type="mesh" class="pd_collision" />
+      <geom name="guide_0452" mesh="pd_guide_0452" type="mesh" class="pd_collision" />
+      <geom name="guide_0453" mesh="pd_guide_0453" type="mesh" class="pd_collision" />
+      <geom name="guide_0454" mesh="pd_guide_0454" type="mesh" class="pd_collision" />
+      <geom name="guide_0455" mesh="pd_guide_0455" type="mesh" class="pd_collision" />
+      <geom name="guide_0456" mesh="pd_guide_0456" type="mesh" class="pd_collision" />
+      <geom name="guide_0457" mesh="pd_guide_0457" type="mesh" class="pd_collision" />
+      <geom name="guide_0458" mesh="pd_guide_0458" type="mesh" class="pd_collision" />
+      <geom name="guide_0459" mesh="pd_guide_0459" type="mesh" class="pd_collision" />
+      <geom name="guide_0460" mesh="pd_guide_0460" type="mesh" class="pd_collision" />
+      <geom name="guide_0461" mesh="pd_guide_0461" type="mesh" class="pd_collision" />
+      <geom name="guide_0462" mesh="pd_guide_0462" type="mesh" class="pd_collision" />
+      <geom name="guide_0463" mesh="pd_guide_0463" type="mesh" class="pd_collision" />
+      <geom name="stop_000" mesh="pd_stop_000" type="mesh" class="pd_collision" />
+      <geom name="stop_001" mesh="pd_stop_001" type="mesh" class="pd_collision" />
+      <geom name="stop_002" mesh="pd_stop_002" type="mesh" class="pd_collision" />
+      <geom name="stop_003" mesh="pd_stop_003" type="mesh" class="pd_collision" />
+      <geom name="stop_004" mesh="pd_stop_004" type="mesh" class="pd_collision" />
+      <geom name="stop_005" mesh="pd_stop_005" type="mesh" class="pd_collision" />
+      <geom name="stop_006" mesh="pd_stop_006" type="mesh" class="pd_collision" />
+      <geom name="stop_007" mesh="pd_stop_007" type="mesh" class="pd_collision" />
+      <geom name="stop_008" mesh="pd_stop_008" type="mesh" class="pd_collision" />
+      <geom name="stop_009" mesh="pd_stop_009" type="mesh" class="pd_collision" />
+      <geom name="stop_010" mesh="pd_stop_010" type="mesh" class="pd_collision" />
+      <geom name="stop_011" mesh="pd_stop_011" type="mesh" class="pd_collision" />
+      <geom name="stop_012" mesh="pd_stop_012" type="mesh" class="pd_collision" />
+      <geom name="stop_013" mesh="pd_stop_013" type="mesh" class="pd_collision" />
+      <geom name="stop_014" mesh="pd_stop_014" type="mesh" class="pd_collision" />
+      <geom name="stop_015" mesh="pd_stop_015" type="mesh" class="pd_collision" />
+      <geom name="stop_016" mesh="pd_stop_016" type="mesh" class="pd_collision" />
+      <geom name="stop_017" mesh="pd_stop_017" type="mesh" class="pd_collision" />
+      <geom name="stop_018" mesh="pd_stop_018" type="mesh" class="pd_collision" />
+      <geom name="stop_019" mesh="pd_stop_019" type="mesh" class="pd_collision" />
+      <geom name="stop_020" mesh="pd_stop_020" type="mesh" class="pd_collision" />
+      <geom name="stop_021" mesh="pd_stop_021" type="mesh" class="pd_collision" />
+      <geom name="stop_022" mesh="pd_stop_022" type="mesh" class="pd_collision" />
+      <geom name="stop_023" mesh="pd_stop_023" type="mesh" class="pd_collision" />
+    </body>
+  </worldbody>
+</mujoco>

@@ -1,0 +1,101 @@
+{
+  "policy": "Byte-identical lightweight copies; raw arrays, logs and source snapshots remain in ignored runs/",
+  "files": {
+    "analysis_manifest.json": {
+      "source": "runs/petal_angle1_blend030_20261003/analysis_manifest.json",
+      "sha256": "2f5e10ccff7134824071179c789f35d3d9d8f89ea2d44131817ba914d052f311"
+    },
+    "archived_reference_checks.json": {
+      "source": "runs/petal_angle1_blend030_20261003/archived_reference_checks.json",
+      "sha256": "9836186a8f09d08b1d4334cca378af1f906ccdfa8ce34df8de020eb233bdf5ff"
+    },
+    "artifact_manifest.json": {
+      "source": "runs/petal_angle1_blend030_20261003/artifact_manifest.json",
+      "sha256": "ef1f0d974100cd79522b9e281867466632e22afea41dc718af067ce3c526cd16"
+    },
+    "environment.json": {
+      "source": "runs/petal_angle1_blend030_20261003/environment.json",
+      "sha256": "c5b3aafe83b8bc25de18beea8f81c5e22d8c255ca372916330ef2faad13baa30"
+    },
+    "implementation_checks.json": {
+      "source": "runs/petal_angle1_blend030_20261003/implementation_checks.json",
+      "sha256": "ed5e5776556077e94bc8fd871a07d906a5a5133ec2eb91b158849ea0af5fe1f0"
+    },
+    "partial_audit.json": {
+      "source": "runs/petal_angle1_blend030_20261003/partial_audit.json",
+      "sha256": "7b4da65c4dba5c0d25f0d955fa30b8f6365f43077d9848e0be0168cd3cdba132"
+    },
+    "robot_assets.json": {
+      "source": "runs/petal_angle1_blend030_20261003/robot_assets.json",
+      "sha256": "60e045807e103ed6386ca14557a76908e289edb59e158f56578835eb80fa5817"
+    },
+    "scene_equivalence.json": {
+      "source": "runs/petal_angle1_blend030_20261003/scene_equivalence.json",
+      "sha256": "2b001dcfc2b564ad9c3c6a08fc386c9c87155e57e432b9a41ba1caf98911046e"
+    },
+    "selected_geometry_validation.json": {
+      "source": "runs/petal_angle1_blend030_20261003/selected_geometry_validation.json",
+      "sha256": "a7da2702078f58949d5d0b23dfeffa47ccd060d5627467199b5626ce481e479f"
+    },
+    "selected_preflight.json": {
+      "source": "runs/petal_angle1_blend030_20261003/selected_preflight.json",
+      "sha256": "048a25fae15e384ecba76ca0869489a91a1fbb145d3ceca33c26a20cd11377d9"
+    },
+    "source_manifest.json": {
+      "source": "runs/petal_angle1_blend030_20261003/source_manifest.json",
+      "sha256": "52ef6d8dd4ea28553e356ae1f78078e0ba03949da65e3a4ce6b9be76b9670ec1"
+    },
+    "study_plan.json": {
+      "source": "runs/petal_angle1_blend030_20261003/study_plan.json",
+      "sha256": "08d8151175f3506aae1d5a064e4297e9c5cac2f62a5cb7708cd686f48d93931b"
+    },
+    "summary.json": {
+      "source": "runs/petal_angle1_blend030_20261003/summary.json",
+      "sha256": "14da21b18202c26059417adf49e740741089e7de4a2664d1cf14d69ac243e2a3"
+    },
+    "ui_checks.json": {
+      "source": "runs/petal_angle1_blend030_20261003/ui_checks.json",
+      "sha256": "30da6b26eb81301b46700b5f73409fc9977b542e2fd3d9abfdc9db9a0ba8ddf4"
+    },
+    "selected_designer.png": {
+      "source": "runs/petal_angle1_blend030_20261003/selected_designer.png",
+      "sha256": "760e881bd53889cee61d393f7b36e1403d2a1899485eafb09660b9f857eebe63"
+    },
+    "selected_profiles.png": {
+      "source": "runs/petal_angle1_blend030_20261003/selected_profiles.png",
+      "sha256": "dae9d3cc0f41f37a253dc239cf41dff66d1c3068397d5bd5752d5db6430cbebe"
+    },
+    "selected_traces.png": {
+      "source": "runs/petal_angle1_blend030_20261003/selected_traces.png",
+      "sha256": "b8f39f8712d5e5fcb939ec573bb4b1481146a596f63179709eb5903786bc0c39"
+    },
+    "selected_profiles.pdf": {
+      "source": "runs/petal_angle1_blend030_20261003/selected_profiles.pdf",
+      "sha256": "68d79bc20bd5c43f392241075fc2ccd6f25e117ec82a39c02bb32434edf52ae2"
+    },
+    "selected_traces.pdf": {
+      "source": "runs/petal_angle1_blend030_20261003/selected_traces.pdf",
+      "sha256": "8caa8080f2537c5ce61124d946acd7ad81885f80311e4088f9aa3d672a747705"
+    },
+    "report.md": {
+      "source": "runs/petal_angle1_blend030_20261003/report.md",
+      "sha256": "96813d8b29a9c86f2347e981bc4a0cb7003861a55d1df13e468614635da09066"
+    },
+    "g_selected_combo_ny6_p15_lateral_released_dt_half.json": {
+      "source": "runs/petal_angle1_blend030_20261003/g_selected_combo_ny6_p15_lateral_released_dt_half.json",
+      "sha256": "00df18397b7b9a2b80f7b52a1fbd336aaadd998af832ee33c076d2501ae2aa7c"
+    },
+    "g_selected_combo_py6_n15_lateral_released_dt_half.json": {
+      "source": "runs/petal_angle1_blend030_20261003/g_selected_combo_py6_n15_lateral_released_dt_half.json",
+      "sha256": "6397e032a5b29aaaff174ce92947147c34ca705c2fc314c97b7850ac73ad3019"
+    },
+    "g_selected_nx6_lateral_released_dt_half.json": {
+      "source": "runs/petal_angle1_blend030_20261003/g_selected_nx6_lateral_released_dt_half.json",
+      "sha256": "5805e7fd4480fd8d2dc5871b9a7857ee2c778b50a56170dce0ca691b53dc64e4"
+    },
+    "g_selected_nx6_lateral_released_dt_quarter.json": {
+      "source": "runs/petal_angle1_blend030_20261003/g_selected_nx6_lateral_released_dt_quarter.json",
+      "sha256": "045f8dccf9da708fccb0045d2940e89d4c0a9f8bccf76fbc8c6f5f23882fa81f"
+    }
+  }
+}

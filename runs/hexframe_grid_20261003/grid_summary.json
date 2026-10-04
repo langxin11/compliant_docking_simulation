@@ -1,0 +1,290 @@
+{
+  "nominal_baseline": {
+    "status": "PASS",
+    "lock_time_s": 36.611000000000004,
+    "peak_axial_force_n": 1.8550067626648206,
+    "max_penetration_mm": 0.002164953330996348,
+    "final_module_error_mm": 0.005054356134462048
+  },
+  "results": [
+    {
+      "label": "pick_x_m10",
+      "field": "pick",
+      "delta_m": [
+        -0.01,
+        0.0,
+        0.0
+      ],
+      "status": "PASS",
+      "audit": "PASS",
+      "faults": [],
+      "lock_time_s": 36.611000000000004,
+      "peak_axial_force_n": 1.8560268401607878,
+      "max_penetration_mm": 0.002195897483736793,
+      "final_module_error_mm": 0.005440003296165085,
+      "events": {
+        "grip_on": 10.4,
+        "rack_off": 11.601,
+        "assembly_on": 36.611000000000004,
+        "grip_off": 47.6
+      },
+      "wall_seconds": 367.9690745859989
+    },
+    {
+      "label": "pick_x_p10",
+      "field": "pick",
+      "delta_m": [
+        0.01,
+        0.0,
+        0.0
+      ],
+      "status": "PASS",
+      "audit": "PASS",
+      "faults": [],
+      "lock_time_s": 36.611000000000004,
+      "peak_axial_force_n": 1.849607335725087,
+      "max_penetration_mm": 0.002219119063840169,
+      "final_module_error_mm": 0.005419142383359493,
+      "events": {
+        "grip_on": 10.4,
+        "rack_off": 11.601,
+        "assembly_on": 36.611000000000004,
+        "grip_off": 47.6
+      },
+      "wall_seconds": 361.53137447200425
+    },
+    {
+      "label": "pick_y_m10",
+      "field": "pick",
+      "delta_m": [
+        0.0,
+        -0.01,
+        0.0
+      ],
+      "status": "PASS",
+      "audit": "PASS",
+      "faults": [],
+      "lock_time_s": 38.876,
+      "peak_axial_force_n": 1.910350088624193,
+      "max_penetration_mm": 0.0021587514162369915,
+      "final_module_error_mm": 0.005622303507331076,
+      "events": {
+        "grip_on": 10.4,
+        "rack_off": 11.601,
+        "assembly_on": 38.876,
+        "grip_off": 47.6
+      },
+      "wall_seconds": 366.33336227800464
+    },
+    {
+      "label": "pick_y_p10",
+      "field": "pick",
+      "delta_m": [
+        0.0,
+        0.01,
+        0.0
+      ],
+      "status": "PASS",
+      "audit": "PASS",
+      "faults": [],
+      "lock_time_s": 36.611000000000004,
+      "peak_axial_force_n": 1.8571444338714431,
+      "max_penetration_mm": 0.0021849170402932533,
+      "final_module_error_mm": 0.005025049049025176,
+      "events": {
+        "grip_on": 10.4,
+        "rack_off": 11.601,
+        "assembly_on": 36.611000000000004,
+        "grip_off": 47.6
+      },
+      "wall_seconds": 373.871497221
+    },
+    {
+      "label": "seed_x_m2",
+      "field": "seed",
+      "delta_m": [
+        -0.002,
+        0.0,
+        0.0
+      ],
+      "status": "PASS",
+      "audit": "PASS",
+      "faults": [],
+      "lock_time_s": 36.697,
+      "peak_axial_force_n": 1.8569209137282607,
+      "max_penetration_mm": 0.0022034051032074563,
+      "final_module_error_mm": 0.002763882517515193,
+      "events": {
+        "grip_on": 10.4,
+        "rack_off": 11.601,
+        "assembly_on": 36.697,
+        "grip_off": 47.6
+      },
+      "wall_seconds": 364.66504447000625
+    },
+    {
+      "label": "seed_x_p2",
+      "field": "seed",
+      "delta_m": [
+        0.002,
+        0.0,
+        0.0
+      ],
+      "status": "PASS",
+      "audit": "PASS",
+      "faults": [],
+      "lock_time_s": 39.67,
+      "peak_axial_force_n": 1.8539959215882604,
+      "max_penetration_mm": 0.00220540138728994,
+      "final_module_error_mm": 0.005512529801803062,
+      "events": {
+        "grip_on": 10.4,
+        "rack_off": 11.601,
+        "assembly_on": 39.67,
+        "grip_off": 47.6
+      },
+      "wall_seconds": 366.834276966998
+    },
+    {
+      "label": "seed_x_m4",
+      "field": "seed",
+      "delta_m": [
+        -0.004,
+        0.0,
+        0.0
+      ],
+      "status": "PASS",
+      "audit": "PASS",
+      "faults": [],
+      "lock_time_s": 36.611000000000004,
+      "peak_axial_force_n": 1.8598480724678514,
+      "max_penetration_mm": 0.0022459858152748756,
+      "final_module_error_mm": 0.005155467667918611,
+      "events": {
+        "grip_on": 10.4,
+        "rack_off": 11.601,
+        "assembly_on": 36.611000000000004,
+        "grip_off": 47.6
+      },
+      "wall_seconds": 361.0958458670066
+    },
+    {
+      "label": "seed_x_p4",
+      "field": "seed",
+      "delta_m": [
+        0.004,
+        0.0,
+        0.0
+      ],
+      "status": "PASS",
+      "audit": "PASS",
+      "faults": [],
+      "lock_time_s": 38.356,
+      "peak_axial_force_n": 1.8514545183914108,
+      "max_penetration_mm": 0.0021424544366931584,
+      "final_module_error_mm": 0.004823952362651497,
+      "events": {
+        "grip_on": 10.4,
+        "rack_off": 11.601,
+        "assembly_on": 38.356,
+        "grip_off": 47.6
+      },
+      "wall_seconds": 361.4505386529927
+    },
+    {
+      "label": "seed_y_m2",
+      "field": "seed",
+      "delta_m": [
+        0.0,
+        -0.002,
+        0.0
+      ],
+      "status": "PASS",
+      "audit": "PASS",
+      "faults": [],
+      "lock_time_s": 36.611000000000004,
+      "peak_axial_force_n": 1.8486915902464003,
+      "max_penetration_mm": 0.00220677506002106,
+      "final_module_error_mm": 0.005441372645768318,
+      "events": {
+        "grip_on": 10.4,
+        "rack_off": 11.601,
+        "assembly_on": 36.611000000000004,
+        "grip_off": 47.6
+      },
+      "wall_seconds": 357.0384046830004
+    },
+    {
+      "label": "seed_y_p2",
+      "field": "seed",
+      "delta_m": [
+        0.0,
+        0.002,
+        0.0
+      ],
+      "status": "PASS",
+      "audit": "PASS",
+      "faults": [],
+      "lock_time_s": 36.611000000000004,
+      "peak_axial_force_n": 1.857002846628589,
+      "max_penetration_mm": 0.002191340455981515,
+      "final_module_error_mm": 0.005640682942968163,
+      "events": {
+        "grip_on": 10.4,
+        "rack_off": 11.601,
+        "assembly_on": 36.611000000000004,
+        "grip_off": 47.6
+      },
+      "wall_seconds": 365.38121761700313
+    },
+    {
+      "label": "seed_y_m4",
+      "field": "seed",
+      "delta_m": [
+        0.0,
+        -0.004,
+        0.0
+      ],
+      "status": "PASS",
+      "audit": "PASS",
+      "faults": [],
+      "lock_time_s": 36.761,
+      "peak_axial_force_n": 1.886972620354787,
+      "max_penetration_mm": 0.002074425980991333,
+      "final_module_error_mm": 0.0017771823548451962,
+      "events": {
+        "grip_on": 10.4,
+        "rack_off": 11.601,
+        "assembly_on": 36.761,
+        "grip_off": 47.6
+      },
+      "wall_seconds": 360.951775619993
+    },
+    {
+      "label": "seed_y_p4",
+      "field": "seed",
+      "delta_m": [
+        0.0,
+        0.004,
+        0.0
+      ],
+      "status": "PASS",
+      "audit": "PASS",
+      "faults": [],
+      "lock_time_s": 36.611000000000004,
+      "peak_axial_force_n": 1.8591438450579545,
+      "max_penetration_mm": 0.002218627266792438,
+      "final_module_error_mm": 0.005434790455124722,
+      "events": {
+        "grip_on": 10.4,
+        "rack_off": 11.601,
+        "assembly_on": 36.611000000000004,
+        "grip_off": 47.6
+      },
+      "wall_seconds": 365.38002284499817
+    }
+  ],
+  "passes": 12,
+  "total": 12,
+  "continuous_capture_verified": false
+}

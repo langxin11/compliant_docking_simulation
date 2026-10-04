@@ -1,0 +1,10 @@
+{
+  "status": "PASS",
+  "ignored_fields": [
+    "name",
+    "path"
+  ],
+  "scene": "scenes/iiwa14_petal_angle1_blend030.yaml",
+  "case": "combo_ny6_p15",
+  "setting": "dt_half"
+}

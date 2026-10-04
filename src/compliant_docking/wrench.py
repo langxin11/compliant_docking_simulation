@@ -26,8 +26,33 @@ EE body wrench（与 Pinocchio ``ReferenceFrame.LOCAL`` body Jacobian 同 frame�
 """
 from __future__ import annotations
 
+from dataclasses import dataclass
+
 import numpy as np
 import pinocchio as pin
+
+
+@dataclass(frozen=True)
+class WrenchSample:
+    """A causal sensor sample with its solve timestamp and physical origin.
+
+    Copy the solve-time site pose before another physics step can mutate it.
+    Hold this sample in world coordinates and transport it to the body frame
+    used by the next control update; do not rotate old data with a new site pose.
+    """
+
+    t: float
+    origin: np.ndarray
+    world: np.ndarray  # force, moment about origin
+
+    @classmethod
+    def from_site(cls, t, force, torque, position, rotation):
+        rotation = np.asarray(rotation).reshape(3, 3)
+        return cls(float(t), np.asarray(position).copy(),
+                   np.r_[rotation @ force, rotation @ torque])
+
+    def at_body(self, pose: pin.SE3) -> np.ndarray:
+        return wrench_to_body(self.world[:3], self.world[3:], self.origin, np.eye(3), pose)
 
 
 def transform_wrench(force: np.ndarray, torque: np.ndarray,

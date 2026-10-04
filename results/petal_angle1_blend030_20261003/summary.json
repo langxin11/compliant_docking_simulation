@@ -1,0 +1,109 @@
+{
+  "primary_cases": 3,
+  "passes": 3,
+  "comparisons": {
+    "nx6": {
+      "error": [
+        -6.0,
+        0.0,
+        0.0
+      ],
+      "archived_narrow": {
+        "status": "CANDIDATE_PASS",
+        "lateral_mm": 0.4325558764728633,
+        "phase_deg": 0.05535368397413265,
+        "gap_mm": 8.379703597682919e-07,
+        "stop_fraction": 1.0,
+        "force_N": 10.565626359596658,
+        "moment_Nm": 0.10191449572389817
+      },
+      "selected": {
+        "status": "CANDIDATE_PASS",
+        "lateral_mm": 0.28876529903142445,
+        "phase_deg": 0.1934713312059202,
+        "gap_mm": 8.277088459074378e-07,
+        "stop_fraction": 1.0,
+        "force_N": 9.444543411298257,
+        "moment_Nm": 0.10763352944218162
+      }
+    },
+    "combo_ny6_p15": {
+      "error": [
+        0.0,
+        -6.0,
+        15.0
+      ],
+      "archived_narrow": {
+        "status": "CANDIDATE_PASS",
+        "lateral_mm": 0.002670914945162738,
+        "phase_deg": 0.5894585581090723,
+        "gap_mm": 8.258922989945461e-07,
+        "stop_fraction": 1.0,
+        "force_N": 15.110650043712699,
+        "moment_Nm": 0.2664767023688605
+      },
+      "selected": {
+        "status": "CANDIDATE_PASS",
+        "lateral_mm": 0.001282275891016146,
+        "phase_deg": 0.525370659291255,
+        "gap_mm": 8.263689177390177e-07,
+        "stop_fraction": 1.0,
+        "force_N": 17.682515877549537,
+        "moment_Nm": 0.3446844498272593
+      }
+    },
+    "combo_py6_n15": {
+      "error": [
+        0.0,
+        6.0,
+        -15.0
+      ],
+      "archived_narrow": {
+        "status": "CANDIDATE_PASS",
+        "lateral_mm": 0.002809738884534643,
+        "phase_deg": 0.588765512278492,
+        "gap_mm": 8.355384717440018e-07,
+        "stop_fraction": 1.0,
+        "force_N": 14.876986310840088,
+        "moment_Nm": 0.28450202357766985
+      },
+      "selected": {
+        "status": "CANDIDATE_PASS",
+        "lateral_mm": 0.0033442115301766575,
+        "phase_deg": 0.524942901723044,
+        "gap_mm": 8.350873881290966e-07,
+        "stop_fraction": 1.0,
+        "force_N": 17.806976357483997,
+        "moment_Nm": 0.3512638100951948
+      }
+    }
+  },
+  "nx6_timestep_check": {
+    "status": "SENSITIVE",
+    "differences": {
+      "lateral_mm": 0.10411968888059586,
+      "axial_gap_mm": 1.0176859355226497e-08,
+      "phase_deg": 0.1101137729086048,
+      "peak_force_N": 0.5289843615382228,
+      "peak_axial_moment_Nm": 0.011925113996772166
+    },
+    "baseline": {
+      "status": "CANDIDATE_PASS",
+      "reasons": [],
+      "locking_verified": false
+    },
+    "half_dt": {
+      "status": "CANDIDATE_PASS",
+      "reasons": [],
+      "locking_verified": false
+    }
+  },
+  "primary_physics_dt_s": 0.00025,
+  "check_physics_dt_s": 0.000125,
+  "control_period_s": 0.0005,
+  "feedback_delay_s": 0.0005,
+  "baseline_policy": "archived narrow rollouts; verified runtime and reference commands; not freshly rerun",
+  "continuous_capture_verified": false,
+  "locking_verified": false,
+  "manufacturing_fit_verified": false
+}

@@ -1,0 +1,31 @@
+{
+  "status": "PASS",
+  "configurations": 11,
+  "initial_contacts": 0,
+  "max_position_error_m": 6.217248937900877e-15,
+  "max_rotation_matrix_error": 1.9095836023552692e-14,
+  "max_mass_matrix_error": 2.886579864025407e-14,
+  "tool_mass_kg": 0.391691,
+  "tolerance": 1e-10,
+  "iterations": 60,
+  "lower_position_limits": [
+    -2.96706,
+    -2.0944,
+    -2.96706,
+    -2.0944,
+    -2.96706,
+    -2.0944,
+    -3.05433
+  ],
+  "upper_position_limits": [
+    2.96706,
+    2.0944,
+    2.96706,
+    2.0944,
+    2.96706,
+    2.0944,
+    3.05433
+  ],
+  "full_tool_inertia_preserved": true,
+  "default_scene_replaced": false
+}

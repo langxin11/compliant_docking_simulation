@@ -1,0 +1,277 @@
+<mujoco model="male_cone">
+  <compiler angle="degree" meshdir="." />
+  <asset>
+    <mesh name="male_cone_mesh" file="../../iiwa14/assets/dock_1_17_new.STL" />
+    <material name="male_cone_mat" rgba="0.7 0.7 0.7 1" />
+    <mesh name="crown_part_000" file="component_00_part_000.obj" />
+    <mesh name="crown_part_001" file="component_00_part_001.obj" />
+    <mesh name="crown_part_002" file="component_00_part_002.obj" />
+    <mesh name="crown_part_003" file="component_00_part_003.obj" />
+    <mesh name="crown_part_004" file="component_00_part_004.obj" />
+    <mesh name="crown_part_005" file="component_00_part_005.obj" />
+    <mesh name="crown_part_006" file="component_00_part_006.obj" />
+    <mesh name="crown_part_007" file="component_00_part_007.obj" />
+    <mesh name="crown_part_008" file="component_00_part_008.obj" />
+    <mesh name="crown_part_009" file="component_00_part_009.obj" />
+    <mesh name="crown_part_010" file="component_00_part_010.obj" />
+    <mesh name="crown_part_011" file="component_00_part_011.obj" />
+    <mesh name="crown_part_012" file="component_00_part_012.obj" />
+    <mesh name="crown_part_013" file="component_00_part_013.obj" />
+    <mesh name="crown_part_014" file="component_00_part_014.obj" />
+    <mesh name="crown_part_015" file="component_00_part_015.obj" />
+    <mesh name="crown_part_016" file="component_00_part_016.obj" />
+    <mesh name="crown_part_017" file="component_00_part_017.obj" />
+    <mesh name="crown_part_018" file="component_00_part_018.obj" />
+    <mesh name="crown_part_019" file="component_00_part_019.obj" />
+    <mesh name="crown_part_020" file="component_00_part_020.obj" />
+    <mesh name="crown_part_021" file="component_00_part_021.obj" />
+    <mesh name="crown_part_022" file="component_00_part_022.obj" />
+    <mesh name="crown_part_023" file="component_00_part_023.obj" />
+    <mesh name="crown_part_024" file="component_00_part_024.obj" />
+    <mesh name="crown_part_025" file="component_00_part_025.obj" />
+    <mesh name="crown_part_026" file="component_00_part_026.obj" />
+    <mesh name="crown_part_027" file="component_00_part_027.obj" />
+    <mesh name="crown_part_028" file="component_00_part_028.obj" />
+    <mesh name="crown_part_029" file="component_00_part_029.obj" />
+    <mesh name="crown_part_030" file="component_00_part_030.obj" />
+    <mesh name="crown_part_031" file="component_00_part_031.obj" />
+    <mesh name="crown_part_032" file="component_00_part_032.obj" />
+    <mesh name="crown_part_033" file="component_00_part_033.obj" />
+    <mesh name="crown_part_034" file="component_00_part_034.obj" />
+    <mesh name="crown_part_035" file="component_01_part_000.obj" />
+    <mesh name="crown_part_036" file="component_01_part_001.obj" />
+    <mesh name="crown_part_037" file="component_01_part_002.obj" />
+    <mesh name="crown_part_038" file="component_01_part_003.obj" />
+    <mesh name="crown_part_039" file="component_01_part_004.obj" />
+    <mesh name="crown_part_040" file="component_01_part_005.obj" />
+    <mesh name="crown_part_041" file="component_01_part_006.obj" />
+    <mesh name="crown_part_042" file="component_01_part_007.obj" />
+    <mesh name="crown_part_043" file="component_01_part_008.obj" />
+    <mesh name="crown_part_044" file="component_01_part_009.obj" />
+    <mesh name="crown_part_045" file="component_01_part_010.obj" />
+    <mesh name="crown_part_046" file="component_01_part_011.obj" />
+    <mesh name="crown_part_047" file="component_01_part_012.obj" />
+    <mesh name="crown_part_048" file="component_01_part_013.obj" />
+    <mesh name="crown_part_049" file="component_01_part_014.obj" />
+    <mesh name="crown_part_050" file="component_01_part_015.obj" />
+    <mesh name="crown_part_051" file="component_01_part_016.obj" />
+    <mesh name="crown_part_052" file="component_01_part_017.obj" />
+    <mesh name="crown_part_053" file="component_01_part_018.obj" />
+    <mesh name="crown_part_054" file="component_01_part_019.obj" />
+    <mesh name="crown_part_055" file="component_01_part_020.obj" />
+    <mesh name="crown_part_056" file="component_01_part_021.obj" />
+    <mesh name="crown_part_057" file="component_01_part_022.obj" />
+    <mesh name="crown_part_058" file="component_01_part_023.obj" />
+    <mesh name="crown_part_059" file="component_01_part_024.obj" />
+    <mesh name="crown_part_060" file="component_01_part_025.obj" />
+    <mesh name="crown_part_061" file="component_01_part_026.obj" />
+    <mesh name="crown_part_062" file="component_01_part_027.obj" />
+    <mesh name="crown_part_063" file="component_01_part_028.obj" />
+    <mesh name="crown_part_064" file="component_01_part_029.obj" />
+    <mesh name="crown_part_065" file="component_01_part_030.obj" />
+    <mesh name="crown_part_066" file="component_02_part_000.obj" />
+    <mesh name="crown_part_067" file="component_02_part_001.obj" />
+    <mesh name="crown_part_068" file="component_03_part_000.obj" />
+    <mesh name="crown_part_069" file="component_04_part_000.obj" />
+    <mesh name="crown_part_070" file="component_05_part_000.obj" />
+    <mesh name="crown_part_071" file="component_06_part_000.obj" />
+    <mesh name="crown_part_072" file="component_06_part_001.obj" />
+    <mesh name="crown_part_073" file="component_06_part_002.obj" />
+    <mesh name="crown_part_074" file="component_06_part_003.obj" />
+    <mesh name="crown_part_075" file="component_06_part_004.obj" />
+    <mesh name="crown_part_076" file="component_06_part_005.obj" />
+    <mesh name="crown_part_077" file="component_06_part_006.obj" />
+    <mesh name="crown_part_078" file="component_06_part_007.obj" />
+    <mesh name="crown_part_079" file="component_06_part_008.obj" />
+    <mesh name="crown_part_080" file="component_06_part_009.obj" />
+    <mesh name="crown_part_081" file="component_06_part_010.obj" />
+    <mesh name="crown_part_082" file="component_06_part_011.obj" />
+    <mesh name="crown_part_083" file="component_06_part_012.obj" />
+    <mesh name="crown_part_084" file="component_06_part_013.obj" />
+    <mesh name="crown_part_085" file="component_06_part_014.obj" />
+    <mesh name="crown_part_086" file="component_06_part_015.obj" />
+    <mesh name="crown_part_087" file="component_06_part_016.obj" />
+    <mesh name="crown_part_088" file="component_06_part_017.obj" />
+    <mesh name="crown_part_089" file="component_06_part_018.obj" />
+    <mesh name="crown_part_090" file="component_06_part_019.obj" />
+    <mesh name="crown_part_091" file="component_06_part_020.obj" />
+    <mesh name="crown_part_092" file="component_06_part_021.obj" />
+    <mesh name="crown_part_093" file="component_06_part_022.obj" />
+    <mesh name="crown_part_094" file="component_06_part_023.obj" />
+    <mesh name="crown_part_095" file="component_06_part_024.obj" />
+    <mesh name="crown_part_096" file="component_06_part_025.obj" />
+    <mesh name="crown_part_097" file="component_06_part_026.obj" />
+    <mesh name="crown_part_098" file="component_06_part_027.obj" />
+    <mesh name="crown_part_099" file="component_06_part_028.obj" />
+    <mesh name="crown_part_100" file="component_06_part_029.obj" />
+    <mesh name="crown_part_101" file="component_07_part_000.obj" />
+    <mesh name="crown_part_102" file="component_07_part_001.obj" />
+    <mesh name="crown_part_103" file="component_07_part_002.obj" />
+    <mesh name="crown_part_104" file="component_07_part_003.obj" />
+    <mesh name="crown_part_105" file="component_07_part_004.obj" />
+    <mesh name="crown_part_106" file="component_07_part_005.obj" />
+    <mesh name="crown_part_107" file="component_07_part_006.obj" />
+    <mesh name="crown_part_108" file="component_07_part_007.obj" />
+    <mesh name="crown_part_109" file="component_07_part_008.obj" />
+    <mesh name="crown_part_110" file="component_07_part_009.obj" />
+    <mesh name="crown_part_111" file="component_07_part_010.obj" />
+    <mesh name="crown_part_112" file="component_07_part_011.obj" />
+    <mesh name="crown_part_113" file="component_07_part_012.obj" />
+    <mesh name="crown_part_114" file="component_07_part_013.obj" />
+    <mesh name="crown_part_115" file="component_07_part_014.obj" />
+    <mesh name="crown_part_116" file="component_07_part_015.obj" />
+    <mesh name="crown_part_117" file="component_07_part_016.obj" />
+    <mesh name="crown_part_118" file="component_07_part_017.obj" />
+    <mesh name="crown_part_119" file="component_07_part_018.obj" />
+    <mesh name="crown_part_120" file="component_07_part_019.obj" />
+    <mesh name="crown_part_121" file="component_07_part_020.obj" />
+    <mesh name="crown_part_122" file="component_07_part_021.obj" />
+    <mesh name="crown_part_123" file="component_07_part_022.obj" />
+    <mesh name="crown_part_124" file="component_07_part_023.obj" />
+    <mesh name="crown_part_125" file="component_07_part_024.obj" />
+    <mesh name="crown_part_126" file="component_07_part_025.obj" />
+    <mesh name="crown_part_127" file="component_07_part_026.obj" />
+    <mesh name="crown_part_128" file="component_07_part_027.obj" />
+    <mesh name="crown_part_129" file="component_07_part_028.obj" />
+  </asset>
+  <worldbody>
+    <body name="dock">
+      <site pos="0 0 0" name="sensor_site" />
+      <body name="rev" euler="0 0 40">
+        <inertial mass="1" pos="0 0 0" diaginertia="0.1 0.1 0.1" />
+        <geom name="dock_geom" type="mesh" mesh="male_cone_mesh" material="male_cone_mat" contype="0" conaffinity="0" group="3" />
+        <geom name="dock_visual" type="mesh" mesh="male_cone_mesh" material="male_cone_mat" contype="0" conaffinity="0" group="2" />
+        <geom name="convex_000" type="mesh" mesh="crown_part_000" group="3" material="male_cone_mat" />
+        <geom name="convex_001" type="mesh" mesh="crown_part_001" group="3" material="male_cone_mat" />
+        <geom name="convex_002" type="mesh" mesh="crown_part_002" group="3" material="male_cone_mat" />
+        <geom name="convex_003" type="mesh" mesh="crown_part_003" group="3" material="male_cone_mat" />
+        <geom name="convex_004" type="mesh" mesh="crown_part_004" group="3" material="male_cone_mat" />
+        <geom name="convex_005" type="mesh" mesh="crown_part_005" group="3" material="male_cone_mat" />
+        <geom name="convex_006" type="mesh" mesh="crown_part_006" group="3" material="male_cone_mat" />
+        <geom name="convex_007" type="mesh" mesh="crown_part_007" group="3" material="male_cone_mat" />
+        <geom name="convex_008" type="mesh" mesh="crown_part_008" group="3" material="male_cone_mat" />
+        <geom name="convex_009" type="mesh" mesh="crown_part_009" group="3" material="male_cone_mat" />
+        <geom name="convex_010" type="mesh" mesh="crown_part_010" group="3" material="male_cone_mat" />
+        <geom name="convex_011" type="mesh" mesh="crown_part_011" group="3" material="male_cone_mat" />
+        <geom name="convex_012" type="mesh" mesh="crown_part_012" group="3" material="male_cone_mat" />
+        <geom name="convex_013" type="mesh" mesh="crown_part_013" group="3" material="male_cone_mat" />
+        <geom name="convex_014" type="mesh" mesh="crown_part_014" group="3" material="male_cone_mat" />
+        <geom name="convex_015" type="mesh" mesh="crown_part_015" group="3" material="male_cone_mat" />
+        <geom name="convex_016" type="mesh" mesh="crown_part_016" group="3" material="male_cone_mat" />
+        <geom name="convex_017" type="mesh" mesh="crown_part_017" group="3" material="male_cone_mat" />
+        <geom name="convex_018" type="mesh" mesh="crown_part_018" group="3" material="male_cone_mat" />
+        <geom name="convex_019" type="mesh" mesh="crown_part_019" group="3" material="male_cone_mat" />
+        <geom name="convex_020" type="mesh" mesh="crown_part_020" group="3" material="male_cone_mat" />
+        <geom name="convex_021" type="mesh" mesh="crown_part_021" group="3" material="male_cone_mat" />
+        <geom name="convex_022" type="mesh" mesh="crown_part_022" group="3" material="male_cone_mat" />
+        <geom name="convex_023" type="mesh" mesh="crown_part_023" group="3" material="male_cone_mat" />
+        <geom name="convex_024" type="mesh" mesh="crown_part_024" group="3" material="male_cone_mat" />
+        <geom name="convex_025" type="mesh" mesh="crown_part_025" group="3" material="male_cone_mat" />
+        <geom name="convex_026" type="mesh" mesh="crown_part_026" group="3" material="male_cone_mat" />
+        <geom name="convex_027" type="mesh" mesh="crown_part_027" group="3" material="male_cone_mat" />
+        <geom name="convex_028" type="mesh" mesh="crown_part_028" group="3" material="male_cone_mat" />
+        <geom name="convex_029" type="mesh" mesh="crown_part_029" group="3" material="male_cone_mat" />
+        <geom name="convex_030" type="mesh" mesh="crown_part_030" group="3" material="male_cone_mat" />
+        <geom name="convex_031" type="mesh" mesh="crown_part_031" group="3" material="male_cone_mat" />
+        <geom name="convex_032" type="mesh" mesh="crown_part_032" group="3" material="male_cone_mat" />
+        <geom name="convex_033" type="mesh" mesh="crown_part_033" group="3" material="male_cone_mat" />
+        <geom name="convex_034" type="mesh" mesh="crown_part_034" group="3" material="male_cone_mat" />
+        <geom name="convex_035" type="mesh" mesh="crown_part_035" group="3" material="male_cone_mat" />
+        <geom name="convex_036" type="mesh" mesh="crown_part_036" group="3" material="male_cone_mat" />
+        <geom name="convex_037" type="mesh" mesh="crown_part_037" group="3" material="male_cone_mat" />
+        <geom name="convex_038" type="mesh" mesh="crown_part_038" group="3" material="male_cone_mat" />
+        <geom name="convex_039" type="mesh" mesh="crown_part_039" group="3" material="male_cone_mat" />
+        <geom name="convex_040" type="mesh" mesh="crown_part_040" group="3" material="male_cone_mat" />
+        <geom name="convex_041" type="mesh" mesh="crown_part_041" group="3" material="male_cone_mat" />
+        <geom name="convex_042" type="mesh" mesh="crown_part_042" group="3" material="male_cone_mat" />
+        <geom name="convex_043" type="mesh" mesh="crown_part_043" group="3" material="male_cone_mat" />
+        <geom name="convex_044" type="mesh" mesh="crown_part_044" group="3" material="male_cone_mat" />
+        <geom name="convex_045" type="mesh" mesh="crown_part_045" group="3" material="male_cone_mat" />
+        <geom name="convex_046" type="mesh" mesh="crown_part_046" group="3" material="male_cone_mat" />
+        <geom name="convex_047" type="mesh" mesh="crown_part_047" group="3" material="male_cone_mat" />
+        <geom name="convex_048" type="mesh" mesh="crown_part_048" group="3" material="male_cone_mat" />
+        <geom name="convex_049" type="mesh" mesh="crown_part_049" group="3" material="male_cone_mat" />
+        <geom name="convex_050" type="mesh" mesh="crown_part_050" group="3" material="male_cone_mat" />
+        <geom name="convex_051" type="mesh" mesh="crown_part_051" group="3" material="male_cone_mat" />
+        <geom name="convex_052" type="mesh" mesh="crown_part_052" group="3" material="male_cone_mat" />
+        <geom name="convex_053" type="mesh" mesh="crown_part_053" group="3" material="male_cone_mat" />
+        <geom name="convex_054" type="mesh" mesh="crown_part_054" group="3" material="male_cone_mat" />
+        <geom name="convex_055" type="mesh" mesh="crown_part_055" group="3" material="male_cone_mat" />
+        <geom name="convex_056" type="mesh" mesh="crown_part_056" group="3" material="male_cone_mat" />
+        <geom name="convex_057" type="mesh" mesh="crown_part_057" group="3" material="male_cone_mat" />
+        <geom name="convex_058" type="mesh" mesh="crown_part_058" group="3" material="male_cone_mat" />
+        <geom name="convex_059" type="mesh" mesh="crown_part_059" group="3" material="male_cone_mat" />
+        <geom name="convex_060" type="mesh" mesh="crown_part_060" group="3" material="male_cone_mat" />
+        <geom name="convex_061" type="mesh" mesh="crown_part_061" group="3" material="male_cone_mat" />
+        <geom name="convex_062" type="mesh" mesh="crown_part_062" group="3" material="male_cone_mat" />
+        <geom name="convex_063" type="mesh" mesh="crown_part_063" group="3" material="male_cone_mat" />
+        <geom name="convex_064" type="mesh" mesh="crown_part_064" group="3" material="male_cone_mat" />
+        <geom name="convex_065" type="mesh" mesh="crown_part_065" group="3" material="male_cone_mat" />
+        <geom name="convex_066" type="mesh" mesh="crown_part_066" group="3" material="male_cone_mat" />
+        <geom name="convex_067" type="mesh" mesh="crown_part_067" group="3" material="male_cone_mat" />
+        <geom name="convex_068" type="mesh" mesh="crown_part_068" group="3" material="male_cone_mat" />
+        <geom name="convex_069" type="mesh" mesh="crown_part_069" group="3" material="male_cone_mat" />
+        <geom name="convex_070" type="mesh" mesh="crown_part_070" group="3" material="male_cone_mat" />
+        <geom name="convex_071" type="mesh" mesh="crown_part_071" group="3" material="male_cone_mat" />
+        <geom name="convex_072" type="mesh" mesh="crown_part_072" group="3" material="male_cone_mat" />
+        <geom name="convex_073" type="mesh" mesh="crown_part_073" group="3" material="male_cone_mat" />
+        <geom name="convex_074" type="mesh" mesh="crown_part_074" group="3" material="male_cone_mat" />
+        <geom name="convex_075" type="mesh" mesh="crown_part_075" group="3" material="male_cone_mat" />
+        <geom name="convex_076" type="mesh" mesh="crown_part_076" group="3" material="male_cone_mat" />
+        <geom name="convex_077" type="mesh" mesh="crown_part_077" group="3" material="male_cone_mat" />
+        <geom name="convex_078" type="mesh" mesh="crown_part_078" group="3" material="male_cone_mat" />
+        <geom name="convex_079" type="mesh" mesh="crown_part_079" group="3" material="male_cone_mat" />
+        <geom name="convex_080" type="mesh" mesh="crown_part_080" group="3" material="male_cone_mat" />
+        <geom name="convex_081" type="mesh" mesh="crown_part_081" group="3" material="male_cone_mat" />
+        <geom name="convex_082" type="mesh" mesh="crown_part_082" group="3" material="male_cone_mat" />
+        <geom name="convex_083" type="mesh" mesh="crown_part_083" group="3" material="male_cone_mat" />
+        <geom name="convex_084" type="mesh" mesh="crown_part_084" group="3" material="male_cone_mat" />
+        <geom name="convex_085" type="mesh" mesh="crown_part_085" group="3" material="male_cone_mat" />
+        <geom name="convex_086" type="mesh" mesh="crown_part_086" group="3" material="male_cone_mat" />
+        <geom name="convex_087" type="mesh" mesh="crown_part_087" group="3" material="male_cone_mat" />
+        <geom name="convex_088" type="mesh" mesh="crown_part_088" group="3" material="male_cone_mat" />
+        <geom name="convex_089" type="mesh" mesh="crown_part_089" group="3" material="male_cone_mat" />
+        <geom name="convex_090" type="mesh" mesh="crown_part_090" group="3" material="male_cone_mat" />
+        <geom name="convex_091" type="mesh" mesh="crown_part_091" group="3" material="male_cone_mat" />
+        <geom name="convex_092" type="mesh" mesh="crown_part_092" group="3" material="male_cone_mat" />
+        <geom name="convex_093" type="mesh" mesh="crown_part_093" group="3" material="male_cone_mat" />
+        <geom name="convex_094" type="mesh" mesh="crown_part_094" group="3" material="male_cone_mat" />
+        <geom name="convex_095" type="mesh" mesh="crown_part_095" group="3" material="male_cone_mat" />
+        <geom name="convex_096" type="mesh" mesh="crown_part_096" group="3" material="male_cone_mat" />
+        <geom name="convex_097" type="mesh" mesh="crown_part_097" group="3" material="male_cone_mat" />
+        <geom name="convex_098" type="mesh" mesh="crown_part_098" group="3" material="male_cone_mat" />
+        <geom name="convex_099" type="mesh" mesh="crown_part_099" group="3" material="male_cone_mat" />
+        <geom name="convex_100" type="mesh" mesh="crown_part_100" group="3" material="male_cone_mat" />
+        <geom name="convex_101" type="mesh" mesh="crown_part_101" group="3" material="male_cone_mat" />
+        <geom name="convex_102" type="mesh" mesh="crown_part_102" group="3" material="male_cone_mat" />
+        <geom name="convex_103" type="mesh" mesh="crown_part_103" group="3" material="male_cone_mat" />
+        <geom name="convex_104" type="mesh" mesh="crown_part_104" group="3" material="male_cone_mat" />
+        <geom name="convex_105" type="mesh" mesh="crown_part_105" group="3" material="male_cone_mat" />
+        <geom name="convex_106" type="mesh" mesh="crown_part_106" group="3" material="male_cone_mat" />
+        <geom name="convex_107" type="mesh" mesh="crown_part_107" group="3" material="male_cone_mat" />
+        <geom name="convex_108" type="mesh" mesh="crown_part_108" group="3" material="male_cone_mat" />
+        <geom name="convex_109" type="mesh" mesh="crown_part_109" group="3" material="male_cone_mat" />
+        <geom name="convex_110" type="mesh" mesh="crown_part_110" group="3" material="male_cone_mat" />
+        <geom name="convex_111" type="mesh" mesh="crown_part_111" group="3" material="male_cone_mat" />
+        <geom name="convex_112" type="mesh" mesh="crown_part_112" group="3" material="male_cone_mat" />
+        <geom name="convex_113" type="mesh" mesh="crown_part_113" group="3" material="male_cone_mat" />
+        <geom name="convex_114" type="mesh" mesh="crown_part_114" group="3" material="male_cone_mat" />
+        <geom name="convex_115" type="mesh" mesh="crown_part_115" group="3" material="male_cone_mat" />
+        <geom name="convex_116" type="mesh" mesh="crown_part_116" group="3" material="male_cone_mat" />
+        <geom name="convex_117" type="mesh" mesh="crown_part_117" group="3" material="male_cone_mat" />
+        <geom name="convex_118" type="mesh" mesh="crown_part_118" group="3" material="male_cone_mat" />
+        <geom name="convex_119" type="mesh" mesh="crown_part_119" group="3" material="male_cone_mat" />
+        <geom name="convex_120" type="mesh" mesh="crown_part_120" group="3" material="male_cone_mat" />
+        <geom name="convex_121" type="mesh" mesh="crown_part_121" group="3" material="male_cone_mat" />
+        <geom name="convex_122" type="mesh" mesh="crown_part_122" group="3" material="male_cone_mat" />
+        <geom name="convex_123" type="mesh" mesh="crown_part_123" group="3" material="male_cone_mat" />
+        <geom name="convex_124" type="mesh" mesh="crown_part_124" group="3" material="male_cone_mat" />
+        <geom name="convex_125" type="mesh" mesh="crown_part_125" group="3" material="male_cone_mat" />
+        <geom name="convex_126" type="mesh" mesh="crown_part_126" group="3" material="male_cone_mat" />
+        <geom name="convex_127" type="mesh" mesh="crown_part_127" group="3" material="male_cone_mat" />
+        <geom name="convex_128" type="mesh" mesh="crown_part_128" group="3" material="male_cone_mat" />
+        <geom name="convex_129" type="mesh" mesh="crown_part_129" group="3" material="male_cone_mat" />
+      </body>
+    </body>
+  </worldbody>
+</mujoco>

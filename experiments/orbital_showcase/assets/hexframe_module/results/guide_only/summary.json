@@ -1,0 +1,58 @@
+{
+  "mujoco_version": "3.14.0",
+  "initial": {
+    "offset_y_mm": 2,
+    "offset_z_mm": -1,
+    "twist_deg": 2,
+    "tilt_deg": 1
+  },
+  "guide_only": true,
+  "lock_enabled": false,
+  "first_contact": {
+    "time_s": 3.3130000000002737,
+    "axial_error_mm": -7.803333333311347,
+    "y_error_mm": -2.0,
+    "z_error_mm": 1.0000000000000009,
+    "lateral_error_mm": 2.23606797749979,
+    "position_error_mm": 8.117389427073704,
+    "angle_error_deg": 2.2360452719662205,
+    "contacts": 2,
+    "normal_force_n": 6.697155365176539,
+    "penetration_mm": 0.0010321690072229162,
+    "seating": false,
+    "locked": false
+  },
+  "locked_at_s": null,
+  "final": {
+    "time_s": 9.000499999999509,
+    "axial_error_mm": 7.720336592242916e-07,
+    "y_error_mm": 0.05041185560945382,
+    "z_error_mm": 0.030592930938988516,
+    "lateral_error_mm": 0.05896848827489256,
+    "position_error_mm": 0.05896848827994641,
+    "angle_error_deg": 0.08459894879305375,
+    "contacts": 158,
+    "normal_force_n": 0.2999987440925022,
+    "penetration_mm": 6.565259173457548e-07,
+    "seating": true,
+    "locked": false
+  },
+  "warnings": {},
+  "sampled_peak_force_n": 2.402153288462216,
+  "sampled_peak_penetration_mm": 0.0015707114496840262,
+  "controller": {
+    "approach_speed_m_s": 0.01,
+    "axial_stiffness_n_m": 1500,
+    "lateral_stiffness_n_m": 0,
+    "rotational_stiffness_nm_rad": 0,
+    "linear_damping_ns_m": [
+      140,
+      35,
+      35
+    ],
+    "angular_damping_nms_rad": 0.35,
+    "force_cap_n": 12,
+    "torque_cap_nm": 0.5
+  },
+  "note": "Rigid module bench. No spacecraft control, flexibility, physical latch or calibrated capture envelope."
+}

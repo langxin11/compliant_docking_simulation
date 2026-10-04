@@ -58,6 +58,10 @@ class Log:
         # 控制器 latest_diagnostics 的标量子集 + torque_saturated，见
         # experiments/run_docking.py）。旧控制器路径不触碰该列表。
         self.se3_diagnostics = []
+        self.docking_samples = []
+        self.docking_joint_limit_violation = False
+        self.contact_diagnostics = []
+        self.contact_events = []
 
 
 

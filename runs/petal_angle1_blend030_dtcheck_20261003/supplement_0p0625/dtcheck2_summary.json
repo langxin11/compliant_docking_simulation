@@ -1,0 +1,51 @@
+{
+ "pairs": {
+  "S_combo_ny6_p15_0p125_vs_0p0625": {
+   "status": "STABLE_IN_TWO_STEPS",
+   "differences": {
+    "lateral_mm": 0.01430712995320828,
+    "axial_gap_mm": 1.2069234500700077e-09,
+    "phase_deg": 0.013585543774894404,
+    "peak_force_N": 0.1748010298321141,
+    "peak_axial_moment_Nm": 0.04282703521248993
+   },
+   "baseline": {
+    "status": "CANDIDATE_PASS",
+    "reasons": [],
+    "locking_verified": false
+   },
+   "half_dt": {
+    "status": "CANDIDATE_PASS",
+    "reasons": [],
+    "locking_verified": false
+   }
+  },
+  "S_combo_py6_n15_0p125_vs_0p0625": {
+   "status": "STABLE_IN_TWO_STEPS",
+   "differences": {
+    "lateral_mm": 0.002303906930223641,
+    "axial_gap_mm": 2.1754820167529942e-10,
+    "phase_deg": 0.004155240006085137,
+    "peak_force_N": 1.187047048782297,
+    "peak_axial_moment_Nm": 0.0052766835130966805
+   },
+   "baseline": {
+    "status": "CANDIDATE_PASS",
+    "reasons": [],
+    "locking_verified": false
+   },
+   "half_dt": {
+    "status": "CANDIDATE_PASS",
+    "reasons": [],
+    "locking_verified": false
+   }
+  }
+ },
+ "statuses": {
+  "S_combo_ny6_p15_0p125_vs_0p0625": "STABLE_IN_TWO_STEPS",
+  "S_combo_py6_n15_0p125_vs_0p0625": "STABLE_IN_TWO_STEPS"
+ },
+ "attribution": "archived 0.25 ms coarseness",
+ "preresistered_verdict_unchanged": true,
+ "wall_seconds": 1302.7877970499976
+}

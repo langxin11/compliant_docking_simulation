@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import matplotlib as mpl
+import matplotlib.font_manager as fm
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -28,9 +29,11 @@ if TYPE_CHECKING:  # 仅类型检查用，避免运行时环导入 / type-checki
 
 # IEEE 单栏图宽（英寸）/ IEEE single-column figure width (inches)
 _FIG_WIDTH = 3.5
+COLORS = {"stiff": "#4477AA", "compliant": "#EE7733", "planned": "#008C95",
+          "actual": "#EE7733", "target": "#228833", "text": "#263445"}
 
 
-def apply_style() -> None:
+def apply_style(profile: str = "paper", *, cjk_first: bool = False) -> None:
     """应用 SciencePlots IEEE + 中文字体回退样式（幂等，可重复调用）/
     Apply the SciencePlots IEEE style with CJK font fallback (idempotent)."""
     # 导入 scienceplots 即向 matplotlib 注册样式表（此处无需直接引用）/
@@ -39,7 +42,7 @@ def apply_style() -> None:
 
     # 顺序固定：science → ieee → no-latex，确保 text.usetex 关闭 /
     # Order matters: science → ieee → no-latex, guaranteeing text.usetex = False
-    plt.style.use(["science", "ieee", "no-latex"])
+    plt.style.use(["default", "science", "ieee", "no-latex"])
 
     # 中文字体回退（覆盖在 style.use 之后）：具体字体列表必须放在 font.family——
     # matplotlib 仅对 font.family 列表构建逐字形回退链；font.serif 这类泛型别名
@@ -53,12 +56,37 @@ def apply_style() -> None:
     # fallback (tofu). Times New Roman renders Latin, CJK falls to Noto; STIX
     # mathtext matches the serif look; CJK fonts lack U+2212 so the ASCII
     # minus is required
-    mpl.rcParams["font.family"] = ["Times New Roman", "Noto Serif CJK SC",
-                                   "Noto Sans CJK SC", "DejaVu Serif"]
+    families = ["Times New Roman", "Liberation Serif", "Noto Serif CJK SC",
+                "Noto Sans CJK SC", "DejaVu Serif"]
+    if cjk_first:
+        families.insert(0, families.pop(families.index("Noto Serif CJK SC")))
+    available = []
+    for family in families:
+        try:
+            fm.findfont(fm.FontProperties(family=[family]), fallback_to_default=False)
+            available.append(family)
+        except ValueError:
+            pass
+    mpl.rcParams["font.family"] = available
     mpl.rcParams["font.serif"] = ["Times New Roman", "Noto Serif CJK SC",
                                   "Noto Sans CJK SC", "DejaVu Serif"]
     mpl.rcParams["mathtext.fontset"] = "stix"
     mpl.rcParams["axes.unicode_minus"] = False
+    mpl.rcParams["axes.prop_cycle"] = mpl.cycler(color=[COLORS["stiff"], COLORS["compliant"],
+                                                        COLORS["target"], "#CC6677", "#AA4499", "#666666"])
+    if profile == "report":
+        mpl.rcParams.update({"font.size": 11, "axes.labelsize": 11, "axes.titlesize": 12,
+                             "xtick.labelsize": 10, "ytick.labelsize": 10, "legend.fontsize": 9,
+                             "axes.titlepad": 10, "axes.spines.top": False,
+                             "axes.spines.right": False, "figure.facecolor": "white",
+                             "text.color": COLORS["text"], "axes.labelcolor": COLORS["text"],
+                             "axes.edgecolor": "#A4ADB8", "grid.color": "#DCE1E7",
+                             "grid.linewidth": .6, "savefig.dpi": 300,
+                             "xtick.top": False, "ytick.right": False,
+                             "xtick.minor.visible": False, "ytick.minor.visible": False,
+                             "xtick.direction": "out", "ytick.direction": "out"})
+    elif profile != "paper":
+        raise ValueError("Plot style profile must be paper or report")
 
 
 def plot_docking_log(log: "Log", out_dir: str | Path, *,

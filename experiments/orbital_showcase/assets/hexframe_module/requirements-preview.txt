@@ -1,0 +1,3 @@
+-r requirements.txt
+Pillow>=10
+matplotlib>=3.8
