@@ -83,6 +83,7 @@ MUJOCO_GL=egl uv run python -m experiments.system.hexframe \
 
 ```text
 assets/                          唯一来源的模型资产、许可与导入清单
+  modules/hexframe/              HexFrame 原始模型、CAD、网格与来源记录
 scenes/                          明确物理与控制配置的场景
 experiments/models_interfaces/   模型资格检查、接口候选与几何编排
 experiments/control/             RQ1/RQ2、误差范围与自由空间验证
@@ -90,9 +91,17 @@ experiments/system/              正式验收、预检、回放与扩展验证
 src/compliant_docking/           共享模型、控制、规划、仿真、研究记录与系统实现
 tests/                           数学、配置、来源保护与行为回归
 docs/                            研究协议、架构、证据与开发说明
+  reports/                       本地研究报告草稿（不参与文档站点发布）
 results/                         历史报告与冻结证据；不续写旧结果
-runs/                            本地运行与源码快照（默认忽略）
+  historical/                    从旧实验与运行目录迁入的冻结证据
+archive/                         历史实验实现与说明；不作为研究主入口
+runs/                            本地运行、图件、设计草稿与站点输出（忽略）
+demo/                            整理过的展示图件与视频
+scripts/                         项目维护与迁移检查工具
 ```
+
+正式实验从上述三个分层入口启动。旧命令仅保留兼容入口；历史实现与证据的迁移对应关系见
+[目录归档记录](docs/directory_cleanup.md)。本地环境 `.venv/` 和测试缓存默认忽略。
 
 ```bash
 uv run ruff check .

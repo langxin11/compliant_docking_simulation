@@ -45,7 +45,7 @@ target-version = "py310"
 # Keep imported upstream sources and immutable experiment provenance untouched.
 extend-exclude = [
     "runs",
-    "experiments/orbital_showcase/assets/hexframe_module",
+    "assets/modules/hexframe",
 ]
 
 [tool.ruff.lint]
@@ -55,9 +55,9 @@ ignore = ["E501"]
 [tool.pytest.ini_options]
 testpaths = [
     "tests",
-    "experiments/orbital_showcase/test_hexframe_integration.py",
-    "experiments/orbital_showcase/contact_force_study",
-    "experiments/orbital_showcase/crown_seating",
+    "archive/orbital_showcase/test_hexframe_integration.py",
+    "archive/orbital_showcase/contact_force_study",
+    "archive/orbital_showcase/crown_seating",
 ]
 markers = [
     "slow: long physics regression runs",

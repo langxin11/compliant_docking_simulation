@@ -5,6 +5,11 @@ __pycache__/
 dist/
 build/
 .venv/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
 
 # --- Editor / OS junk ---
 .ipynb_checkpoints/
@@ -13,9 +18,12 @@ build/
 .vscode/
 
 # --- Project outputs (generated at runtime; demo/ keeps its tracked assets) ---
-figure/
-video/
-runs/
+# New generated artifacts belong under runs/. Root paths remain ignored for
+# legacy commands; frozen evidence is explicitly maintained under results/.
+/figure/
+/video/
+/runs/
+/designs/
 *.mp4
 !demo/*.mp4
 
@@ -26,4 +34,8 @@ runs/
 
 # --- MuJoCo 运行副产物 ---
 MUJOCO_LOG.TXT
-site/
+/site/
+
+# Local report builds; report source and curated figures remain visible to Git.
+/docs/reports/**/report.pdf
+/docs/reports/**/page*.png

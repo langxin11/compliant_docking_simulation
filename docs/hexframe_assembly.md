@@ -28,7 +28,7 @@ uv run docking --scene scenes/fr3_docking.yaml --quick
 
 ## 资源、布局与模型
 
-原始 Astra HexFrame / PetalDock100 V2 资源、CAD、网格、许可和 `IMPORT.json` 保留在 `experiments/orbital_showcase/assets/hexframe_module/`。正式配置引用此唯一资源，不重新缩放或复制原始 CAD。六侧面接口 1–6 映射为资源端口 3、4、5、0、1、2，接口 1 朝上、接口 4 朝下；端口位姿、46.4 mm 配合根间距、45° 配合相位均读取资源元数据。质量为 CAD 估算 3.5082656535 kg，完整惯量与质心同源。
+原始 Astra HexFrame / PetalDock100 V2 资源、CAD、网格、许可和 `IMPORT.json` 保留在 `assets/modules/hexframe/`。正式配置引用此唯一资源，不重新缩放或复制原始 CAD。六侧面接口 1–6 映射为资源端口 3、4、5、0、1、2，接口 1 朝上、接口 4 朝下；端口位姿、46.4 mm 配合根间距、45° 配合相位均读取资源元数据。质量为 CAD 估算 3.5082656535 kg，完整惯量与质心同源。
 
 工作区与工具片段位于 `assets/scenes/hexframe/`；模型构建复用主项目 `assets/iiwa14/iiwa14_arm.xml`，关节范围只读取机器人 URDF 的七个关节限制，不加载旧工具质量惯量。`AssemblyRuntime` 显式保存每次运行的布局、参考姿态、锁定 site、控制增益与输出目录，正式场景不导入或修改实验模块的共享变量。
 

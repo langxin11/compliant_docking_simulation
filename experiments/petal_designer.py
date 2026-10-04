@@ -26,7 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import prepare_petal_guidance as geometry  # noqa: E402
 
 UI_ROOT = Path(__file__).with_name("petal_designer_ui")
-SAVE_ROOT = geometry.REPO_ROOT / "designs/petal_guidance"
+SAVE_ROOT = geometry.REPO_ROOT / "runs/designs/petal_guidance"
 PARAMETERS = {
     "guide_tip_half_angle_deg": (1., 15., .03125, "平顶半角", "°"),
     "guide_blend_fraction": (.02, .30, .01, "斜坡过渡比例", ""),

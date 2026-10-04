@@ -1,7 +1,7 @@
 # 实验复现手册
 
 所有命令在仓库根执行；无显示环境渲染加 `MUJOCO_GL=egl` 前缀。图件输出到
-`figure/<场景名>/`，对比研究数据落 `results/`。
+`runs/figures/<场景名>/`，新运行数据落 `runs/`，冻结摘要纳入 `results/`。
 
 新增组合接触实验使用独立的 `runs/compliant_insertion/` 输出目录：
 
@@ -71,7 +71,7 @@ uv run docking --scene scenes/fr3_tracking.yaml --quick  # 标记 INCOMPLETE
 ```bash
 uv run python experiments/se3_free_space.py --quick
 uv run python experiments/se3_free_space.py
-uv run python experiments/se3_free_space_plots.py
+uv run python experiments/se3_free_space_plots.py --out runs/figures/se3_free_space
 # 自定义图件目录：.../se3_free_space_plots.py --out /tmp/se3-free-space
 ```
 
@@ -87,7 +87,7 @@ uv run python experiments/se3_free_space_plots.py
 
 完整平移阶跃的已验证超调为 0% / 0% / **48.6%**（A=0.5 / 5 / 100），
 与二阶理论值一致。绘图脚本将 PNG 与 PDF 写入
-`figure/se3_free_space/se3_free_space_validation.*`。这些实验验证的是 Kim et al.
+`runs/figures/se3_free_space/se3_free_space_validation.*`。这些实验验证的是 Kim et al.
 2025 §IV-A 的标称 SE(3) 阻抗；不包含该论文 §III-B 的 NRIC 鲁棒内环。
 
 ## 4. 无传感器 HQP-AC 与接触预紧
@@ -107,7 +107,7 @@ MUJOCO_GL=egl uv run python experiments/compare_frameworks.py
 ```
 
 2×2 矩阵（{单段五次, 两段式}×{CIC, HQP-AC}）按 Table 10 三层指标输出对比表
-（`results/framework_comparison_*.md`）与图件（`figure/framework_comparison/`）。
+（`runs/framework_comparison/framework_comparison_*.md`）与图件（`runs/figures/framework_comparison/`）。
 核心结论：HQP-AC 在 FR3 摩擦场景峰值力 -81%；两段式规划在慢速基线上无时长收益。
 
 ## 6. 规划器选择

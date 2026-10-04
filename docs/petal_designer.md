@@ -21,7 +21,7 @@ uv run python experiments/petal_designer.py
 - 拖动模型旋转、滚轮缩放，或切换斜视、侧视、俯视；可显示两端坐标轴。
 - 展开“两侧偏差与接近距离”调整预览的 XY、绕轴、倾斜偏差及接近距离。
   它们只改变观察姿态，不运行运动规划、柔顺控制或接触仿真。
-- “保存候选”将参数另存到 `designs/petal_guidance/candidate_*.json`，同时提供下载链接。
+- “保存候选”将参数另存到 `runs/designs/petal_guidance/candidate_*.json`，同时提供下载链接。
   “加载参数”可恢复保存的几何参数；预览姿态不作为控制或工况配置导入。
 
 ## 与当前模型的关系
@@ -60,7 +60,7 @@ uv run python experiments/petal_designer.py
 以保存的候选作为页面初始轮廓：
 
 ```bash
-uv run python experiments/petal_designer.py --design designs/petal_guidance/candidate_20261003T103814Z_23ff2b4e.json
+uv run python experiments/petal_designer.py --design assets/interfaces/petal_guidance/angle1_blend030/selected_design.json
 ```
 
 下拉框同时保留旧窄平顶与径向对照。若已有服务在运行，需要先结束该服务再以此命令启动。
@@ -70,10 +70,11 @@ uv run python experiments/petal_designer.py --design designs/petal_guidance/cand
 
 ```bash
 uv run python experiments/prepare_petal_design.py \
-  --design designs/petal_guidance/candidate_20261003T103814Z_23ff2b4e.json \
-  --out assets/interfaces/petal_guidance/angle1_blend030
+  --design assets/interfaces/petal_guidance/angle1_blend030/selected_design.json \
+  --out runs/generated_assets/petal_guidance/angle1_blend030
 ```
 
+生成文件先放在 `runs/generated_assets/`；审查并冻结后才纳入 `assets/`。
 输出目录已存在时会拒绝覆盖。此构建器只允许调整导面形状，导向高度和轴向余量
 必须沿用18 mm与0.4 mm，否则要求先重建安装/止挡CAD。构建器记录自身与原生成器
 哈希，并更新整体惯量；不会修改旧生成器的候选策略。

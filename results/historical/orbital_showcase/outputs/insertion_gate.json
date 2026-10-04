@@ -1,0 +1,18 @@
+{
+  "status": "FAIL",
+  "reasons": [
+    "not settled (translation)",
+    "not settled (rotation)"
+  ],
+  "duration_s": 23.849000000006164,
+  "first_contact_s": 11.537999999999045,
+  "final_depth_mm": 21.12565535683236,
+  "final_lateral_mm": 0.4955977731417109,
+  "final_tilt_deg": 0.17886821941850597,
+  "final_yaw_deg": 0.005269476765519032,
+  "contact_yaw_change_deg": 0.008873108820120181,
+  "post_contact_advance_mm": 6.647826533656252,
+  "peak_force_N": 14.612378017951285,
+  "peak_axial_moment_Nm": 0.4809244804778648,
+  "torque_saturation_ratio": 0.0
+}

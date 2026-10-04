@@ -1,6 +1,6 @@
 # 历史证据索引
 
-原报告、资产来源、源码快照和结果目录保持原样。本索引按问题分类，不重新评价历史结果。
+原报告、资产来源、源码快照和结果内容保持原样；目录迁移见[归档记录](directory_cleanup.md)。本索引按问题分类，不重新评价历史结果。
 本地 `runs/` 通道可能按数据策略精简；需要完整原始数据时按原协议重跑到新目录。
 
 | 层次 | 记录 | 证据用途 |
@@ -16,7 +16,7 @@
 | 系统 | [HexFrame 正式流程](hexframe_assembly.md) | 当前导纳流程验收 |
 | 归档 | [接口阶段收尾](stage_closeout_20261003.md) | 阶段状态、失败与未晋升结论 |
 
-P0/P1/P2 历史说明保存在仓库文件 `experiments/hexframe_validation/README.md`；
+P0/P1/P2 历史说明保存在仓库文件 `archive/hexframe_validation/README.md`；
 P2 包含判定策略变量，不能归因于单接口 SE(3) 控制。旧 orbital_showcase/冠形/接触力实验
 按其原协议复现，不能以历史视频替代正式系统验收。
 

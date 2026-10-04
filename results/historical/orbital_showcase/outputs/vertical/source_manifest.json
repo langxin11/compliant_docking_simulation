@@ -1,0 +1,7 @@
+{
+  "experiments/orbital_showcase/vertical_assembly.py": "6934107cd9df93501eaf2dfd7070668fb35ce7a883dfab77a8d844044e652e2c",
+  "experiments/orbital_showcase/assembly_sequence.py": "dbee9bcbeff738296a96452e8758d2945ce9f6bf7522cdafe918ef1e95a8f73f",
+  "experiments/orbital_showcase/build_assets.py": "efcd32e6dd6e2afe98ea9f7a4a0d19c02874259fd2a8e185f8adcc8f53447860",
+  "experiments/orbital_showcase/side_docking.py": "098765c17bb928ad03d978fcd141f646a6fbdae77e52f06e86af40531ef5b5ff",
+  "experiments/orbital_showcase/assets/vertical_assembly.xml": "22e86567a4b4fe6caf16eee69022ba6dff3c30b9b1ae497df8b94a90f90401c3"
+}

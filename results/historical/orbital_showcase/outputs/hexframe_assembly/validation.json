@@ -1,0 +1,55 @@
+{
+  "status": "PASS",
+  "faults": [],
+  "events": [
+    {
+      "t": 10.4,
+      "event": "grip_on",
+      "error_m": 2.9700532208223475e-10,
+      "gripper_constraint_force_n": 0.0,
+      "unloaded_dwell_s": 0.0
+    },
+    {
+      "t": 11.601,
+      "event": "rack_off",
+      "error_m": 1.6983321886228928e-12,
+      "gripper_constraint_force_n": 1.220874587074798e-08,
+      "unloaded_dwell_s": 0.0
+    },
+    {
+      "t": 36.857,
+      "event": "assembly_on",
+      "force_n": 0.3985921059171035,
+      "dwell_s": 0.5000000000000003
+    },
+    {
+      "t": 47.6,
+      "event": "grip_off",
+      "error_m": 7.4311700717309985e-09,
+      "gripper_constraint_force_n": 0.016029769326330528,
+      "unloaded_dwell_s": 10.741999999999486
+    }
+  ],
+  "peak_axial_force_n": 1.8552917818782126,
+  "max_penetration_mm": 0.002226267154792116,
+  "final_module_error_mm": 0.0003584519238889336,
+  "first_contact_s": 35.112,
+  "lock_time_s": 36.857,
+  "module_mass_kg": 3.5082656535,
+  "module_inertia_kg_m2": [
+    0.0817026468127,
+    0.0470836073302,
+    0.0470815673535
+  ],
+  "duration_s": 53.0,
+  "contact_force_target_n": 0.4,
+  "scope": "full arm and module dynamics; convex guide contact; ideal locks",
+  "storage_interface": {
+    "module_port": "module1_port_4",
+    "storage_port": "storage_dock_port",
+    "peak_contact_force_n": 0.001898122500310464,
+    "max_penetration_mm": 3.420673119758358e-07,
+    "final_clearance_m": 0.7530416164728131
+  },
+  "module_asset": "hexframe"
+}

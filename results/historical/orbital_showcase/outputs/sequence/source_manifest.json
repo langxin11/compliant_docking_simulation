@@ -1,0 +1,8 @@
+{
+  "experiments/orbital_showcase/assembly_sequence.py": "0268f45488f53fb5424797c5d3a62a3f82bce7b824232247cd059f3d698ab109",
+  "experiments/orbital_showcase/build_assets.py": "efcd32e6dd6e2afe98ea9f7a4a0d19c02874259fd2a8e185f8adcc8f53447860",
+  "experiments/orbital_showcase/side_docking.py": "098765c17bb928ad03d978fcd141f646a6fbdae77e52f06e86af40531ef5b5ff",
+  "src/compliant_docking/planning/kinematics.py": "669b1e14f8a3d92cc87cd43eb96cb73cd993ab6d95ebb8749962651de424b225",
+  "assets/iiwa14/iiwa14_dock.urdf": "3b9d2940e71921c6fdcf46f65353b691e21a1ebfdfa69c2d90988beb33086e98",
+  "experiments/orbital_showcase/assets/assembly_sequence.xml": "2ca021fbe824cb082d1594b388a8a28f50e19d537be3f816288cd0d2ef706ef9"
+}

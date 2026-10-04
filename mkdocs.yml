@@ -3,6 +3,10 @@ site_description: MuJoCo × Pinocchio 柔顺对接研究平台——经典阻抗
 site_url: https://langxin11.github.io/compliant_docking_simulation/
 repo_url: https://github.com/langxin11/compliant_docking_simulation
 repo_name: langxin11/compliant_docking_simulation
+site_dir: runs/docs_site
+# Local research drafts are maintained separately from the published manual.
+exclude_docs: |
+  /reports/research_draft/
 
 theme:
   name: material
@@ -67,6 +71,7 @@ nav:
       - 分层实验入口: experiment_entrypoints.md
       - 历史证据索引: historical_evidence.md
       - 迁移验证记录: restructuring_validation.md
+      - 目录归档与清理: directory_cleanup.md
       - 原始重构计划（草案）: restructuring_plan.md
   - 架构总览: architecture.md
   - 论文-代码对照: paper_mapping.md

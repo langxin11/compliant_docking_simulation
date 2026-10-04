@@ -1,0 +1,40 @@
+{
+  "case": {
+    "name": "admittance_8N_half_dt",
+    "target_n": 8.0,
+    "feedback": true,
+    "pose_feedback": true,
+    "contact_timeconst_s": 0.008,
+    "dt_s": 0.0005,
+    "speed_m_s": 0.002,
+    "lateral_offset_m": 0.0,
+    "duration_s": 14.0
+  },
+  "scope": "fixed-base, zero-gravity, three-pad seating proxy",
+  "assembly_weld_active": false,
+  "contact_time_s": 1.306,
+  "peak_axial_force_n": 8.033513299192844,
+  "steady_mean_force_n": 8.030703379576467,
+  "steady_rmse_n": 0.030801918448251663,
+  "steady_peak_to_peak_n": 0.008703789087112668,
+  "steady_contact_fraction": 1.0,
+  "max_lateral_force_n": 0.8051587025866338,
+  "max_contact_moment_nm": 0.13640166218526895,
+  "max_penetration_m": 2.8942494862398138e-05,
+  "max_actual_normal_speed_m_s": 0.00234653391664389,
+  "max_mating_position_error_in_final_window_m": 8.785335659074912e-05,
+  "max_mating_angle_error_in_final_window_deg": 0.015240472724328644,
+  "force_pose_gate_eligible_at_end": true,
+  "first_force_pose_gate_time_s": 7.3245000000000005,
+  "minimum_joint_margin_rad": 0.5281085277067818,
+  "max_torque_fraction": 0.019820454691060193,
+  "faults": [],
+  "benchmark_criteria": {
+    "steady_rmse_n": 0.5,
+    "steady_contact_fraction": 0.99,
+    "peak_axial_force_n": 12.0,
+    "max_lateral_force_n": 2.0,
+    "max_contact_moment_nm": 0.5
+  },
+  "force_hold_pass": true
+}

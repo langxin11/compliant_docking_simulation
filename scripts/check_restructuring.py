@@ -6,11 +6,13 @@ from __future__ import annotations
 
 import argparse
 import ast
+import hashlib
 import json
 import subprocess
 from pathlib import Path
 
 import numpy as np
+import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 MOVED = {
@@ -25,19 +27,93 @@ def functions(text):
     return {node.name: ast.dump(node) for node in ast.parse(text).body if isinstance(node, ast.FunctionDef)}
 
 
+def git_bytes(ref, path):
+    return subprocess.check_output(["git", "show", f"{ref}:{path}"], cwd=ROOT)
+
+
+def git_files(ref, path):
+    return subprocess.check_output(
+        ["git", "ls-tree", "-r", "--name-only", ref, "--", path], cwd=ROOT, text=True
+    ).splitlines()
+
+
+def check_directory_mapping():
+    manifest = json.loads((ROOT / "docs/evidence/directory_cleanup_20261004.json").read_text())
+    checked = 0
+    for item in manifest["files"]:
+        if item["operation"] == "move_local_output":
+            continue  # Local ignored channels are deliberately not required in a clone.
+        destination = ROOT / item["new"]
+        if hashlib.sha256(destination.read_bytes()).hexdigest() != item["sha256"]:
+            raise AssertionError(f"Migration bytes changed: {item['new']}")
+        if item["previously_tracked"]:
+            if hashlib.sha256(git_bytes(manifest["baseline"], item["old"])).hexdigest() != item["sha256"]:
+                raise AssertionError(f"Migration baseline differs: {item['old']}")
+        checked += 1
+    for path, target in manifest["compatibility_symlinks"].items():
+        link = ROOT / path
+        if not link.is_symlink() or str(link.readlink()) != target:
+            raise AssertionError(f"Compatibility link differs: {path}")
+        if "hexframe_module" in path and not link.is_dir():
+            raise AssertionError(f"Production resource alias is dangling: {path}")
+    return dict(baseline=manifest["baseline"], identical_files=checked,
+                local_ignored_channels_required=False)
+
+
 def check_sources(baseline):
     checks = {}
     for old, (new, names) in MOVED.items():
-        before = functions(subprocess.check_output(["git", "show", f"{baseline}:{old}"], cwd=ROOT, text=True))
+        before = functions(git_bytes(baseline, old).decode())
         after = functions((ROOT / new).read_text())
         for name in names:
             if before[name] != after[name]:
                 raise AssertionError(f"Migrated function changed: {name}")
             checks[name] = "IDENTICAL_AST"
     physical_paths = ["src/compliant_docking/control", "src/compliant_docking/assembly",
-                      "src/compliant_docking/orchestration", "scenes", "assets"]
+                      "src/compliant_docking/planning", "src/compliant_docking/simulation"]
     subprocess.run(["git", "diff", "--quiet", baseline, "--", *physical_paths], cwd=ROOT, check=True)
-    return dict(functions=checks, unchanged_physical_paths=physical_paths)
+    # Permit exact generated-output destination edits; every other orchestration byte remains fixed.
+    for path in git_files(baseline, "src/compliant_docking/orchestration"):
+        before = git_bytes(baseline, path).decode()
+        after = (ROOT / path).read_text()
+        if path.endswith("/run_docking.py"):
+            after = after.replace('save_path="runs/figures/"', 'save_path="figure/"')
+            after = after.replace('os.path.join(current_dir, "runs", "videos")', 'os.path.join(current_dir, "video")')
+            after = after.replace('# 生成视频与其它运行产物一起写入 runs/videos/ /', '# 视频固定落在仓库根 video/，与编排器位于 experiments/ 时期一致 /')
+            after = after.replace('# Generated videos land in <repo>/runs/videos/', '# Videos land in <repo>/video exactly as when this module lived in experiments/')
+        if before != after:
+            raise AssertionError(f"Orchestration changed beyond output path: {path}")
+    # Only the declared production-resource location may change in the scene configuration.
+    for path in git_files(baseline, "scenes"):
+        before = git_bytes(baseline, path)
+        after = (ROOT / path).read_bytes()
+        if path == "scenes/hexframe_assembly.yaml":
+            left, right = yaml.safe_load(before), yaml.safe_load(after)
+            assert left["assembly"]["resource"] == "experiments/orbital_showcase/assets/hexframe_module"
+            assert right["assembly"]["resource"] == "assets/modules/hexframe"
+            right["assembly"]["resource"] = left["assembly"]["resource"]
+            if left != right:
+                raise AssertionError(f"Scene changed beyond resource path: {path}")
+        elif before != after:
+            raise AssertionError(f"Scene bytes changed: {path}")
+    # Existing assets and every migrated resource are checked against original Git blobs.
+    for path in git_files(baseline, "assets"):
+        if git_bytes(baseline, path) != (ROOT / path).read_bytes():
+            raise AssertionError(f"Existing asset bytes changed: {path}")
+    mapping = check_directory_mapping()
+    manifest = json.loads((ROOT / "docs/evidence/directory_cleanup_20261004.json").read_text())
+    resources = [item for item in manifest["files"] if item["operation"] == "move_production_asset"]
+    expected_resources = {item["new"] for item in resources}
+    actual_resources = {str(path.relative_to(ROOT)) for path in (ROOT / "assets/modules/hexframe").rglob("*")
+                        if path.is_file() and "__pycache__" not in path.parts}
+    if actual_resources != expected_resources:
+        raise AssertionError("Production resource inventory changed beyond migration mapping")
+    for item in resources:
+        if git_bytes(baseline, item["old"]) != (ROOT / item["new"]).read_bytes():
+            raise AssertionError(f"Production asset changed: {item['new']}")
+    return dict(functions=checks, unchanged_physical_paths=physical_paths,
+                permitted_path_edits=["assembly.resource", "orchestration plot_results save_path", "orchestration video_dir"],
+                directory_mapping=mapping, migrated_production_assets=len(resources))
 
 
 def check_petal(old, new):

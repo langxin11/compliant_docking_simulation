@@ -1,0 +1,91 @@
+{
+  "status": "PASS",
+  "reasons": [],
+  "scope": "dynamic rigid-body transfer with ideal pose-gated latches; crown contact disabled",
+  "collision_coverage": "robot proxies, module rails, fixture tops, workcell floor; trim visual only",
+  "duration_s": 37.0,
+  "planning": {
+    "ik_samples": 1111,
+    "fk_max_error_m": 5.609228968793016e-08,
+    "joint_limits": [
+      [
+        -2.96705972839,
+        -2.09439510239,
+        -2.96705972839,
+        -2.09439510239,
+        -2.96705972839,
+        -2.09439510239,
+        -3.05432619099
+      ],
+      [
+        2.96705972839,
+        2.09439510239,
+        2.96705972839,
+        2.09439510239,
+        2.96705972839,
+        2.09439510239,
+        3.05432619099
+      ]
+    ]
+  },
+  "events": [
+    {
+      "t": 10.4,
+      "event": "grip_on",
+      "error_m": 4.908499086008824e-10,
+      "error_deg": 4.110281391157171e-08,
+      "active_locks": [
+        true,
+        true,
+        false
+      ]
+    },
+    {
+      "t": 11.601,
+      "event": "rack_off",
+      "error_m": 9.341418261032987e-13,
+      "error_deg": 1.4780487676666555e-10,
+      "active_locks": [
+        false,
+        true,
+        false
+      ]
+    },
+    {
+      "t": 30.201,
+      "event": "assembly_on",
+      "error_m": 6.732121148729215e-10,
+      "error_deg": 6.081302495586088e-08,
+      "active_locks": [
+        false,
+        true,
+        true
+      ]
+    },
+    {
+      "t": 31.6,
+      "event": "grip_off",
+      "error_m": 8.984285612820922e-14,
+      "error_deg": 2.97917856068106e-11,
+      "active_locks": [
+        false,
+        false,
+        true
+      ]
+    }
+  ],
+  "rejected_unsafe_events": [
+    "grip_on",
+    "rack_off",
+    "grip_off"
+  ],
+  "module_free_joint": true,
+  "qpos_changes_after_initialization": "MuJoCo integration only",
+  "max_joint_tracking_error_rad": 0.0008086259286530506,
+  "max_latch_position_error_m": 6.38286358695462e-06,
+  "final_module_position_error_m": 5.113116628887145e-14,
+  "torque_saturated_steps": 0,
+  "structural_contact_pairs": [],
+  "deepest_contact_m": 0.0,
+  "nominal_crown_engagement_m": 0.05
+}

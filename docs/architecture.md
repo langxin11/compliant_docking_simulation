@@ -22,7 +22,7 @@
                     ┌─────────┴─────────┐
                     ▼                   ▼
              plotting 出图          metrics 指标/门禁
-         figure/<场景>/*.png|pdf   stdout + results/*.md
+         runs/figures/<场景>/*.png|pdf   stdout + results/*.md
 ```
 
 ## 模块契约
@@ -42,7 +42,7 @@
 | `wrench` | F/T 坐标变换 | sensor site 原点/坐标系 → EE body 原点/坐标系；保留参考点平移产生的力矩项，确保与 LOCAL Jacobian 配对 |
 | `simulation.mujoco_env` | MuJoCo 封装 | `step(τ) -> (q, v, eef_pos)`（**副本语义由 telemetry 保证**）；离屏渲染/录帧 |
 | `telemetry` | 时序记录 | `store_data(...)` 存副本；`plot_results()` 委托 plotting |
-| `plotting` | 出图 | SciencePlots IEEE 中文，PNG+PDF，`figure/<场景>/` 归档 |
+| `plotting` | 出图 | SciencePlots IEEE 中文，PNG+PDF，`runs/figures/<场景>/` 归档 |
 | `metrics` | Table 10 指标 | `compute_metrics`（对接三层指标）、`tracking_summary`（分段跟踪）、`evaluate_tracking_gate`（PASS/FAIL 门禁） |
 | `compliant_docking.orchestration.run_docking` | 主入口（`experiments/run_docking.py` 为兼容薄壳） | `main(scene=…, controller=…, plot=…)`；观测器按步更新；tracking 模式隔离 F/T 反馈 |
 

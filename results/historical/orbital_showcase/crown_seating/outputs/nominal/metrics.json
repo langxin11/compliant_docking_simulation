@@ -1,0 +1,18 @@
+{
+  "name": "nominal",
+  "timestep": 0.001,
+  "control_period_s": 0.001,
+  "xy_each_axis_m": 0.0,
+  "initial_yaw_error_deg": 0.0,
+  "stiff_yaw": false,
+  "lock_time_s": 6.99300000000067,
+  "peak_force_n": 0.9112634215261997,
+  "max_penetration_mm": 0.0022754547719972466,
+  "final_lateral_mm": 0.2568514876008145,
+  "final_abs_gap_mm": 0.08056892283531819,
+  "final_angle_deg": 0.020406949189120956,
+  "warnings": 0,
+  "latch_position_drift_m": 5.18322299176919e-07,
+  "status": "LATCHED_IDEAL_CONSTRAINT",
+  "physical_latch_verified": false
+}

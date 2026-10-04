@@ -1,0 +1,18 @@
+{
+  "name": "xy1mm_yaw2deg_stiff_halfstep",
+  "timestep": 0.0005,
+  "control_period_s": 0.001,
+  "xy_each_axis_m": 0.001,
+  "initial_yaw_error_deg": 2.0,
+  "stiff_yaw": true,
+  "lock_time_s": null,
+  "peak_force_n": 1.66403737695979,
+  "max_penetration_mm": 0.002220232723622629,
+  "final_lateral_mm": 0.39925515497177455,
+  "final_abs_gap_mm": 0.5566695184611379,
+  "final_angle_deg": 1.205989177021299,
+  "warnings": 0,
+  "latch_position_drift_m": null,
+  "status": "REJECTED",
+  "physical_latch_verified": false
+}

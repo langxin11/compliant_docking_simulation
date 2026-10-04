@@ -6,7 +6,7 @@ physics:
   timestep: 0.001
   gravity: [0, 0, 0]
 assembly:
-  resource: experiments/orbital_showcase/assets/hexframe_module
+  resource: assets/modules/hexframe
   workcell: assets/scenes/hexframe/workcell.xml
   port_mapping: [3, 4, 5, 0, 1, 2]
   layout:

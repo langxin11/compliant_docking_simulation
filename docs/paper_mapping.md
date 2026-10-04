@@ -82,7 +82,7 @@ trajectory planning in robotic in-orbit assembly. _Acta Astronautica_ 243, 32–
 | 关节耗散（frictionloss/damping）前馈 + 工具惯量对齐 | `load_pin_model`、场景 `pin_inertia`；质量矩阵一致性 <1e-10 |
 | 跟踪测试轨迹（圆+8字，C2 平滑）与自由空间门禁 | `CircleFigure8Trajectory`、`TrackingThresholds`；iiwa14 0.23 mm / FR3 1.31 mm |
 | 框架对比研究自动化 | `experiments/compare_frameworks.py` |
-| SciencePlots IEEE 中文绘图体系 | `plotting.py`；`figure/<场景>/` 归档 |
+| SciencePlots IEEE 中文绘图体系 | `plotting.py`；`runs/figures/<场景>/` 归档 |
 
 ## 尚未复现或尚缺端到端验证
 

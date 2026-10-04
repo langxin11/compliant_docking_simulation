@@ -9,7 +9,7 @@ compare_frameworks.py - 框架配置对比研究（复现 Ren & Shan 2026 §4.2.
     MUJOCO_GL=egl uv run python experiments/compare_frameworks.py [--scene 场景YAML ...]
 
 指标取自 compute_metrics（Table 10 三层：接触安全/内部安全/跟踪精度），
-结果打印为对比表并写入 results/framework_comparison_<场景>.md。
+结果打印为对比表并写入 runs/framework_comparison/framework_comparison_<场景>.md。
 """
 import argparse
 import contextlib
@@ -29,7 +29,7 @@ from compliant_docking.telemetry import Log  # noqa: E402
 from experiments.run_docking import main  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[1]
-RESULTS = REPO / "results"
+RESULTS = REPO / "runs" / "framework_comparison"
 _FIG_WIDTH = 3.5  # IEEE 单栏图宽（英寸）
 
 # 四配置的绘图样式（线图颜色/线型，柱图颜色同源）
@@ -126,7 +126,7 @@ def plot_comparison(scene: Scene, logs: dict[str, Log],
     from compliant_docking.plotting import apply_style
 
     apply_style()
-    out = REPO / "figure" / "framework_comparison"
+    out = REPO / "runs" / "figures" / "framework_comparison"
     out.mkdir(parents=True, exist_ok=True)
     saved: list[Path] = []
 
@@ -177,7 +177,7 @@ def main_script() -> int:
         "scenes/iiwa14_docking.yaml", "scenes/fr3_docking.yaml"])
     args = parser.parse_args()
 
-    RESULTS.mkdir(exist_ok=True)
+    RESULTS.mkdir(parents=True, exist_ok=True)
     for scene_path in args.scene:
         base = load_scene(REPO / scene_path)
         # 行程短于默认 standoff 时预对接点会退回起点（接近段长度为零），
