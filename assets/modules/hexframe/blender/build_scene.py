@@ -4,15 +4,20 @@ blender --background --python blender/build_scene.py
 Output: blender/hexframe_module.blend
 No physics is recomputed in Blender. Saved animation replays trajectory.json.
 """
-import json,math
+import argparse,json,math,sys
 from pathlib import Path
 import bpy
 from mathutils import Vector,Quaternion
 ROOT=Path(__file__).resolve().parents[1]
+WORK=ROOT.parents[2]/'runs/hexframe_module'
+ap=argparse.ArgumentParser(description=__doc__);ap.add_argument('--glb',type=Path,default=WORK/'blender/module.glb');ap.add_argument('--out',type=Path,default=WORK/'blender/hexframe_module.blend');ap.add_argument('--trajectory',type=Path);ap.add_argument('--model-info',type=Path,default=ROOT/'model_info.json');a=ap.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
+if not a.glb.is_file():ap.error(f'GLB input missing: {a.glb}; generate.py produces it, or pass --glb explicitly')
+if a.trajectory is not None and not a.trajectory.is_file():ap.error('Explicit trajectory input does not exist; run demo.py first')
+a.out.parent.mkdir(parents=True,exist_ok=True)
 
 # This script intentionally creates a new scene; run it in a new Blender file.
 bpy.ops.object.select_all(action='SELECT');bpy.ops.object.delete(use_global=False)
-bpy.ops.import_scene.gltf(filepath=str(ROOT/'blender/module.glb'))
+bpy.ops.import_scene.gltf(filepath=str(a.glb))
 imported=list(bpy.context.scene.objects)
 root_a=bpy.data.objects.new('Module_A',None);bpy.context.collection.objects.link(root_a)
 for obj in imported:
@@ -26,9 +31,9 @@ for obj in imported:
  new=obj.copy();new.data=obj.data;bpy.context.collection.objects.link(new);mapping[obj]=new
 for old,new in mapping.items():new.parent=mapping.get(old.parent,root_b)
 root_b.rotation_mode='QUATERNION'
-meta=json.loads((ROOT/'model_info.json').read_text());traj=ROOT/'results/demo/trajectory.json'
+meta=json.loads((a.model_info).read_text());traj=a.trajectory
 scene=bpy.context.scene;scene.render.fps=30
-if traj.exists():
+if traj is not None:
  data=json.loads(traj.read_text())
  root_b.location=tuple(meta['nominal_pair_translation_m'][i]+([.04,0,.2][i]) for i in range(3));root_b.rotation_quaternion=Quaternion(meta['nominal_pair_quaternion_wxyz'])
  for item in data:
@@ -48,5 +53,5 @@ for name,pos,power,size in [('Key',(0,-1,1.5),350,1.5),('Fill',(.5,1,1),200,1),(
 camdata=bpy.data.cameras.new('Camera');cam=bpy.data.objects.new('Camera',camdata);bpy.context.collection.objects.link(cam);cam.location=(.8,-.9,.85);cam.rotation_euler=(Vector((.16,0,.2))-cam.location).to_track_quat('-Z','Y').to_euler();camdata.type='ORTHO';camdata.ortho_scale=.95;scene.camera=cam
 scene.render.resolution_x=1600;scene.render.resolution_y=1000;scene.render.resolution_percentage=100
 scene.world.color=(.2,.2,.2)
-bpy.ops.wm.save_as_mainfile(filepath=str(ROOT/'blender/hexframe_module.blend'))
+bpy.ops.wm.save_as_mainfile(filepath=str(a.out))
 print('Saved Blender scene with CAD-derived meshes and MuJoCo pose replay.')

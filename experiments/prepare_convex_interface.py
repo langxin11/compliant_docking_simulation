@@ -265,19 +265,22 @@ def main(argv=None):
     parser.add_argument("--scene", default="scenes/iiwa14_compliant_insertion.yaml")
     parser.add_argument("--threshold", type=float, default=.01, help="CoACD normalized concavity; validated independently in metres")
     parser.add_argument("--validate-only", action="store_true")
+    parser.add_argument("--out", type=Path, help="New generated model directory; validation defaults to frozen assets")
     parser.add_argument("--report", type=Path, default=REPO_ROOT / "runs/convex_geometry_20261002")
     args = parser.parse_args(argv)
     source_sha256 = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
     scene = load_scene(args.scene)
     if scene.tool.mjcf.name != "male_cone.xml" or scene.target.mjcf.name != "female_socket.xml":
         parser.error("This generator is scoped to the existing crown fragments")
-    out = CONVEX_DIRECTORY
+    out = args.out or (CONVEX_DIRECTORY if args.validate_only else REPO_ROOT / "runs/generated_assets/convex_crown")
+    if not args.validate_only and out.exists():
+        parser.error("Generated model directory exists; choose a new output")
     out.mkdir(parents=True, exist_ok=True)
     manifest_path = out / "manifest.json"
     source_assets = portable_asset_fingerprints(scene)
     if args.validate_only:
         manifest = json.loads(manifest_path.read_text())
-        if manifest["source_assets"] != source_assets or manifest["generated_assets"] != portable_asset_fingerprints(candidate_scene(scene)):
+        if manifest["source_assets"] != source_assets or manifest["generated_assets"] != portable_asset_fingerprints(candidate_scene(scene, out)):
             raise ValueError("Assets changed; regenerate before validation")
     else:
         import coacd
@@ -317,22 +320,23 @@ def main(argv=None):
                         packages={p: version(p) for p in ["coacd", "mujoco", "numpy", "scipy"]},
                         parameters=params, source_assets=source_assets, components=components,
                         coordinates="SI metres in the source target rev frame; original male 40 degree mount retained",
-                        generated_assets=portable_asset_fingerprints(candidate_scene(scene)))
-    candidate = candidate_scene(scene)
+                        generated_assets=portable_asset_fingerprints(candidate_scene(scene, out)))
+    candidate = candidate_scene(scene, out)
     manifest["validation"] = validate(scene, candidate, manifest["components"], args.report)
     manifest["validation_source_sha256"] = source_sha256
     manifest["validation_helper_sha256"] = hashlib.sha256(
         (REPO_ROOT / "src/compliant_docking/collision_geometry.py").read_bytes()).hexdigest()
-    manifest_path.write_text(json.dumps(manifest, indent=2)+"\n")
+    destination_manifest = args.report / "validation_manifest.json" if args.validate_only else manifest_path
+    destination_manifest.write_text(json.dumps(manifest, indent=2)+"\n")
     print(json.dumps({k: v for k, v in manifest["validation"].items()
                       if k in ["status", "reasons", "convex_parts", "max_height_error_m", "max_phase_error_deg", "sampled_excess_m", "sampled_missing_m"]}, indent=2))
     return 0 if manifest["validation"]["status"] == "PASS" else 2
 
 
-def candidate_scene(scene):
+def candidate_scene(scene, directory=CONVEX_DIRECTORY):
     from dataclasses import replace
-    return replace(scene, tool=replace(scene.tool, mjcf=CONVEX_DIRECTORY / "male.xml"),
-                   target=replace(scene.target, mjcf=CONVEX_DIRECTORY / "female.xml"))
+    return replace(scene, tool=replace(scene.tool, mjcf=directory / "male.xml"),
+                   target=replace(scene.target, mjcf=directory / "female.xml"))
 
 
 if __name__ == "__main__":

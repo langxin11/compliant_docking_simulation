@@ -2,7 +2,9 @@
 
 这是参考 MIRROR“结构模块＋标准接口＋机器人装配”思路建立的原创六棱柱框架，用于几何布局和 MuJoCo 刚体对接研究。它不是 MIRROR 原厂 CAD，也不声明与 HOTDOCK 产品互换。框架通过六个安装座连接 PetalDock100 V2 对接头，机器人侧可继续使用之前的 iiwa 14 转接板。
 
-![模块预览](preview/hexframe_module_preview.png)
+预览、轨迹和 Blender 导出是可再生成产物，当前默认保存在仓库 `runs/hexframe_module/`；
+导入包配套的原文件保留于本地 `runs/imported_artifacts/hexframe/`，原哈希见
+`docs/evidence/generated_artifacts_20261004.json`。原始 `IMPORT.json` 未改写。
 
 ## 1. 本版尺寸与构成
 
@@ -51,7 +53,7 @@ python demo.py --headless
 关闭锁定及横向、姿态定位刚度，观察导向面的作用：
 
 ```bash
-python demo.py --headless --guide-only --no-lock --output results/guide_only
+python demo.py --headless --guide-only --no-lock --output ../../../runs/hexframe_module/results/guide_only
 ```
 
 查看三个模块的闭环布局：
@@ -92,7 +94,7 @@ python demo.py --headless
 当前安装板按 Ø100 mm 对接头、PCD82 的 M4 孔型设计，不支持只修改接口直径而不联动修改安装结构。`interface/source/generate.py` 保留了接口自身的参数化生成代码；如需重建接口，可执行：
 
 ```bash
-python interface/source/generate.py --config interface/config.json --output interface
+python interface/source/generate.py --config interface/config.json --output ../../../runs/generated_assets/petaldock_interface
 python generate.py
 ```
 
@@ -100,15 +102,15 @@ CAD、MJCF 和 GLB 的单位转换已处理。STEP/STL 为 mm；OBJ/MJCF/GLB 为
 
 ## 5. Blender 使用方式
 
-在 Blender 中通过 `File > Import > glTF 2.0` 导入 `blender/module.glb`。文件包含框架和各对接头网格、颜色及装配位置。GLB 使用标准 Y-up 坐标，Blender 导入后会转换回其 Z-up 场景；长度单位为米。
+在 Blender 中通过 `File > Import > glTF 2.0` 导入仓库 `runs/hexframe_module/blender/module.glb`（先运行生成器；也可显式选择保留在本地的导入 GLB）。文件包含框架和各对接头网格、颜色及装配位置。GLB 使用标准 Y-up 坐标，Blender 导入后会转换回其 Z-up 场景；长度单位为米。
 
-也提供 `blender/build_scene.py`，用于创建双模块场景、灯光和摄像机，并从 `results/demo/trajectory.json` 回放 MuJoCo 记录的真实位姿：
+也提供 `blender/build_scene.py`，用于创建双模块场景、灯光和摄像机，并显式从 `runs/hexframe_module/results/demo/trajectory.json` 回放 MuJoCo 记录的真实位姿：
 
 ```bash
-blender --background --python blender/build_scene.py
+blender --background --python blender/build_scene.py -- --trajectory ../../../runs/hexframe_module/results/demo/trajectory.json
 ```
 
-脚本会创建新场景并输出 `blender/hexframe_module.blend`。请在新文件或后台进程运行，避免清空正在编辑的 Blender 场景。该脚本不会重新计算对接物理。
+脚本会创建新场景并输出仓库 `runs/hexframe_module/blender/hexframe_module.blend`。请在新文件或后台进程运行，避免清空正在编辑的 Blender 场景。该脚本不会重新计算对接物理。
 
 本次已完成 GLB 的导出、重新读取与尺寸/坐标核对；当前生成环境没有 Blender，因此没有实际执行该导入脚本，也未附原生 `.blend` 文件。预览图和 GIF 由 MuJoCo 渲染。
 
@@ -144,17 +146,20 @@ blender --background --python blender/build_scene.py
 | `cad/frame_with_mounts_mm.step` | 框架及安装座连通实体 |
 | `cad/mount_plate_mm.step` | 单个安装板 |
 | `interface/cad/docking_head_mm.step` | 可复用的花瓣对接头 |
-| `blender/module.glb` | Blender 等软件可导入的装配网格 |
+| `runs/hexframe_module/blender/module.glb` | Blender 等软件可导入的装配网格 |
 | `blender/build_scene.py` | Blender 场景与仿真位姿回放脚本 |
 | `mjcf/single.xml` | 单模块 |
 | `mjcf/pair.xml` | 双模块接触演示模型 |
 | `mjcf/three_modules.xml` | 三模块闭环布局 |
 | `demo.py` | 双模块接触推进、落座和抽象锁紧 |
 | `generate.py`、`config.json` | 参数化结构生成器与配置 |
-| `results/` | 验证 JSON、时序 CSV、位姿记录 |
-| `preview/module_docking.gif` | 默认工况的 MuJoCo 位姿回放 |
+| `runs/hexframe_module/results/` | 验证 JSON、时序 CSV、位姿记录 |
+| `runs/hexframe_module/preview/module_docking.gif` | 默认工况的 MuJoCo 位姿回放 |
 
-预览可通过 `uv pip install -r requirements-preview.txt`、`python create_preview.py` 重建。重新生成模型后，需要重新运行演示和预览；旧的结果文件不会自动代表新配置。
+预览可通过 `uv pip install -r requirements-preview.txt`、`python create_preview.py` 重建静态图；
+动画需显式加 `--trajectory-dir ../../../runs/hexframe_module/results/demo`，缺输入会明确拒绝。
+CAD 生成器默认写 `runs/generated_assets/`，不覆写正式资产，需额外安装其 CAD 依赖；
+独立接口生成结果不会自动替换正式接口，审查后再按唯一来源策略纳入资产。重新生成模型后，需要重新运行演示和预览；旧的结果文件不会自动代表新配置。
 
 ## 9. 参考
 

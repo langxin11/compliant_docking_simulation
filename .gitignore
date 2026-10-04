@@ -1,6 +1,7 @@
 # --- Python ---
 __pycache__/
 *.pyc
+*.pyo
 *.egg-info/
 dist/
 build/
@@ -16,6 +17,12 @@ htmlcov/
 **/*Zone.Identifier
 .DS_Store
 .vscode/
+*.swp
+*.swo
+*~
+.env
+.env.*
+!.env.example
 
 # --- Project outputs (generated at runtime; demo/ keeps its tracked assets) ---
 # New generated artifacts belong under runs/. Root paths remain ignored for
@@ -24,8 +31,29 @@ htmlcov/
 /video/
 /runs/
 /designs/
+# Raw numerical channels and runtime logs are not source artifacts.
+*.npy
+*.npz
+*.log
 *.mp4
-!demo/*.mp4
+
+# Legacy asset tools once generated these files beside frozen model sources.
+# Maintained commands now write them under runs/ instead.
+/assets/**/results/
+/assets/**/preview/
+/assets/modules/hexframe/blender/module.glb
+
+# Demo artifacts are explicitly curated; new program output is ignored.
+/demo/*
+!/demo/README.md
+!/demo/LICENSE
+!/demo/docking.mp4
+!/demo/docking_preview.gif
+!/demo/fr3_docking.mp4
+!/demo/fr3_docking_preview.jpg
+!/demo/se3_lie_docking.mp4
+!/demo/se3_lie_docking_preview.jpg
+!/demo/se3_free_space_validation.png
 
 # --- Tool caches ---
 .ruff_cache/
@@ -37,5 +65,5 @@ MUJOCO_LOG.TXT
 /site/
 
 # Local report builds; report source and curated figures remain visible to Git.
-/docs/reports/**/report.pdf
+/docs/reports/**/*.pdf
 /docs/reports/**/page*.png

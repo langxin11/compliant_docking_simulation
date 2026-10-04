@@ -411,7 +411,7 @@ def make_mjcf(p, names, meta, collision_count, out):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--config", type=Path, default=ROOT / "config.json")
-    ap.add_argument("--output", type=Path, default=ROOT)
+    ap.add_argument("--output", type=Path, default=ROOT.parents[4] / "runs/generated_assets/petaldock_interface")
     args = ap.parse_args()
     p = json.loads(args.config.read_text(encoding="utf-8"))
     validate_parameters(p)

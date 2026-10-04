@@ -15,14 +15,16 @@ from pathlib import Path
 
 from compliant_docking.scene import REPO_ROOT
 
-DIRECTORY = REPO_ROOT / "assets/interfaces/petal_dock100"
+DIRECTORY = REPO_ROOT / "runs/generated_assets/petal_dock100"
 
 
 def prepare(source, destination=DIRECTORY):
     source, destination = Path(source).resolve(), Path(destination).resolve()
     assets = ET.parse(source / "mjcf/dock_assets.xml").getroot()
     inputs = {source / "mjcf/dock_assets.xml", source / "model_info.json"}
-    destination.mkdir(parents=True, exist_ok=True)
+    if destination.exists():
+        raise ValueError("Import destination exists; choose a new directory")
+    destination.mkdir(parents=True)
     for mesh in assets.findall("./asset/mesh"):
         mesh_source = (source / "mjcf" / mesh.get("file")).resolve()
         if not mesh_source.is_relative_to(source):
@@ -71,6 +73,7 @@ def prepare(source, destination=DIRECTORY):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=Path)
+    parser.add_argument("--out", type=Path, default=DIRECTORY)
     args = parser.parse_args()
-    manifest = prepare(args.source)
-    print(f"Imported {len(manifest['imported_files'])} files to {DIRECTORY}")
+    manifest = prepare(args.source, args.out)
+    print(f"Imported {len(manifest['imported_files'])} files to {args.out}")

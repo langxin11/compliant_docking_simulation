@@ -15,6 +15,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Reject tracked ignored artifacts
+        run: |
+          tracked_ignored_artifacts="$(git ls-files --cached --ignored --exclude-standard)"
+          if [ -n "$tracked_ignored_artifacts" ]; then
+            printf '%s\n' "$tracked_ignored_artifacts"
+            exit 1
+          fi
+
       - name: Install EGL libraries for headless MuJoCo
         run: sudo apt-get update && sudo apt-get install -y libegl1 libegl-dev
 

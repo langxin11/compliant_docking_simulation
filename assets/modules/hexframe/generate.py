@@ -4,15 +4,16 @@ Original MIRROR-inspired research geometry, not a reproduction or certified
 HOTDOCK-compatible product. CAD uses mm; mesh, MJCF and GLB use metres.
 """
 from __future__ import annotations
+import argparse
 import json
+import shutil
 from pathlib import Path
 import xml.etree.ElementTree as ET
-import cadquery as cq
 import numpy as np
 from scipy.spatial.transform import Rotation
-import trimesh
 
 ROOT=Path(__file__).resolve().parent
+SOURCE=ROOT
 
 def fmt(x):return ' '.join(f'{float(v):.12g}' for v in np.atleast_1d(x))
 def quat(r):
@@ -78,6 +79,13 @@ def geometry(p):
  return frame,ports,beams,plate,plate_mesh
 
 def main():
+ global ROOT,cq,trimesh
+ ap=argparse.ArgumentParser(description=__doc__);ap.add_argument('--out',type=Path,default=SOURCE.parents[2]/'runs/generated_assets/hexframe');ap.add_argument('--artifacts-out',type=Path,default=SOURCE.parents[2]/'runs/hexframe_module/blender');args=ap.parse_args()
+ ROOT=args.out.resolve()
+ if ROOT.exists():ap.error('Output directory exists; preserve the frozen model and select a new directory')
+ import cadquery as cq
+ import trimesh
+ ROOT.mkdir(parents=True);shutil.copy2(SOURCE/'config.json',ROOT/'config.json');shutil.copytree(SOURCE/'interface',ROOT/'interface');args.artifacts_out.mkdir(parents=True,exist_ok=True)
  p=json.loads((ROOT/'config.json').read_text());interface=json.loads((ROOT/'interface/model_info.json').read_text());ip=interface['parameters']
  assert len(set(p['enabled_ports']))==len(p['enabled_ports']) and set(p['enabled_ports'])<=set(range(6))
  assert set(p['detailed_collision_ports'])<=set(p['enabled_ports'])
@@ -85,7 +93,7 @@ def main():
  if p['frame_ring_separation_mm']<p['mount_outer_diameter_mm']+2*p['beam_width_mm']:raise ValueError('Frame too short for mounting plate')
  if abs(p['mount_start_z_mm']+p['mount_thickness_mm']-ip['adapter_thickness_mm'])>1e-8:raise ValueError('Mount must end at head base z=8 mm')
  if ip['outer_diameter_mm']!=100 or ip['head_bolt_pcd_mm']!=82:raise ValueError('This plate pattern requires PetalDock100 / PCD82')
- for sub in ['cad','meshes','mjcf','results','preview','blender']:(ROOT/sub).mkdir(exist_ok=True)
+ for sub in ['cad','meshes','mjcf']:(ROOT/sub).mkdir(exist_ok=True)
  frame,ports,beams,plate,plate_mesh=geometry(p)
  head=cq.importers.importStep(str(ROOT/'interface/cad/docking_head_mm.step')).val()
  if not head.isValid():raise ValueError('Invalid docking head CAD')
@@ -109,7 +117,7 @@ def main():
  print('Exporting assembly...',flush=True);assembly.export(str(ROOT/'cad/module_assembly_mm.step'))
  # glTF uses Y up; convert from the engineering Z-up frame. Blender converts back.
  export_scene=scene.copy();tf=np.eye(4);tf[:3,:3]=Rotation.from_euler('x',-90,degrees=True).as_matrix();export_scene.apply_transform(tf)
- export_scene.export(ROOT/'blender/module.glb')
+ export_scene.export(args.artifacts_out/'module.glb')
  mass,com,inertia=combine(properties)
  bb=scene.bounds
  meta=dict(name='HexFrameModule',version='1.0',parameters=p,interface_version=interface['version'],

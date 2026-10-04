@@ -16,7 +16,6 @@ import numpy as np
 import experiments.petal_selected_study as selected
 import experiments.prepare_petal_guidance as geometry
 from compliant_docking.plotting import apply_style
-from compliant_docking.scene import REPO_ROOT
 
 
 def save(fig, out, name):
@@ -123,14 +122,11 @@ def build(out):
         "模型为独立仿真候选，尚未生成新的制造STEP文件；连续捕获、摩擦/倾斜鲁棒性和锁定尚未验证。\n")
     text = header + "\n".join(rows) + tail
     (out / "report.md").write_text(text)
-    public = REPO_ROOT / "results/petal_angle1_blend030_validation.md"
-    relative = f"../runs/{out.name}/"
-    public.write_text(text.replace("](selected_", f"]({relative}selected_"))
     snapshot = out / "analysis_snapshot" / Path(__file__).name
     snapshot.parent.mkdir(exist_ok=True)
     snapshot.write_bytes(Path(__file__).read_bytes())
     (out / "analysis_manifest.json").write_text(json.dumps({"source_sha256": hashlib.sha256(snapshot.read_bytes()).hexdigest()}, indent=2)+"\n")
-    print(public)
+    print(out / "report.md")
 
 
 if __name__ == "__main__":

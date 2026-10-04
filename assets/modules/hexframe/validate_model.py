@@ -1,4 +1,5 @@
 """Validate module pose conventions, empty frame space and mating collisions."""
+import argparse
 import json
 from pathlib import Path
 import mujoco
@@ -7,7 +8,8 @@ from scipy.spatial.transform import Rotation
 from demo import ModuleDemo
 ROOT=Path(__file__).resolve().parent
 
-def validate():
+def validate(out=None):
+ out=Path(out) if out is not None else ROOT.parents[2]/'runs/hexframe_module/results';out.mkdir(parents=True,exist_ok=True)
  info=json.loads((ROOT/'model_info.json').read_text());m=mujoco.MjModel.from_xml_path(str(ROOT/'mjcf/single.xml'))
  assert abs(m.body_mass[m.body('module_a').id]-info['body_mass_kg'])<1e-8
  assert np.linalg.eigvalsh(info['body_inertia_kg_m2']).min()>0
@@ -34,5 +36,6 @@ def validate():
  result=dict(mujoco_version=mujoco.__version__,body_mass_kg=info['body_mass_kg'],single_geoms=int(m.ngeom),pair_geoms=int(s.model.ngeom),
              port_mating_position_error_m=pe,port_mating_rotation_matrix_error=re,empty_centre_ray_distance=distance,
              separated=separated,nominal=nominal,overtravel_01mm=overtravel)
- (ROOT/'results/geometry_validation.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))
-if __name__=='__main__':validate()
+ (out/'geometry_validation.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result,indent=2))
+if __name__=='__main__':
+ ap=argparse.ArgumentParser(description=__doc__);ap.add_argument('--out',type=Path);validate(ap.parse_args().out)

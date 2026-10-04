@@ -103,6 +103,11 @@ scripts/                         项目维护与迁移检查工具
 正式实验从上述三个分层入口启动。旧命令仅保留兼容入口；历史实现与证据的迁移对应关系见
 [目录归档记录](docs/directory_cleanup.md)。本地环境 `.venv/` 和测试缓存默认忽略。
 
+程序运行生成的日志、轨迹、数组、图件、预览和导出文件默认写入 `runs/`，不进入 Git。
+`assets/` 保留仿真必需的模型和来源记录；`results/` 只保留经审查的冻结证据，
+`demo/` 只保留明确列入白名单的展示文件。新增运行数据不会自动成为项目成果。
+具体默认路径、保留边界和验证方法见[生成数据策略](docs/generated_artifacts.md)。
+
 ```bash
 uv run ruff check .
 uv run pytest -m 'not slow' -q

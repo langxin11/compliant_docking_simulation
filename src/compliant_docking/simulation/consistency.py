@@ -440,6 +440,8 @@ def main():
         urdf_path=str(PIN_URDF)
     )
 
+    output = os.path.join(str(ASSETS_DIR.parents[1]), "runs", "figures", "consistency")
+    os.makedirs(output, exist_ok=True)
     # 运行不同轨迹的仿真
     trajectories = ['sine']
     for traj in trajectories:
@@ -449,7 +451,7 @@ def main():
             duration=5.0,
             render=True
         )
-        controller.plot_results(save_path=f"results_{traj}.png")
+        controller.plot_results(save_path=os.path.join(output, f"results_{traj}.png"))
 
 if __name__ == "__main__":
     main()

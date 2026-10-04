@@ -84,7 +84,7 @@ class ModuleDemo:
 def main():
  ap=argparse.ArgumentParser(description=__doc__);ap.add_argument('--headless',action='store_true');ap.add_argument('--seconds',type=float,default=9)
  ap.add_argument('--offset-y-mm',type=float,default=2);ap.add_argument('--offset-z-mm',type=float,default=-1);ap.add_argument('--twist-deg',type=float,default=2);ap.add_argument('--tilt-deg',type=float,default=1)
- ap.add_argument('--no-lock',action='store_true');ap.add_argument('--guide-only',action='store_true');ap.add_argument('--output',type=Path,default=ROOT/'results/demo');a=ap.parse_args()
+ ap.add_argument('--no-lock',action='store_true');ap.add_argument('--guide-only',action='store_true');ap.add_argument('--output',type=Path,default=ROOT.parents[2]/'runs/hexframe_module/results/demo');a=ap.parse_args()
  s=ModuleDemo(a.offset_y_mm,a.offset_z_mm,a.twist_deg,a.tilt_deg,not a.no_lock,a.guide_only)
  if a.headless:
   while s.data.time<a.seconds:s.step()
