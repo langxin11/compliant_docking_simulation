@@ -32,6 +32,9 @@ jobs:
       - name: Lint (ruff)
         run: uv run ruff check .
 
+      - name: Strict documentation build
+        run: uv run mkdocs build --strict
+
       # 慢速接触回归（-m slow）耗时较长，不在免费 runner 的 CI 中运行 /
       # The slow contact regression (-m slow) is too slow for free CI runners
       - name: Run fast tests

@@ -1,0 +1,25 @@
+name: Bug report
+description: Report a reproducible simulation or documentation failure
+title: "[Bug] "
+body:
+  - type: dropdown
+    id: layer
+    attributes:
+      label: Project layer
+      options: [Models and interfaces, Control research, System validation, Shared tooling or docs]
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction and expected behavior
+      description: Include exact command, scene, output status and the expected result.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Environment and evidence
+      description: Include commit, dependency versions, relevant JSON/logs and source fingerprints. Do not overwrite an archive to reproduce.
+    validations:
+      required: true

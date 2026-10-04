@@ -1,0 +1,37 @@
+# 贡献指南
+
+请先说明变更属于模型与接口、控制研究或完整系统，具体触发条件和预期结果。
+缺陷修复可直接提交 PR；研究协议或大范围物理变更先在 issue 中描述研究问题和主要变量。
+
+## 开发与检查
+
+```bash
+uv sync --frozen --dev
+uv run ruff check .
+uv run pytest -m 'not slow' -q
+uv run mkdocs build --strict
+```
+
+修改控制、采样、模型或系统编排时运行受影响的数值锚点。正式系统变更还需完整 53 s
+HexFrame 流程和独立审计；回放改动需从同一状态记录验证。慢速套件使用 `uv run pytest -m slow -q`。
+CI 使用上述静态/快速检查、严格文档构建和完整系统验收。请在 PR 记录实际运行命令与结果。
+
+## 研究与数据
+
+- 对照声明唯一主要变量和固定条件；物理步长、控制周期、减速、接口几何分别立项。
+- 保存有效配置、失败原因、运行环境、来源哈希、状态与评价；新运行写新目录。
+- 不改旧结果/源码快照/哈希以通过检查；不把不同矩阵合成统一成功率。
+- 模型/资产保留唯一来源、许可与导入清单；候选不未经验证替代基线。
+- 共享库不导入实验脚本；算法不依赖 Demo 布局；旧入口兼容与变更记录一起提交。
+
+结构变更需要新旧有效配置、退出语义和多进程入口检查。指纹变化无法证明安全复用时拒绝复用。
+视频由验收记录回放；预检与渲染成功不代表系统通过。
+
+## 采用的开源习惯
+
+本项目参考 [MuJoCo Menagerie 的贡献流程](https://github.com/google-deepmind/mujoco_menagerie/blob/main/CONTRIBUTING.md)
+统一本地/CI 检查及变更记录，并保持模型来源和许可；参考
+[robosuite 的模块划分](https://github.com/ARISE-Initiative/robosuite/blob/master/README.md)
+区分模型、控制、任务和回放。这里采用职责与复现习惯，不引入它们的框架依赖。
+
+提交时更新 `CHANGELOG.md` 的 Unreleased 项，避免将未执行验证写为通过。

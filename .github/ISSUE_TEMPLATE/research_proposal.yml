@@ -1,0 +1,23 @@
+name: Research proposal
+description: Propose a controlled experiment or an integration task
+title: "[Research] "
+body:
+  - type: textarea
+    id: question
+    attributes:
+      label: Question, hypothesis and project layer
+    validations:
+      required: true
+  - type: textarea
+    id: factors
+    attributes:
+      label: Primary variable and fixed conditions
+      description: Specify model version, controller, trajectory, feedback timing, physics and paired cases.
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Criteria, failure definitions, execution budget and claim scope
+    validations:
+      required: true
