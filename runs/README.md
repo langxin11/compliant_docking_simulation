@@ -17,6 +17,8 @@
 | `petal_angle1_blend030_dtcheck_20261003/` | 288M | 步长复核（含 `supplement_0p0625/`）：预注册判定**不晋升**，0.125 ms 三点收敛；报告 `results/petal_angle1_blend030_dtcheck_20261003.md`，JSON 证据已入库，NPZ（core 遥测）留本地 |
 | `hexframe_halfstep_20261003/` | 9.4M | P0 半步长验证：PASS + 审计 PASS，结论对步长不敏感；入口 `experiments/hexframe_validation/run_halfstep.py` |
 | `hexframe_grid_20261003/` | 74M | P1 误差网格 12 组：全 PASS（pick ±10 mm / seed ±4 mm 内）；入口 `experiments/hexframe_validation/run_grid.py` |
+| `hexframe_grid_gatecheck_20261003/` | 75M | P2 候选门禁（filtered_debounce）干净复核：12/12 PASS，dwell 重置延迟消除；与上一行逐组配对 |
+| `hexframe_noise_20261003/` | 82M | P2 噪声 A/B：12 组全 PASS；filtered_debounce 锁定 36.615–36.618 s 恒定，raw_strict 散布 7.4 s，无误锁（真值列核查） |
 | `compliant_insertion/` | 36M | `insertion_suite.py` 默认输出目录（会被同名更新覆盖，历史用带日期 `--out`） |
 | `petal_iiwa14_validation/` | 23M | 初版失败记录（沿用旧增益未落座）；报告声明保留，有效数据在 `_20261002` |
 | `collision_comparison_20261002/`、`convex_geometry_20261002/`、`petal_model_review_20261002/` | <1M | 小体积，整体保留 |

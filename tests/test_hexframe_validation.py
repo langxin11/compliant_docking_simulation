@@ -7,14 +7,33 @@ and is bit-identical at 1 ms (regression-checked against the recorded run).
 import json
 from dataclasses import replace
 
+import numpy as np
 import pytest
 import yaml
 
-from compliant_docking.assembly.audit import window_n
+from compliant_docking.assembly.audit import debounce_stats, window_n
 from compliant_docking.assembly.simulation import control_every_steps
 from compliant_docking.scene import REPO_ROOT, load_scene
 
 FORMAL = REPO_ROOT / "scenes/hexframe_assembly.yaml"
+
+
+def test_debounce_stats_fraction_and_longest_invalid_run():
+    dt = 0.001
+    mask = np.ones(100, dtype=bool)
+    mask[10:13] = False   # 3 ms blip
+    mask[50] = False      # 1 ms blip
+    fraction, worst = debounce_stats(mask, dt)
+    assert fraction == 0.96
+    assert worst == pytest.approx(0.003)
+
+
+def test_debounce_stats_rejects_long_outage():
+    mask = np.ones(2000, dtype=bool)
+    mask[100:130] = False  # 30 ms outage, far above the 10 ms budget
+    fraction, worst = debounce_stats(mask, 0.001)
+    assert fraction >= 0.98
+    assert worst > 0.01
 
 
 def test_control_cadence_and_audit_window_derive_from_timestep():

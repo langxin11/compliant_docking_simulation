@@ -31,6 +31,7 @@ def simulate(r, model, spline, phase_list, planning):
     qref = data.qpos[:7].copy()
     qdot, filtered, zvelocity = np.zeros(7), 0., -.001
     first_contact, locked, dwell, unload_dwell = None, None, 0., 0.
+    invalid_run = 0.
     events, done, faults = [], set(), set()
     records = {key: [] for key in ["t", "qpos", "qvel", "phase", "locks"]}
     telemetry = []
@@ -38,6 +39,11 @@ def simulate(r, model, spline, phase_list, planning):
     gripper_id = model.equality("gripper_lock").id
     low, high = np.asarray(planning["joint_limits"])
     control_every = control_every_steps(r.dt)
+    # Measurement-chain variants for the validation entries. Defaults keep the
+    # formal 1 ms run bit-identical: no noise, and the historical raw/strict gate.
+    gate = getattr(r, "seating_gate", "raw_strict")
+    noise_sigma = float(getattr(r, "force_noise_sigma", 0.) or 0.)
+    rng = np.random.default_rng(getattr(r, "noise_seed", 0)) if noise_sigma else None
     start_step = 0
     for step in range(start_step, round(ends[-1]/r.dt)+1):
         t = step*r.dt
@@ -60,9 +66,17 @@ def simulate(r, model, spline, phase_list, planning):
             faults.add("joint limit")
         contact_mode = k == 9 and locked is None
         if contact_mode:
-            filtered += (1-np.exp(-r.dt/.02))*(f[2]-filtered)
-            if first_contact is None and f[2] >= .1:
-                first_contact = t
+            # axial is the measured signal: true force plus optional sensor noise.
+            axial = f[2] if rng is None else f[2]+rng.normal(0., noise_sigma)
+            filtered += (1-np.exp(-r.dt/.02))*(axial-filtered)
+            if gate == "filtered_debounce":
+                if first_contact is None and filtered >= .1:
+                    first_contact = t
+                in_window = .15 <= filtered <= .6
+            else:
+                if first_contact is None and axial >= .1:
+                    first_contact = t
+                in_window = .15 <= axial <= .6
             if first_contact is not None:
                 target = contact_force_n*min(1., (t-first_contact)/1.)
                 zvelocity += r.dt*(filtered-target-200*zvelocity)/.5
@@ -85,12 +99,22 @@ def simulate(r, model, spline, phase_list, planning):
                 qdot = np.zeros(7)
             desired, velocity = qref, qdot
             error = physical_error
-            ready = (first_contact is not None and t-first_contact >= 1. and .15 <= f[2] <= .6
+            ready = (first_contact is not None and t-first_contact >= 1. and in_window
                      and error[0] <= .00075 and error[1] <= np.deg2rad(.5)
                      and error[2] <= .0005 and error[3] <= np.deg2rad(.5)
                      and depth <= .0003 and np.linalg.norm(moment) <= .5
                      and seating_condition)
-            dwell = dwell+r.dt if ready else 0.
+            if ready:
+                dwell += r.dt
+                invalid_run = 0.
+            elif first_contact is not None and t-first_contact >= 1.:
+                # filtered_debounce tolerates measurement blips up to 10 ms;
+                # the historical raw_strict gate resets on any single step.
+                invalid_run += r.dt
+                if gate != "filtered_debounce" or invalid_run > .01:
+                    dwell = 0.
+            else:
+                dwell, invalid_run = 0., 0.
             if dwell >= .5:
                 # Site weld target matches measured installed pose: no snap.
                 anchor = model.site("assembly_anchor").id
@@ -125,9 +149,14 @@ def simulate(r, model, spline, phase_list, planning):
         torque = r.kp*(desired-data.qpos[:7])+r.kd*(velocity-data.qvel[:7])+data.qfrc_bias[:7]
         if np.any(abs(torque) > r.torque_limits):
             faults.add("torque saturation")
-        telemetry.append([t, f[2], np.linalg.norm(f[:2]), np.linalg.norm(moment), count, depth, dwell,
-                          *physical_error, int(data.eq_active[2]), grip_load, unload_dwell,
-                          int(seating_condition), int(ready), float(np.linalg.norm(data.qvel[:7]))])
+        row = [t, axial if contact_mode else f[2], np.linalg.norm(f[:2]), np.linalg.norm(moment), count, depth, dwell,
+               *physical_error, int(data.eq_active[2]), grip_load, unload_dwell,
+               int(seating_condition), int(ready), float(np.linalg.norm(data.qvel[:7]))]
+        if noise_sigma or gate != "raw_strict":
+            # Measurement-modified runs record the true force and the filtered
+            # channel alongside the measured axial force in column 1.
+            row += [f[2], filtered]
+        telemetry.append(row)
         if storage_contact is not None:
             storage_force, storage_depth, storage_count = storage_contact(model, data)
             separation = float(np.linalg.norm(data.site("module1_port_4_mating").xpos-data.site("storage_dock_mating").xpos))
@@ -162,6 +191,8 @@ def simulate(r, model, spline, phase_list, planning):
                   module_inertia_kg_m2=model.body("module1").inertia.tolist(),
                   duration_s=float(ends[-1]),
                   contact_force_target_n=contact_force_n,
+                  seating_gate=gate, force_noise_sigma_n=noise_sigma,
+                  noise_seed=int(getattr(r, "noise_seed", 0)),
                   scope="fixed-base zero-gravity arm/module dynamics; real guide/stop contact; ideal weld locks; MuJoCo bias-compensated joint servo")
     if storage_telemetry:
         report["storage_interface"] = dict(
@@ -173,12 +204,15 @@ def simulate(r, model, spline, phase_list, planning):
                            columns=np.array(["time", "force_x", "force_y", "force_z", "penetration",
                                              "loaded_contacts", "mating_separation", "storage_locked",
                                              "gripper_locked", "assembly_locked"]))
+    columns = ["time", "axial_force", "lateral_force", "moment", "contacts",
+               "penetration", "seating_dwell", "position_error", "angle_error",
+               "relative_speed", "relative_spin", "assembly_locked",
+               "gripper_constraint_force", "unloaded_dwell",
+               "seating_contact_condition", "seating_eligible", "arm_speed_norm"]
+    if noise_sigma or gate != "raw_strict":
+        columns += ["true_axial_force", "filtered_axial_force"]
     np.savez_compressed(r.output/"contact_trace.npz", values=a,
-                       columns=np.array(["time", "axial_force", "lateral_force", "moment", "contacts",
-                                         "penetration", "seating_dwell", "position_error", "angle_error",
-                                         "relative_speed", "relative_spin", "assembly_locked",
-                                         "gripper_constraint_force", "unloaded_dwell",
-                                         "seating_contact_condition", "seating_eligible", "arm_speed_norm"]))
+                       columns=np.array(columns))
     records = {key: np.asarray(value) for key, value in records.items()}
     np.savez_compressed(r.output/"rollout.npz", **records)
     (r.output/"validation.json").write_text(json.dumps(report, indent=2)+"\n")

@@ -56,6 +56,56 @@ uv run python experiments/hexframe_validation/run_grid.py --only seed_x_m4  # �
 持续就位；y 向抓取偏差和 x 向配合偏差主要表现为就位时间延长而非失败。
 连续捕获区域仍未验证（网格是离散点），yaw/tilt 误差待模型级注入。
 
+## P2 测量噪声与锁定门禁变体（run_noise.py）
+
+正式场景的锁定门禁保持历史 `raw_strict` 变体（原始力读数 + 单步出窗即清零），
+validation 入口可选两种门禁变体（`r.seating_gate`，1 ms / 零噪声下逐位一致）：
+
+- `raw_strict`：原始测量力阈值，任何一步出窗就位 dwell 清零——对误锁最严格，
+  对测量缺陷最脆弱（σ=0.05 N 时窗边缘单步出窗概率约 16%，严格 dwell 无法走满）。
+- `filtered_debounce`：就位判定移到已有 20 ms 低通通道（首次接触检测同通道，
+  消除噪声误触发），出窗 ≤10 ms 不清零；审计对 trace 复核统计门禁
+  （窗内 ≥98% 且最长连续违约 ≤10 ms）。力窗数值、几何/速度判据、其余全部门限不变。
+
+噪声钩子：`r.force_noise_sigma`（轴向力测量高斯噪声，固定种子 `r.noise_seed`），
+默认 0 = 正式路径逐位不变；测量链被修改的运行在 trace 末尾追加
+`true_axial_force` / `filtered_axial_force` 两列，真值与测量分离。
+
+```bash
+# A/B：两个门禁变体 × σ{0.02, 0.05} N × 3 种子，外加候选门禁干净回归
+uv run python experiments/hexframe_validation/run_noise.py --jobs 3
+# 候选门禁干净误差网格（与 P1 逐组配对）
+uv run python experiments/hexframe_validation/run_grid.py \
+  --gate filtered_debounce --out runs/hexframe_grid_gatecheck_20261003
+```
+
+2026-10-03 结果：
+
+**候选门禁干净回归（与 P1 逐组配对，runs/hexframe_grid_gatecheck_20261003/）**：
+12/12 PASS + 审计全 PASS；峰值力与 raw_strict 完全一致（差 <0.001 N）；
+锁定时刻大多一致，且消除了三组 raw_strict 的 dwell 重置延迟
+（pick_y_m10 38.876→36.618、seed_x_p2 39.670→36.622、seed_x_p4 38.356→36.612 s）
+——干净工况下 debounce 不会误锁，只会去掉无谓重置。
+
+**噪声 A/B（runs/hexframe_noise_20261003/，12 组全部 PASS + 审计 PASS）**：
+
+| σ, 种子 | raw_strict 锁定 | filtered_debounce 锁定 |
+|---|---|---|
+| 0.02, 1/2/3 | 43.397 / 36.611 / 41.621 s | 36.615 / 36.618 / 36.617 s |
+| 0.05, 1/2/3 | 36.000 / 40.674 / 40.100 s | 36.615 / 36.618 / 36.617 s |
+
+- `filtered_debounce`：锁定时刻在全部噪声组合下几乎恒定（36.615–36.618 s），
+  与无噪声基线一致——对测量噪声不敏感。
+- `raw_strict`：锁定时刻散布 36.0–43.4 s（跨度 7.4 s），由 dwell 重置与
+  噪声扰动的导纳共同造成；σ=0.05 时首次接触检测被噪声提前触发
+  （如 seed3 的 29.0 s，真实接触 35.1 s）。
+- 真值列核查：raw_strict 最早锁定组（36.000 s）的真实力自 35.410 s 起持续
+  在窗内 ≥0.5 s——**没有发现误锁**，早锁源于噪声改变了该次实现的接触轨迹。
+
+结论：`filtered_debounce` 在干净与噪声工况下都保持或改善判定一致性与
+锁定及时性，未引入误锁；正式场景维持 `raw_strict` 不变，候选变体的
+晋升决策留给研究负责人（数据与入口均已就绪）。
+
 ## 测试
 
 `tests/test_hexframe_validation.py`：节拍/窗口推导、replace 入口、

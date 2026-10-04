@@ -105,6 +105,7 @@ def run(scene, *, output=None, record=False, preview_only=False, replay=False):
     write_json(output/"runtime.json", dict(python=platform.python_version(), platform=platform.platform(),
                 mujoco=mujoco.__version__, numpy=np.__version__, physics_timestep_s=r.dt,
                 state_record_hz=100, contact_record_hz=1000, video_fps=24,
+                seating_gate="raw_strict",
                 controller="MuJoCo bias-compensated joint servo with contact admittance",
                 pinocchio_role="same-source IK and nominal rigid-body consistency checks"))
     if preview_only:

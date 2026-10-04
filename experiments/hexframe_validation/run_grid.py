@@ -48,7 +48,7 @@ GRID = [("pick_x_m10", "pick", (-0.010, 0., 0.)), ("pick_x_p10", "pick", (0.010,
         ("seed_y_m4", "seed", (0., -0.004, 0.)), ("seed_y_p4", "seed", (0., 0.004, 0.))]
 
 
-def run_one(job, out_root):
+def run_one(job, out_root, gate="raw_strict", sigma=0., seed=0):
     label, field, delta = job
     out = out_root / label
     start = time.monotonic()
@@ -59,6 +59,7 @@ def run_one(job, out_root):
     scene = replace(base, **{field: layout[field]})
     out.mkdir(parents=True, exist_ok=True)
     r = AssemblyRuntime(scene, out)
+    r.seating_gate, r.force_noise_sigma, r.noise_seed = gate, sigma, seed
     model = r.geometry.build_model()
     prepare_models(r)
     spline, phases, planning = r.plan(model)
@@ -72,6 +73,7 @@ def run_one(job, out_root):
     write_json(out/"runtime.json", dict(python=platform.python_version(), platform=platform.platform(),
                 mujoco=mujoco.__version__, numpy=np.__version__, physics_timestep_s=r.dt,
                 state_record_hz=100, contact_record_hz=round(1/r.dt), video_fps=24,
+                seating_gate=gate, force_noise_sigma_n=sigma, noise_seed=seed,
                 controller="MuJoCo bias-compensated joint servo with contact admittance",
                 validation_context=f"P1 error grid {label}: {field} offset {delta} m"))
     try:
@@ -83,6 +85,8 @@ def run_one(job, out_root):
     audit_result = audit(out) if report["status"] == "PASS" else None
     return dict(label=label, field=field, delta_m=list(delta), status=report["status"],
                 audit=audit_result and audit_result["status"], faults=report["faults"],
+                seating_gate=gate, force_noise_sigma_n=sigma, noise_seed=seed,
+                first_contact_s=report["first_contact_s"],
                 lock_time_s=report["lock_time_s"], peak_axial_force_n=report["peak_axial_force_n"],
                 max_penetration_mm=report["max_penetration_mm"],
                 final_module_error_mm=report["final_module_error_mm"],
@@ -94,6 +98,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, default=DEFAULT_OUT)
     parser.add_argument("--jobs", type=int, choices=range(1, 7), default=3)
+    parser.add_argument("--gate", choices=["raw_strict", "filtered_debounce"], default="raw_strict",
+                        help="seating gate variant; filtered_debounce is the noise-robust candidate")
     parser.add_argument("--only", nargs="*", help="restrict to these labels")
     args = parser.parse_args()
     out_root = args.out.resolve()
@@ -102,10 +108,10 @@ def main():
     (out_root/"grid_plan.json").write_text(json.dumps(dict(
         jobs=[dict(label=job[0], field=job[1], delta_m=list(job[2])) for job in jobs],
         baseline=str(BASELINE.relative_to(REPO_ROOT)), gates_unchanged=True,
-        nominal_rerun=False, timestep_s=1e-3), indent=1)+"\n")
+        seating_gate=args.gate, nominal_rerun=False, timestep_s=1e-3), indent=1)+"\n")
     results = []
     with ProcessPoolExecutor(max_workers=args.jobs) as executor:
-        futures = {executor.submit(run_one, job, out_root): job[0] for job in jobs}
+        futures = {executor.submit(run_one, job, out_root, args.gate): job[0] for job in jobs}
         for future in as_completed(futures):
             record = future.result()
             results.append(record)
