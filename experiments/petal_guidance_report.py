@@ -45,7 +45,7 @@ def arrays(out, key, fields=None):
 
 def effective_scene(key):
     g,case,setting = key
-    scene = suite.variant(study.geometry_scene(load_scene("scenes/iiwa14_petal_insertion.yaml"),g),
+    scene = suite.variant(study.geometry_scene(load_scene("scenes/iiwa14_petal_original_insertion.yaml"),g),
         f"g_{g}_{case}","lateral_released",error=grid.error_tuple(POINTS[case]))
     divisor = {"dt_half":2,"dt_quarter":4}[setting]
     return replace(scene,physics=replace(scene.physics,timestep=scene.physics.timestep/divisor))

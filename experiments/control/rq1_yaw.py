@@ -1,4 +1,9 @@
-"""RQ1: matched yaw stiffness policies on the fixed original Petal baseline."""
+"""RQ1：固定原版 Petal 接口上的绕轴刚度策略配对实验。
+
+主要变量为 stiff/compliant/released；误差来自 CASES，单位 (m, m, deg)。
+运行目录保存计划、来源快照、单次试验与汇总；成功退出不表示所有工况通过。
+物理步长复核仅在显式选择 setting 时执行，控制周期保持场景声明值。
+"""
 from __future__ import annotations
 
 import argparse
@@ -16,6 +21,7 @@ DEFAULT_OUT = REPO_ROOT / "runs/rq1_yaw_current"
 PROFILES = ("stiff", "compliant", "released")
 
 def build_parser():
+    """建立固定 RQ1 参数接口；默认只运行 baseline 物理步长。"""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--case", nargs="+", choices=CASES, default=list(CASES))
     parser.add_argument("--profile", nargs="+", choices=PROFILES, default=list(PROFILES))
@@ -28,7 +34,8 @@ def build_parser():
     return parser
 
 def run_matrix(args, *, legacy=False):
-    base = load_scene("scenes/iiwa14_petal_insertion.yaml")
+    """校验来源和计划，写入快照并串行或并行执行矩阵；协议不匹配时拒绝续跑。"""
+    base = load_scene("scenes/iiwa14_petal_original_insertion.yaml")
     manifest = source_manifest(base)
     plan = dict(cases=args.case, profiles=args.profile, settings=args.setting,
                 model="original PetalDock100 V2", primary_factor="yaw stiffness policy",
@@ -69,6 +76,7 @@ def run_matrix(args, *, legacy=False):
     summarize(args.out)
 
 def main(argv=None):
+    """解析参数并执行 RQ1；各工况结论读取输出 assessment。"""
     run_matrix(build_parser().parse_args(argv))
 
 if __name__ == "__main__":

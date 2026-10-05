@@ -3,6 +3,7 @@
 实验路径一律由 compliant_docking.scene 的场景 YAML 驱动；本模块的 PIN_URDF
 仅为向后兼容的默认值。
 """
+import xml.etree.ElementTree as ET
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
@@ -11,17 +12,28 @@ import pinocchio as pin
 
 
 def load_assembled_pin_model(scene):
-    """Read a flattened assembled MJCF, preserving fixed-tool full inertia.
+    """从同源组装 MJCF 读取动力学，保留固定工具的完整显式惯量。
 
-    Pinocchio's MJCF reader does not expand the attached include hierarchy in
-    this model. MjSpec serialization resolves it before parsing; no URDF tool
-    or additional inertia is appended to this shared description.
+    MjSpec 展开挂载层级。Pinocchio 不支持 sdf 几何枚举，因此仅在其临时
+    输入中将显式惯量刚体上的 sdf 标为 mesh；不修改 MuJoCo 碰撞模型。
+    若 SDF 刚体没有显式惯量则拒绝转换，避免改变几何推导的质量属性。
     """
     if scene.tool.pin_inertia is not None:
         raise ValueError("assembled Pinocchio model already contains tool inertia")
     with TemporaryDirectory(prefix="docking-pin-") as temporary:
         path = Path(temporary) / "assembled.xml"
-        path.write_text(scene.build_mjspec().to_xml(), encoding="utf-8")
+        xml = scene.build_mjspec().to_xml()
+        root = ET.fromstring(xml)
+        sdf_geoms = root.findall(".//geom[@type='sdf']")
+        if sdf_geoms:
+            for body in root.iter('body'):
+                geoms = body.findall("geom[@type='sdf']")
+                if geoms and body.find('inertial') is None:
+                    raise ValueError('Pinocchio SDF compatibility requires explicit body inertia')
+                for geom in geoms:
+                    geom.set('type', 'mesh')
+            xml = ET.tostring(root, encoding='unicode')
+        path.write_text(xml, encoding="utf-8")
         model = load_pin_model(path)
     model.gravity.linear = np.asarray(scene.physics.gravity, dtype=float)
     return model

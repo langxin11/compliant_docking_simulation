@@ -1,11 +1,18 @@
 # Compliant Docking Simulation
 
+单接口默认采用用户选定的窄平顶＋角向斜坡（`angle1_blend030` 凸块模型，物理/控制/反馈延迟均为 1 ms），入口为 `scenes/iiwa14_petal_insertion.yaml`。
+原轮廓及历史协议保留；HexFrame 尚未切换新接口，详见 [模型与接口](docs/models_interfaces.md)。
+
 [![CI](https://github.com/langxin11/compliant_docking_simulation/actions/workflows/ci.yml/badge.svg)](https://github.com/langxin11/compliant_docking_simulation/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 七自由度机械臂柔顺对接仿真，按 **模型与接口 → 柔顺控制算法研究 → 完整对接/装配** 组织。
 MuJoCo 提供物理世界，Pinocchio 提供运动学与控制侧刚体动力学；内置 KUKA iiwa14 与 Franka FR3。
+
+当前主线是柔顺策略对对接完成、误差与失败边界的影响，以及完整装配集成。
+接触峰值精度与候选接口列为补充研究，不自动阻塞主线。见[研究收束决策](docs/research_focus.md)。
+编码代理先读 [AGENTS.md](AGENTS.md)，代码维护遵循[注释规范](docs/coding_style.md)。
 
 | 层次 | 回答的问题 | 入口与说明 |
 |---|---|---|
@@ -14,7 +21,7 @@ MuJoCo 提供物理世界，Pinocchio 提供运动学与控制侧刚体动力学
 | 完整对接/装配 | 规划、控制、状态切换与交接能否完成任务？ | [系统验收](docs/system_validation.md)、`experiments/system/` |
 
 当前主研究限定固定基座、固定目标、零重力与刚性模型。单接口研究使用原版 PetalDock100 V2，
-候选 `angle1_blend030` 独立保留，尚未晋升。HexFrame 使用 **MuJoCo 偏置补偿关节伺服与接触导纳**，
+`angle1_blend030` 已在新 1 ms 任务协议下通过九点验证并设为默认；SDF 仅保留为有限对照原型。HexFrame 使用 **MuJoCo 偏置补偿关节伺服与接触导纳**，
 尚未集成单接口研究的 SE(3) 阻抗链路；其通过记录是当前系统配置的证据。
 [假设、依赖与证据边界](docs/research_scope.md)。
 

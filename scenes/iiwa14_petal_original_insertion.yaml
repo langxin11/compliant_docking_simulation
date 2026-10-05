@@ -1,0 +1,76 @@
+# Optional replacement interface. Pinocchio reads the same assembled MJCF.
+scene:
+  name: iiwa14_petal_insertion
+  controller: se3_lie
+robot:
+  mjcf: assets/iiwa14/iiwa14_arm.xml
+  pin_model: null
+  ee_site: attachment_site
+  ee_frame: tool_dock
+  # Same position ranges as the repository's iiwa14 URDF.
+  joint_ranges_deg:
+    joint1: [-170, 170]
+    joint2: [-120, 120]
+    joint3: [-170, 170]
+    joint4: [-120, 120]
+    joint5: [-170, 170]
+    joint6: [-120, 120]
+    joint7: [-175, 175]
+tool:
+  mjcf: assets/interfaces/petal_dock100/active.xml
+  prefix: tool_
+  pose: {pos: [0.0, 0.0, 0.0], quat: [1.0, 0.0, 0.0, 0.0]}
+target:
+  mjcf: assets/interfaces/petal_dock100/passive.xml
+  prefix: target_
+  pos: [0.0, 0.5, 0.35]
+  quat: [1.0, 0.0, 0.0, 0.0]
+physics:
+  timestep: 0.0005
+  gravity: [0.0, 0.0, 0.0]
+  integrator: implicitfast
+  cone: elliptic
+  sdf_iterations: 10
+  sdf_initpoints: 40
+  iterations: 60
+  tolerance: 1.0e-10
+task:
+  init_pos: [-0.12, 0.40, 0.55]
+  init_ori: [[0.7071067811865476, 0.7071067811865476, 0], [0.7071067811865476, -0.7071067811865476, 0], [0, 0, -1]]
+  ik_guess: [0.6882329351413595, 0.6954397875938523, -1.3695893884291805, 1.7568197338788447, 2.462767248857433, 1.554635029645154, -1.3952621967472831]
+trajectory:
+  type: waypoints
+  v_max_approach: 0.10
+  a_max_approach: 0.20
+  v_max_docking: 0.02
+  a_max_docking: 0.05
+docking:
+  estimate_pos: [0.002, 0.498, 0.35]
+  estimate_yaw_deg: 5.0
+  mating_yaw_deg: 45.0
+  # Controlled root is now the flange, not the old cylinder_link frame.
+  entry_height: 0.0814
+  clearance: 0.060
+  command_depth: 0.03515  # nominal 46.4 mm separation minus 0.15 mm preload
+  insertion_speed: 0.010
+  insertion_acceleration: 0.030
+  hold_s: 8.0
+  min_depth: 0.03425
+  max_lateral: 0.0005
+  max_tilt_deg: 0.5
+  max_force: 40.0
+  max_axial_moment: 2.0
+  max_linear_speed: 0.003
+  max_angular_speed_deg: 2.0
+se3_impedance:
+  a_diag: [10.0, 10.0, 10.0, 1.0, 1.0, 0.05]
+  d_diag: [80.0, 80.0, 90.0, 10.0, 10.0, 1.0]
+  k_diag: [80.0, 80.0, 1500.0, 25.0, 25.0, 0.5]
+  null_damping: 10.0
+  control_period: 0.0005  # held when refining the physics timestep
+  contact_yaw:
+    force_threshold_N: 0.15  # below the nominal 0.225 N seating preload
+    filter_s: 0.01
+    dwell_s: 0.02
+    release_s: 0.25
+    stiffness_after: 0.0

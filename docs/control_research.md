@@ -1,7 +1,12 @@
 # 柔顺控制算法研究协议
 
-控制主研究采用[固定模型基线](models_interfaces.md)。本页预先声明主要变量、配对条件、
+本页历史 RQ1/RQ2 与捕获范围协议固定原轮廓 `scenes/iiwa14_petal_original_insertion.yaml`，
+不跟随 narrow 默认接口切换；模型版本见[模型基线](models_interfaces.md)。本页预先声明主要变量、配对条件、
 评价与适用范围；结构迁移不引入算法改进或新的研究结论。
+
+2026-10-04 收束：以下保留可复现协议，当前不要求把数值矩阵全部重跑。
+主结果是同点完成情况、误差与失败边界；峰值为辅助结果。新工作按[收束决策](research_focus.md)执行，
+历史载荷门槛与评价标签仍按原规则解释。
 
 ## RQ1：接触后的绕轴释放
 
@@ -34,7 +39,7 @@ nominal、(2,-2) mm/+5°、零 XY/-15°。同点参考与触发前状态应完�
 
 ```bash
 uv run python -m experiments.control.rq2_lateral --stage paired --jobs 3 --out runs/rq2_my_run
-# 在同一协议/来源目录完成预声明代表点的独立数值复核
+# 需要复现历史数值协议或诊断主结论时，显式运行；不是 paired 的自动后续
 uv run python -m experiments.control.rq2_lateral --stage numerics --jobs 3 --out runs/rq2_my_run
 ```
 
@@ -60,5 +65,5 @@ uv run python -m experiments.control.rq2_lateral --stage numerics --jobs 3 --out
 两轮工况集合不同，不能合成统一成功率曲线。当前三控制器属于方法库；
 [框架历史对照](historical_evidence.md)与自由空间验证不替代接触策略研究。
 
-后续先审查 RQ1/RQ2 配对与数值证据缺口，再独立研究边界工况、搜索、预紧或控制周期。
-SE(3) 策略接入 HexFrame 属独立集成任务。
+已完成[主结果、卡滞边界与集成选择](control_main_results.md)的摘要核对，下一步推进候选策略接入 HexFrame。
+精细步长、搜索、预紧或控制周期研究不自动追加；既有 SENSITIVE 结果作为补充限制保留。

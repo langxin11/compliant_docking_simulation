@@ -1,4 +1,9 @@
-"""Research naming, numerical criteria, source fingerprints and strict reuse."""
+"""共享研究协议：离散点命名、来源指纹、记录复用与数值敏感性比较。
+
+网格输入为 (dx_mm, dy_mm, yaw_deg)，单次试验输入为 (dx_m, dy_m, yaw_deg)。
+评价读取已保存的几何残差和接触载荷，不向控制器提供目标真值。
+write_json 写入运行记录；其余辅助函数返回数据。两步长比较不等于数学收敛证明。
+"""
 from __future__ import annotations
 
 import ast
@@ -16,26 +21,38 @@ from .rollout import _json_default
 
 
 def point_key(point):
+    """将 (dx_mm, dy_mm, yaw_deg) 编成稳定文件名片段，统一正负零。"""
     def token(value):
         return f"{0. if value == 0 else value:+g}".replace("+", "p").replace("-", "m").replace(".", "d")
     return "grid_x"+token(point[0])+"_y"+token(point[1])+"_yaw"+token(point[2])
 
 def record_name(point, setting="baseline"):
+    """生成历史绕轴释放记录名；setting 决定半步长后缀。"""
     return point_key(point)+"_released"+("_dt_half" if setting == "dt_half" else "")
 
 def error_tuple(point):
+    """将网格误差转换为单次试验输入，偏航继续使用角度。
+
+    Args:
+        point: (dx_mm, dy_mm, yaw_deg)，施加到规划目标估计的误差。
+
+    Returns:
+        (dx_m, dy_m, yaw_deg)；不修改输入。
+    """
     return point[0]/1000., point[1]/1000., point[2]
 
 def axes_checked(values):
+    """校验网格轴非空且有限，返回排序去重后的数值；无效输入抛出 ValueError。"""
     if not values or not np.isfinite(values).all():
         raise ValueError("Grid axes must contain finite values")
     return sorted(set(float(v) for v in values))
 
 def passed(record):
+    """按已保存 assessment 判断是否为落座候选，不重新计算门禁。"""
     return record["assessment"]["status"] == "CANDIDATE_PASS"
 
 def adjacent_pairs(axes):
-    """Only actual neighboring grid nodes, never diagonal interpolation."""
+    """返回网格中单轴相邻节点对，不连接对角点或推断连续区域。"""
     result = []
     for point in itertools.product(*axes):
         for axis in range(3):
@@ -47,6 +64,7 @@ def adjacent_pairs(axes):
     return result
 
 def midpoint_candidates(pairs, records, limit):
+    """从相邻成功/失败节点提出未采样中点，按 limit 限制数量；不执行仿真。"""
     candidates = []
     for a, b in pairs:
         if a not in records or b not in records or passed(records[a]) == passed(records[b]):
@@ -72,6 +90,7 @@ def midpoint_candidates(pairs, records, limit):
     return selected[:limit]
 
 def margin(record):
+    """返回残差/载荷相对历史阈值的最大比值；缺评价时返回无穷大。"""
     g, c = record.get("geometry_evaluation"), record.get("contact_load_gate")
     if g is None or c is None:
         return float("inf")
@@ -83,6 +102,7 @@ def margin(record):
                1.01 if g["last_second_stop_contact_fraction"] < .95 else 0.)
 
 def boundary_points(records, pairs, limit):
+    """按已有成功/失败与余量交替选择至多 limit 个复核点；不假定对称性。"""
     pool = {p for a, b in pairs if a in records and b in records
             and passed(records[a]) != passed(records[b]) for p in (a, b)}
     pool |= {p for p, r in records.items() if r.get("grid_stage") == "refinement"}
@@ -101,6 +121,7 @@ def boundary_points(records, pairs, limit):
     return selected[:limit]
 
 def source_manifest(base):
+    """读取共享代码、入口、场景和资产清单，返回版本及 SHA-256 来源记录。"""
     files = sorted((REPO_ROOT/"src").rglob("*.py")) + [
         REPO_ROOT/"experiments/petal_insertion_suite.py", REPO_ROOT/"experiments/petal_capture_grid.py",
         REPO_ROOT/"experiments/run_docking.py", REPO_ROOT/"experiments/insertion_suite.py",
@@ -111,6 +132,7 @@ def source_manifest(base):
                 assets=json.loads((base.tool.mjcf.parent/"manifest.json").read_text()))
 
 def write_json(path, value):
+    """经同目录临时文件替换目标 JSON；目录须已存在，支持数组和路径转换。"""
     temporary = path.with_suffix(path.suffix+".tmp")
     temporary.write_text(json.dumps(value, indent=2, ensure_ascii=False, default=_json_default)+"\n")
     temporary.replace(path)
@@ -135,6 +157,7 @@ def reusable_sources(previous, current, directory):
 
 
 def sensitivity(a, b):
+    """比较两条记录的状态、几何残差与载荷峰值，返回历史数值敏感性标签。"""
     if not a.get("geometry_evaluation") or not b.get("geometry_evaluation"):
         return dict(status="NOT_COMPARABLE", differences={})
     g1, g2 = a["geometry_evaluation"], b["geometry_evaluation"]

@@ -1,4 +1,8 @@
-"""Qualify the fixed original Petal model; never change interface or controller."""
+"""当前默认 Petal 固定模型的资格检查入口。
+
+读取正式场景及资产清单，检查双引擎一致性、初值和哈希；向新目录写检查报告。
+PASS 仅覆盖声明的固定基座、零重力刚体模型检查，不代表完成对接或实机标定。
+"""
 from __future__ import annotations
 
 import argparse
@@ -11,6 +15,7 @@ from compliant_docking.scene import REPO_ROOT, load_scene
 
 
 def check_baseline():
+    """核对默认模型与资产 SHA-256，返回检查数据；资产不匹配时抛出 ValueError。"""
     scene = load_scene("scenes/iiwa14_petal_insertion.yaml")
     result = preflight(scene)
     manifest_path = scene.tool.mjcf.parent / "manifest.json"
@@ -28,6 +33,7 @@ def check_baseline():
                 model_preflight=result, inputs_sha256=fingerprints)
 
 def main(argv=None):
+    """运行模型检查并写 baseline_check.json；拒绝向非空目录写入。"""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--out", type=Path, required=True)
     args = parser.parse_args(argv)

@@ -216,7 +216,7 @@ def run_grid(args):
     xy, yaw = axes_checked(args.xy_mm), axes_checked(args.yaw_deg)
     if min(args.refine, args.boundary_checks) < 0:
         raise ValueError("Refinement and boundary budgets must be nonnegative")
-    base = load_scene("scenes/iiwa14_petal_insertion.yaml")
+    base = load_scene("scenes/iiwa14_petal_original_insertion.yaml")
     plan = dict(xy_mm=xy, yaw_deg=yaw, refine=args.refine, boundary_checks=args.boundary_checks,
                 profile="released", control_period_s=.0005, physics_dt_s=base.physics.timestep,
                 all_pass_outer_probe_budget=4,

@@ -1,4 +1,9 @@
-"""Single-source persisted trial telemetry and recorded-state previews."""
+"""单次对接的遥测持久化与记录状态预览，供模型和控制研究复用。
+
+CASES 使用 (dx_m, dy_m, yaw_deg)，与 research.cases.POINTS 的 mm 输入不同。
+save_rollout 写入 JSON/NPZ；core 模式省略部分逐步诊断，不影响本次内存评价。
+preview_rollout 根据已记录关节状态出图，不重新执行控制试验。
+"""
 from __future__ import annotations
 
 import json

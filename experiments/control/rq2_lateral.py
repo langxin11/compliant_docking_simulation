@@ -1,8 +1,8 @@
-"""Matched yaw-only / lateral-release trials through the existing rollout.
+"""RQ2：固定绕轴释放后的 XY 保持/释放同点对照。
 
-One-factor comparisons use identical trajectories. Physical refinement keeps
-control and sensor delay fixed. An optional slower trial is a separate factor,
-only when a seated point still has sensitive peak loads after three steps.
+POINTS 使用 (mm, mm, deg)，run_one 转为单次试验的 (m, m, deg)。
+默认 paired 阶段仅运行九点配对；numerics 和 speed 为显式补充阶段。
+旧入口 legacy-full 保留历史追加规则。所有阶段写入计划、来源和评价，不修改冻结报告。
 """
 from __future__ import annotations
 
@@ -24,10 +24,12 @@ PROFILES = ("released", "lateral_released")
 
 
 def record_name(case, profile, setting="baseline"):
+    """按工况、策略和步长设置生成记录名。"""
     return f"{case}_{profile}" + ("" if setting == "baseline" else "_"+setting)
 
 
 def read_records(out):
+    """读取目录中的试验 JSON，按 (case, profile, numerics) 索引；跳过非试验元数据。"""
     result = {}
     for path in out.glob("*.json"):
         r = json.loads(path.read_text())
@@ -37,6 +39,7 @@ def read_records(out):
 
 
 def run_one(out, base, case, profile, setting, stage):
+    """将 POINTS 的 XY 从 mm 转为 m，执行试验并保存工况与阶段标签。"""
     from compliant_docking.research import protocols as grid
     from compliant_docking.research.petal_trials import run_case
     x, y, yaw = POINTS[case]
@@ -48,6 +51,7 @@ def run_one(out, base, case, profile, setting, stage):
 
 
 def execute(out, base, jobs, stage, workers):
+    """并行运行缺少 JSON 记录的工况；调用方须先校验目录来源与计划。"""
     existing = read_records(out)
     pending = [job for job in jobs if job not in existing]
     if not pending:
@@ -59,6 +63,7 @@ def execute(out, base, jobs, stage, workers):
 
 
 def compare_pairs(out):
+    """核对同点时间、参考和触发前关节状态完全相同，写配对检查；不一致则报错。"""
     from compliant_docking.research import protocols as grid
     records = read_records(out)
     checks = {}
@@ -84,6 +89,7 @@ def compare_pairs(out):
 
 
 def summarize(out):
+    """汇总各策略的离散通过数和已有步长配对，写 JSON 并返回数值比较结果。"""
     from compliant_docking.research import protocols as grid
     records = read_records(out)
     checks = {}
@@ -105,6 +111,7 @@ def summarize(out):
 
 
 def run_study(args):
+    """按 paired/numerics/legacy-full 调度并持久化固定协议；新入口默认止于 paired。"""
     from compliant_docking.research import protocols as grid
     from compliant_docking.research.petal_trials import preflight
     stage = getattr(args, "stage", "legacy-full")
@@ -112,7 +119,7 @@ def run_study(args):
         return run_speed(args)
     out = args.out
     out.mkdir(parents=True, exist_ok=True)
-    base = load_scene("scenes/iiwa14_petal_insertion.yaml")
+    base = load_scene("scenes/iiwa14_petal_original_insertion.yaml")
     plan = dict(points=POINTS, pilot=PILOT, profiles=PROFILES, numerical_cases=NUMERICAL,
                 physics_dt_s=base.physics.timestep, control_period_s=.0005, feedback_delay_s=.0005,
                 lateral_before_N_m=80., lateral_after_N_m=0., release_s=.25,
@@ -180,7 +187,7 @@ def run_speed(args):
     """Separate paired insertion-speed factor; never part of RQ2 primary pairs."""
     from compliant_docking.research import protocols as grid
     from compliant_docking.research.petal_trials import preflight
-    base = load_scene("scenes/iiwa14_petal_insertion.yaml")
+    base = load_scene("scenes/iiwa14_petal_original_insertion.yaml")
     out = args.out
     out.mkdir(parents=True, exist_ok=True)
     plan = dict(primary_factor="insertion_speed", case=args.speed_case,
@@ -203,6 +210,7 @@ def run_speed(args):
     summarize(out)
 
 def build_parser():
+    """建立配对及显式补充阶段参数；speed 使用独立目录与因素。"""
     import argparse
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--stage", choices=("paired", "numerics", "speed"), default="paired")
@@ -213,6 +221,7 @@ def build_parser():
     return parser
 
 def main(argv=None):
+    """校验参数适用阶段后运行；跨阶段使用 speed 参数时拒绝执行。"""
     args = build_parser().parse_args(argv)
     if args.stage != "speed" and (args.speed_case != "yaw_n15" or args.setting != ["baseline"]):
         raise ValueError("--speed-case/--setting apply only to the independent speed factor")

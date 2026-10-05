@@ -1,4 +1,8 @@
-"""Declared historical discrete cases, shared independently of entry points."""
+"""研究协议使用的九个离散误差点，供控制编排共享。
+
+POINTS 的值为 (dx_mm, dy_mm, yaw_deg)，均施加到目标估计；真值仅用于评分。
+调用单次试验前须把 XY 从 mm 转为 m。点集不表示连续捕获范围。
+"""
 POINTS = {"nx6": (-6., 0., 0.), "px6": (6., 0., 0.),
           "ny6": (0., -6., 0.), "py6": (0., 6., 0.),
           "combo_ny6_p15": (0., -6., 15.), "combo_py6_n15": (0., 6., -15.),

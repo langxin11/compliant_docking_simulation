@@ -44,9 +44,9 @@ def on_files(files, config):
 
 
 def on_page_markdown(markdown, page, config, files):
-    # Keep repository-relative links usable in Git while routing the site to
-    # generated evidence pages; the source document remains unchanged.
+    # 源文档使用可在仓库中打开的相对链接，构建站点时转向生成的历史证据页。
     if page.file.src_uri in {"git_stage_closeout_20261003.md", "control_research.md",
-                             "models_interfaces.md", "historical_evidence.md", "development_plan.md"}:
+                             "models_interfaces.md", "historical_evidence.md", "development_plan.md",
+                             "control_main_results.md", "handoff_20261004.md"}:
         return markdown.replace("(../results/", "(reports/")
     return markdown

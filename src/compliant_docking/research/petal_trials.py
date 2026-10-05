@@ -1,4 +1,9 @@
-"""Fixed-scene Petal trials, evaluation and feedback audit shared by all layers."""
+"""固定场景的 Petal 单次试验、评价与反馈审计，共享给各实验入口。
+
+误差 error=(dx_m, dy_m, yaw_deg) 仅注入目标估计；目标真值用于评分与显示。
+run_case 生成配置、执行完整流程并写入运行目录；物理步长复核固定控制周期和反馈延迟。
+CANDIDATE_PASS 表示声明条件下的落座候选，不表示真实锁紧或连续捕获范围。
+"""
 from __future__ import annotations
 
 import json
@@ -93,6 +98,7 @@ def feedback_audit(log):
                 final_lateral_stiffness_N_m=last["lateral_stiffness"].tolist(),
                 first_loaded_stop_s=first_stop)
 
+# 检查初值及固定随机位形的运动学/惯量一致性；返回数据，不执行对接。
 def preflight(scene):
     model, robot = scene.build_mjmodel(), load_assembled_pin_model(scene)
     data, pin_data = mujoco.MjData(model), robot.createData()
@@ -127,6 +133,7 @@ def preflight(scene):
                 upper_position_limits=robot.upperPositionLimit.tolist(),
                 full_tool_inertia_preserved=True, default_scene_replaced=False)
 
+# 执行完整试验并持久化；error 单位 (m, m, deg)，setting 只选择声明的时间方案。
 def run_case(out, base, case, profile, setting, preview=False, error=None, telemetry="auto"):
     # dt refinement reruns re-verify peaks/gates only; conclusions live in the JSON
     # records, so per-step diagnostic channels are not persisted for them by default.
@@ -184,6 +191,7 @@ def run_case(out, base, case, profile, setting, preview=False, error=None, telem
         preview_rollout(out, scene, log)
     return metadata
 
+# 从已有 JSON 汇总评价并绘图；历史 assessment 按原门禁读取。
 def summarize(out):
     records = []
     for path in sorted(out.glob("*.json")):

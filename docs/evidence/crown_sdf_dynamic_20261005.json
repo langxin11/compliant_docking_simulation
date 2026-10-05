@@ -1,0 +1,919 @@
+{
+  "run_directory": "runs/crown_sdf_dynamic_20261005",
+  "plan": {
+    "cases": {
+      "nominal": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "xy": [
+        0.002,
+        -0.002,
+        0.0
+      ],
+      "combined": [
+        0.002,
+        -0.002,
+        5.0
+      ]
+    },
+    "profile": "compliant",
+    "physics_control_delay_s": 0.001,
+    "hold_s": 8.0,
+    "early_contact_is_not_instability_criterion": true,
+    "dynamic_tail_limits": {
+      "linear_m_s": 0.003,
+      "angular_deg_s": 2.0,
+      "contact_fraction": 0.95
+    },
+    "original_benchmark_and_geometry_reported_separately": true
+  },
+  "results": {
+    "nominal": {
+      "dynamics": {
+        "finite": true,
+        "simulation_warnings": {},
+        "tail_settled_under_original_speed_limits": true,
+        "speed_limit_mm_s": 3.0,
+        "angular_speed_limit_deg_s": 2.0,
+        "tail": {
+          "window": 8,
+          "max_speed_mm_s": 2.9793901988021156,
+          "max_angular_speed_deg_s": 0.7757558242670659,
+          "position_peak_to_peak_mm": [
+            0.03730706859388219,
+            0.10325912890779554,
+            0.02185238292967684
+          ],
+          "force_min_N": 1.3788149311015039,
+          "force_max_N": 5.109412903013553,
+          "force_std_N": 0.4299375468777257,
+          "contact_fraction": 1.0
+        },
+        "hold_windows": [
+          {
+            "window": 1,
+            "max_speed_mm_s": 2.4679625975139903,
+            "max_angular_speed_deg_s": 0.9732753574510807,
+            "position_peak_to_peak_mm": [
+              0.1138702458451618,
+              0.15605165011028932,
+              0.034597970500038766
+            ],
+            "force_min_N": 2.2162431173747885,
+            "force_max_N": 5.05994508604583,
+            "force_std_N": 0.41216993302758953,
+            "contact_fraction": 1.0
+          },
+          {
+            "window": 2,
+            "max_speed_mm_s": 3.0114357510769727,
+            "max_angular_speed_deg_s": 0.8018495557810323,
+            "position_peak_to_peak_mm": [
+              0.01751658861605474,
+              0.055817748982223137,
+              0.019555242711577492
+            ],
+            "force_min_N": 2.159460472597234,
+            "force_max_N": 4.942431778004815,
+            "force_std_N": 0.3825751123790521,
+            "contact_fraction": 1.0
+          },
+          {
+            "window": 3,
+            "max_speed_mm_s": 2.7622950709949388,
+            "max_angular_speed_deg_s": 0.8282657135887478,
+            "position_peak_to_peak_mm": [
+              0.019472934547440715,
+              0.039224561817152725,
+              0.01870002336207266
+            ],
+            "force_min_N": 2.3915828478826735,
+            "force_max_N": 5.143768795120361,
+            "force_std_N": 0.37073716574697924,
+            "contact_fraction": 1.0
+          },
+          {
+            "window": 4,
+            "max_speed_mm_s": 2.3467398051112984,
+            "max_angular_speed_deg_s": 0.8279802928795073,
+            "position_peak_to_peak_mm": [
+              0.014825456249793582,
+              0.04425947066388769,
+              0.01862980449462981
+            ],
+            "force_min_N": 0.0,
+            "force_max_N": 4.8274127727643545,
+            "force_std_N": 0.4094282836064481,
+            "contact_fraction": 0.998
+          },
+          {
+            "window": 5,
+            "max_speed_mm_s": 2.493008355138516,
+            "max_angular_speed_deg_s": 0.9400947670272825,
+            "position_peak_to_peak_mm": [
+              0.030063833881385695,
+              0.09136571185847098,
+              0.021994555446214203
+            ],
+            "force_min_N": 2.15714112474506,
+            "force_max_N": 5.172011457330264,
+            "force_std_N": 0.42861026075649417,
+            "contact_fraction": 1.0
+          },
+          {
+            "window": 6,
+            "max_speed_mm_s": 2.696606195887037,
+            "max_angular_speed_deg_s": 0.9752383362012985,
+            "position_peak_to_peak_mm": [
+              0.022014701998222894,
+              0.05142958508463913,
+              0.019467088356817097
+            ],
+            "force_min_N": 1.7877600326629441,
+            "force_max_N": 5.311778830851379,
+            "force_std_N": 0.4322911491141173,
+            "contact_fraction": 1.0
+          },
+          {
+            "window": 7,
+            "max_speed_mm_s": 2.4732878256287623,
+            "max_angular_speed_deg_s": 0.8030624675589945,
+            "position_peak_to_peak_mm": [
+              0.04014027848727808,
+              0.08872515396957104,
+              0.02776271477050729
+            ],
+            "force_min_N": 0.0,
+            "force_max_N": 5.259232806075567,
+            "force_std_N": 0.43842926868697024,
+            "contact_fraction": 0.996
+          },
+          {
+            "window": 8,
+            "max_speed_mm_s": 2.9793901988021156,
+            "max_angular_speed_deg_s": 0.7757558242670659,
+            "position_peak_to_peak_mm": [
+              0.03730706859388219,
+              0.10325912890779554,
+              0.02185238292967684
+            ],
+            "force_min_N": 1.3788149311015039,
+            "force_max_N": 5.109412903013553,
+            "force_std_N": 0.4299375468777257,
+            "contact_fraction": 1.0
+          }
+        ],
+        "first_contact_s": 11.992999999998792,
+        "first_contact_phase": "insert",
+        "post_contact_max_speed_mm_s": 20.253607184448253,
+        "post_contact_max_angular_speed_deg_s": 23.327298347261586,
+        "post_contact_contact_fraction": 0.935342732134176,
+        "force_over_limit_duration_s": 0.0,
+        "moment_over_limit_duration_s": 0.023,
+        "max_penetration_mm": 1.5491139055077532,
+        "tail_max_penetration_mm": 0.16090637838603403,
+        "joint_position_violation": false,
+        "torque_saturation_samples": 0,
+        "torque_saturation_ratio": 0.0,
+        "early_contact_is_not_instability_criterion": true
+      },
+      "loads": {
+        "status": "FAIL",
+        "reasons": [
+          "contact axial moment limit"
+        ],
+        "peak_contact_force_N": 23.302418845591045,
+        "peak_contact_axial_moment_Nm": 2.8769925195322115,
+        "force_limit_N": 40.0,
+        "axial_moment_limit_Nm": 2.0
+      },
+      "geometry": {
+        "status": "NOT_SEATED",
+        "reasons": [
+          "lateral alignment",
+          "above compact reference"
+        ],
+        "samples": [
+          {
+            "t": 23.334000000005535,
+            "root_height_mm": 48.519332496680555,
+            "lateral_mm": 2.709087963423723,
+            "tilt_deg": 0.41362927827340956,
+            "yaw_deg": 3.10174738049937,
+            "candidate_yaw_deg": 4.25,
+            "phase_error_deg": 1.1482526195006244,
+            "compact_height_gap_mm": 1.3319290016199568,
+            "mesh_clearance_mm": -0.15148546016989506
+          },
+          {
+            "t": 23.58400000000584,
+            "root_height_mm": 48.51867648842517,
+            "lateral_mm": 2.7027306848780213,
+            "tilt_deg": 0.42372378345563527,
+            "yaw_deg": 3.100568277933896,
+            "candidate_yaw_deg": 4.25,
+            "phase_error_deg": 1.1494317220661117,
+            "compact_height_gap_mm": 1.3312729933645726,
+            "mesh_clearance_mm": -0.12725291186025528
+          },
+          {
+            "t": 23.834000000006146,
+            "root_height_mm": 48.520021118204525,
+            "lateral_mm": 2.6983806068543625,
+            "tilt_deg": 0.4369384598791418,
+            "yaw_deg": 3.094151460318777,
+            "candidate_yaw_deg": 4.25,
+            "phase_error_deg": 1.155848539681216,
+            "compact_height_gap_mm": 1.3326176231439266,
+            "mesh_clearance_mm": -0.10373898444399066
+          },
+          {
+            "t": 24.08400000000645,
+            "root_height_mm": 48.531210754583384,
+            "lateral_mm": 2.704120574191472,
+            "tilt_deg": 0.43137825268130464,
+            "yaw_deg": 3.092560242398889,
+            "candidate_yaw_deg": 4.25,
+            "phase_error_deg": 1.1574397576011108,
+            "compact_height_gap_mm": 1.3438072595227877,
+            "mesh_clearance_mm": -0.1271807348853654
+          },
+          {
+            "t": 24.334000000006757,
+            "root_height_mm": 48.52384483556654,
+            "lateral_mm": 2.7075801624706326,
+            "tilt_deg": 0.4327954629320254,
+            "yaw_deg": 3.09884129482695,
+            "candidate_yaw_deg": 4.25,
+            "phase_error_deg": 1.15115870517306,
+            "compact_height_gap_mm": 1.3364413405059437,
+            "mesh_clearance_mm": -0.12326614308762196
+          }
+        ],
+        "locking_verified": false
+      },
+      "original_gate": {
+        "status": "FAIL",
+        "reasons": [
+          "axial moment limit"
+        ],
+        "duration_s": 24.334000000006757,
+        "first_contact_s": 11.992999999998792,
+        "final_depth_mm": 21.476155164452837,
+        "final_lateral_mm": 2.70758016242483,
+        "final_tilt_deg": 0.4327954632183482,
+        "final_yaw_deg": 3.098841294739487,
+        "contact_yaw_change_deg": 3.0986254024369706,
+        "post_contact_advance_mm": 7.277974748715721,
+        "peak_force_N": 23.287977084155457,
+        "peak_axial_moment_Nm": 2.024135173193926,
+        "torque_saturation_ratio": 0.0
+      },
+      "feedback": {
+        "status": "PASS",
+        "control_updates": 24335,
+        "max_feedback_age_error_s": 1.2221126888256606e-15,
+        "max_wrench_transform_error": 3.552713678800501e-15,
+        "max_solve_pose_error_m": 1.2252421299763228e-12,
+        "control_period_s": 0.001,
+        "final_yaw_stiffness_Nm_rad": 0.5,
+        "yaw_trigger_s": null,
+        "final_lateral_stiffness_N_m": [
+          80.0,
+          80.0
+        ],
+        "first_loaded_stop_s": null
+      },
+      "wall_s": 52.3994740479975,
+      "mathematical_stability_proved": false,
+      "locking_verified": false
+    },
+    "xy": {
+      "dynamics": {
+        "finite": true,
+        "simulation_warnings": {},
+        "tail_settled_under_original_speed_limits": true,
+        "speed_limit_mm_s": 3.0,
+        "angular_speed_limit_deg_s": 2.0,
+        "tail": {
+          "window": 8,
+          "max_speed_mm_s": 1.3937138415610497,
+          "max_angular_speed_deg_s": 1.090139208267936,
+          "position_peak_to_peak_mm": [
+            0.029227009463468852,
+            0.06851352162878799,
+            0.05040253748234136
+          ],
+          "force_min_N": 2.099122927227254,
+          "force_max_N": 7.590581732774953,
+          "force_std_N": 0.8307714716736448,
+          "contact_fraction": 1.0
+        },
+        "hold_windows": [
+          {
+            "window": 1,
+            "max_speed_mm_s": 2.157725680547522,
+            "max_angular_speed_deg_s": 2.3012798534759726,
+            "position_peak_to_peak_mm": [
+              0.1424942666389355,
+              0.04246942725139036,
+              0.08347670671982055
+            ],
+            "force_min_N": 2.8474929842212697,
+            "force_max_N": 4.7237348262009125,
+            "force_std_N": 0.1823301745067771,
+            "contact_fraction": 1.0
+          },
+          {
+            "window": 2,
+            "max_speed_mm_s": 4.518663448806861,
+            "max_angular_speed_deg_s": 6.249152606334143,
+            "position_peak_to_peak_mm": [
+              0.30642417552589624,
+              0.14578332033671204,
+              0.20419072273208938
+            ],
+            "force_min_N": 2.8891644877861498,
+            "force_max_N": 4.993887486995584,
+            "force_std_N": 0.15482527174662378,
+            "contact_fraction": 1.0
+          },
+          {
+            "window": 3,
+            "max_speed_mm_s": 11.69645485459879,
+            "max_angular_speed_deg_s": 8.80323991086503,
+            "position_peak_to_peak_mm": [
+              0.33214043867996684,
+              0.6672103467751933,
+              0.4368394895305494
+            ],
+            "force_min_N": 2.168142639719715,
+            "force_max_N": 14.093831496534634,
+            "force_std_N": 0.9606674687101753,
+            "contact_fraction": 1.0
+          },
+          {
+            "window": 4,
+            "max_speed_mm_s": 3.9633363070344445,
+            "max_angular_speed_deg_s": 5.25176207553398,
+            "position_peak_to_peak_mm": [
+              0.23068496246131978,
+              0.18928246166532992,
+              0.26876723243185463
+            ],
+            "force_min_N": 2.2882618051102126,
+            "force_max_N": 11.842719848114472,
+            "force_std_N": 1.1886403293423422,
+            "contact_fraction": 1.0
+          },
+          {
+            "window": 5,
+            "max_speed_mm_s": 1.222002812641175,
+            "max_angular_speed_deg_s": 1.072506874200003,
+            "position_peak_to_peak_mm": [
+              0.057564394911848525,
+              0.09653422352995378,
+              0.05774442351530462
+            ],
+            "force_min_N": 1.8503284572337761,
+            "force_max_N": 7.800036137988946,
+            "force_std_N": 0.7356719688132072,
+            "contact_fraction": 1.0
+          },
+          {
+            "window": 6,
+            "max_speed_mm_s": 1.993330706903391,
+            "max_angular_speed_deg_s": 1.4118139028994185,
+            "position_peak_to_peak_mm": [
+              0.04855114667105917,
+              0.06971905695474234,
+              0.04792448289786533
+            ],
+            "force_min_N": 1.963865612684065,
+            "force_max_N": 8.406521528992805,
+            "force_std_N": 0.9960575909429102,
+            "contact_fraction": 1.0
+          },
+          {
+            "window": 7,
+            "max_speed_mm_s": 0.8368428642200786,
+            "max_angular_speed_deg_s": 1.2243122311432961,
+            "position_peak_to_peak_mm": [
+              0.022865780529243186,
+              0.06537944503748339,
+              0.02531631701002679
+            ],
+            "force_min_N": 2.4405219994197953,
+            "force_max_N": 6.9979893692181765,
+            "force_std_N": 0.8487961378894001,
+            "contact_fraction": 1.0
+          },
+          {
+            "window": 8,
+            "max_speed_mm_s": 1.3937138415610497,
+            "max_angular_speed_deg_s": 1.090139208267936,
+            "position_peak_to_peak_mm": [
+              0.029227009463468852,
+              0.06851352162878799,
+              0.05040253748234136
+            ],
+            "force_min_N": 2.099122927227254,
+            "force_max_N": 7.590581732774953,
+            "force_std_N": 0.8307714716736448,
+            "contact_fraction": 1.0
+          }
+        ],
+        "first_contact_s": 11.966999999998807,
+        "first_contact_phase": "insert",
+        "post_contact_max_speed_mm_s": 20.56333673716578,
+        "post_contact_max_angular_speed_deg_s": 11.520172749472549,
+        "post_contact_contact_fraction": 0.9462539400307121,
+        "force_over_limit_duration_s": 0.0,
+        "moment_over_limit_duration_s": 0.002,
+        "max_penetration_mm": 0.9549959335049779,
+        "tail_max_penetration_mm": 0.5083245943520013,
+        "joint_position_violation": false,
+        "torque_saturation_samples": 0,
+        "torque_saturation_ratio": 0.0,
+        "early_contact_is_not_instability_criterion": true
+      },
+      "loads": {
+        "status": "FAIL",
+        "reasons": [
+          "contact axial moment limit"
+        ],
+        "peak_contact_force_N": 14.093831496534634,
+        "peak_contact_axial_moment_Nm": 2.386916251813621,
+        "force_limit_N": 40.0,
+        "axial_moment_limit_Nm": 2.0
+      },
+      "geometry": {
+        "status": "SEATED_CANDIDATE",
+        "reasons": [],
+        "samples": [
+          {
+            "t": 23.33900000000554,
+            "root_height_mm": 46.99812490559102,
+            "lateral_mm": 0.10842182769657503,
+            "tilt_deg": 0.4961458760082741,
+            "yaw_deg": 4.097143869345604,
+            "candidate_yaw_deg": 4.25,
+            "phase_error_deg": 0.15285613065438497,
+            "compact_height_gap_mm": -0.18927858946957837,
+            "mesh_clearance_mm": -0.6669942736817619
+          },
+          {
+            "t": 23.589000000005846,
+            "root_height_mm": 47.0316637748257,
+            "lateral_mm": 0.10333259877692753,
+            "tilt_deg": 0.47860437046963283,
+            "yaw_deg": 4.088067249093085,
+            "candidate_yaw_deg": 4.25,
+            "phase_error_deg": 0.16193275090691372,
+            "compact_height_gap_mm": -0.15573972023489452,
+            "mesh_clearance_mm": -0.617802614521698
+          },
+          {
+            "t": 23.839000000006152,
+            "root_height_mm": 47.0059192861767,
+            "lateral_mm": 0.11735636471118771,
+            "tilt_deg": 0.4768352017967629,
+            "yaw_deg": 4.078762486867809,
+            "candidate_yaw_deg": 4.25,
+            "phase_error_deg": 0.1712375131321835,
+            "compact_height_gap_mm": -0.18148420888389888,
+            "mesh_clearance_mm": -0.6522025015761601
+          },
+          {
+            "t": 24.089000000006457,
+            "root_height_mm": 46.99487724035617,
+            "lateral_mm": 0.1349960592688756,
+            "tilt_deg": 0.48525746413310433,
+            "yaw_deg": 4.095468340036692,
+            "candidate_yaw_deg": 4.25,
+            "phase_error_deg": 0.15453165996331109,
+            "compact_height_gap_mm": -0.19252625470442958,
+            "mesh_clearance_mm": -0.6710571853978595
+          },
+          {
+            "t": 24.339000000006763,
+            "root_height_mm": 46.98303957451583,
+            "lateral_mm": 0.1653030436441413,
+            "tilt_deg": 0.4770577592221259,
+            "yaw_deg": 4.104487128547256,
+            "candidate_yaw_deg": 4.25,
+            "phase_error_deg": 0.14551287145275182,
+            "compact_height_gap_mm": -0.20436392054477143,
+            "mesh_clearance_mm": -0.6827532408392595
+          }
+        ],
+        "locking_verified": false
+      },
+      "original_gate": {
+        "status": "PASS",
+        "reasons": [],
+        "duration_s": 24.339000000006763,
+        "first_contact_s": 11.966999999998807,
+        "final_depth_mm": 23.016960425513044,
+        "final_lateral_mm": 0.16530304479108837,
+        "final_tilt_deg": 0.47705775865142286,
+        "final_yaw_deg": 4.104487128454645,
+        "contact_yaw_change_deg": 4.104273377635889,
+        "post_contact_advance_mm": 9.110636121024696,
+        "peak_force_N": 14.299113754891343,
+        "peak_axial_moment_Nm": 1.5768071072222734,
+        "torque_saturation_ratio": 0.0
+      },
+      "feedback": {
+        "status": "PASS",
+        "control_updates": 24340,
+        "max_feedback_age_error_s": 1.2221126888256606e-15,
+        "max_wrench_transform_error": 1.7763568394002505e-15,
+        "max_solve_pose_error_m": 1.228961377108817e-12,
+        "control_period_s": 0.001,
+        "final_yaw_stiffness_Nm_rad": 0.5,
+        "yaw_trigger_s": null,
+        "final_lateral_stiffness_N_m": [
+          80.0,
+          80.0
+        ],
+        "first_loaded_stop_s": null
+      },
+      "wall_s": 52.400281666981755,
+      "mathematical_stability_proved": false,
+      "locking_verified": false
+    },
+    "combined": {
+      "dynamics": {
+        "finite": true,
+        "simulation_warnings": {},
+        "tail_settled_under_original_speed_limits": true,
+        "speed_limit_mm_s": 3.0,
+        "angular_speed_limit_deg_s": 2.0,
+        "tail": {
+          "window": 8,
+          "max_speed_mm_s": 1.1449606242049528,
+          "max_angular_speed_deg_s": 0.8468086748151556,
+          "position_peak_to_peak_mm": [
+            0.025286635665680807,
+            0.023423288308233037,
+            0.011229244126997884
+          ],
+          "force_min_N": 2.2410710973291152,
+          "force_max_N": 7.914028114148369,
+          "force_std_N": 0.5941006029238173,
+          "contact_fraction": 1.0
+        },
+        "hold_windows": [
+          {
+            "window": 1,
+            "max_speed_mm_s": 1.7662503998744152,
+            "max_angular_speed_deg_s": 3.1563927654060913,
+            "position_peak_to_peak_mm": [
+              0.17349381919229834,
+              0.1637041246346782,
+              0.11763475401965762
+            ],
+            "force_min_N": 2.0664260261830694,
+            "force_max_N": 7.01779286634126,
+            "force_std_N": 0.5525309950747859,
+            "contact_fraction": 1.0
+          },
+          {
+            "window": 2,
+            "max_speed_mm_s": 1.1558879947622085,
+            "max_angular_speed_deg_s": 0.9019637448974537,
+            "position_peak_to_peak_mm": [
+              0.026433423224631634,
+              0.019290903202517917,
+              0.013274417403452698
+            ],
+            "force_min_N": 1.9024144820642888,
+            "force_max_N": 7.464469749595427,
+            "force_std_N": 0.6423176226564655,
+            "contact_fraction": 1.0
+          },
+          {
+            "window": 3,
+            "max_speed_mm_s": 0.7837038442474378,
+            "max_angular_speed_deg_s": 0.6979156037326716,
+            "position_peak_to_peak_mm": [
+              0.023814346788350843,
+              0.017475234626862512,
+              0.011073265786143427
+            ],
+            "force_min_N": 2.414873482468131,
+            "force_max_N": 7.7637636399399135,
+            "force_std_N": 0.6213615934819005,
+            "contact_fraction": 1.0
+          },
+          {
+            "window": 4,
+            "max_speed_mm_s": 0.902134356774929,
+            "max_angular_speed_deg_s": 0.9331922101829768,
+            "position_peak_to_peak_mm": [
+              0.011718815629441725,
+              0.009155651289838307,
+              0.0074412611807406215
+            ],
+            "force_min_N": 2.2622640863226073,
+            "force_max_N": 7.0259547283550345,
+            "force_std_N": 0.6252233324653418,
+            "contact_fraction": 1.0
+          },
+          {
+            "window": 5,
+            "max_speed_mm_s": 1.491544444361413,
+            "max_angular_speed_deg_s": 0.9048854170456644,
+            "position_peak_to_peak_mm": [
+              0.022371458277120386,
+              0.021641988485421315,
+              0.009988494529988845
+            ],
+            "force_min_N": 1.8571514225985057,
+            "force_max_N": 7.089054957545592,
+            "force_std_N": 0.6617174769729018,
+            "contact_fraction": 1.0
+          },
+          {
+            "window": 6,
+            "max_speed_mm_s": 0.7300668237562025,
+            "max_angular_speed_deg_s": 0.6739349015163405,
+            "position_peak_to_peak_mm": [
+              0.022201294910824454,
+              0.031108721796124783,
+              0.01332353899941019
+            ],
+            "force_min_N": 2.295937412909218,
+            "force_max_N": 8.025396988424534,
+            "force_std_N": 0.638776383764074,
+            "contact_fraction": 1.0
+          },
+          {
+            "window": 7,
+            "max_speed_mm_s": 1.130643739732349,
+            "max_angular_speed_deg_s": 0.8960963610500975,
+            "position_peak_to_peak_mm": [
+              0.029784737616627973,
+              0.015310161475989847,
+              0.01464034923626123
+            ],
+            "force_min_N": 1.958044111556838,
+            "force_max_N": 7.755967467064861,
+            "force_std_N": 0.6859311840092387,
+            "contact_fraction": 1.0
+          },
+          {
+            "window": 8,
+            "max_speed_mm_s": 1.1449606242049528,
+            "max_angular_speed_deg_s": 0.8468086748151556,
+            "position_peak_to_peak_mm": [
+              0.025286635665680807,
+              0.023423288308233037,
+              0.011229244126997884
+            ],
+            "force_min_N": 2.2410710973291152,
+            "force_max_N": 7.914028114148369,
+            "force_std_N": 0.5941006029238173,
+            "contact_fraction": 1.0
+          }
+        ],
+        "first_contact_s": 11.758999999998922,
+        "first_contact_phase": "insert",
+        "post_contact_max_speed_mm_s": 26.659882018630647,
+        "post_contact_max_angular_speed_deg_s": 22.40822808547269,
+        "post_contact_contact_fraction": 0.9226611557109927,
+        "force_over_limit_duration_s": 0.0,
+        "moment_over_limit_duration_s": 0.013000000000000001,
+        "max_penetration_mm": 1.5105828256911413,
+        "tail_max_penetration_mm": 0.5447268944188577,
+        "joint_position_violation": false,
+        "torque_saturation_samples": 0,
+        "torque_saturation_ratio": 0.0,
+        "early_contact_is_not_instability_criterion": true
+      },
+      "loads": {
+        "status": "FAIL",
+        "reasons": [
+          "contact axial moment limit"
+        ],
+        "peak_contact_force_N": 21.350901508515907,
+        "peak_contact_axial_moment_Nm": 3.576490424030546,
+        "force_limit_N": 40.0,
+        "axial_moment_limit_Nm": 2.0
+      },
+      "geometry": {
+        "status": "SEATED_CANDIDATE",
+        "reasons": [],
+        "samples": [
+          {
+            "t": 23.33900000000554,
+            "root_height_mm": 47.06986329903645,
+            "lateral_mm": 0.4587974192264873,
+            "tilt_deg": 0.24776456144499215,
+            "yaw_deg": 4.537956093321483,
+            "candidate_yaw_deg": 4.25,
+            "phase_error_deg": 0.2879560933214975,
+            "compact_height_gap_mm": -0.11754019602414761,
+            "mesh_clearance_mm": -0.47546041677463957
+          },
+          {
+            "t": 23.589000000005846,
+            "root_height_mm": 47.07126768264314,
+            "lateral_mm": 0.45642387871478296,
+            "tilt_deg": 0.25197878831415577,
+            "yaw_deg": 4.529333925861561,
+            "candidate_yaw_deg": 4.25,
+            "phase_error_deg": 0.27933392586155037,
+            "compact_height_gap_mm": -0.11613581241746301,
+            "mesh_clearance_mm": -0.4786197038000248
+          },
+          {
+            "t": 23.839000000006152,
+            "root_height_mm": 47.06556508401039,
+            "lateral_mm": 0.4597586914809357,
+            "tilt_deg": 0.2505854198922384,
+            "yaw_deg": 4.527335014530777,
+            "candidate_yaw_deg": 4.25,
+            "phase_error_deg": 0.27733501453076315,
+            "compact_height_gap_mm": -0.12183841105021381,
+            "mesh_clearance_mm": -0.48304177556795364
+          },
+          {
+            "t": 24.089000000006457,
+            "root_height_mm": 47.06782029442502,
+            "lateral_mm": 0.4530321990837196,
+            "tilt_deg": 0.25218099509039155,
+            "yaw_deg": 4.523427472535454,
+            "candidate_yaw_deg": 4.25,
+            "phase_error_deg": 0.2734274725354453,
+            "compact_height_gap_mm": -0.11958320063557709,
+            "mesh_clearance_mm": -0.4810933611665638
+          },
+          {
+            "t": 24.339000000006763,
+            "root_height_mm": 47.0700571223085,
+            "lateral_mm": 0.44805645141246153,
+            "tilt_deg": 0.2524301088230492,
+            "yaw_deg": 4.52076423707047,
+            "candidate_yaw_deg": 4.25,
+            "phase_error_deg": 0.27076423707046615,
+            "compact_height_gap_mm": -0.1173463727521043,
+            "mesh_clearance_mm": -0.4743841111089081
+          }
+        ],
+        "locking_verified": false
+      },
+      "original_gate": {
+        "status": "PASS",
+        "reasons": [],
+        "duration_s": 24.339000000006763,
+        "first_contact_s": 11.758999999998922,
+        "final_depth_mm": 22.929942877717103,
+        "final_lateral_mm": 0.4480564511552112,
+        "final_tilt_deg": 0.252430108251293,
+        "final_yaw_deg": 4.5207642369794785,
+        "contact_yaw_change_deg": -0.4659534965226415,
+        "post_contact_advance_mm": 10.947124982841839,
+        "peak_force_N": 20.486645920036853,
+        "peak_axial_moment_Nm": 1.9632518944859156,
+        "torque_saturation_ratio": 0.0
+      },
+      "feedback": {
+        "status": "PASS",
+        "control_updates": 24340,
+        "max_feedback_age_error_s": 1.2221126888256606e-15,
+        "max_wrench_transform_error": 1.7763568394002505e-15,
+        "max_solve_pose_error_m": 1.2289058659575858e-12,
+        "control_period_s": 0.001,
+        "final_yaw_stiffness_Nm_rad": 0.5,
+        "yaw_trigger_s": null,
+        "final_lateral_stiffness_N_m": [
+          80.0,
+          80.0
+        ],
+        "first_loaded_stop_s": null
+      },
+      "wall_s": 52.04381666300469,
+      "mathematical_stability_proved": false,
+      "locking_verified": false
+    }
+  },
+  "saved_array_audit": {
+    "nominal": {
+      "status": "PASS",
+      "samples": 24335,
+      "dt_s": 0.001,
+      "control_each_step": true,
+      "feedback_delay_s": 0.001,
+      "tail_speed_and_motion_recomputed": true,
+      "net_force_recomputed": true
+    },
+    "xy": {
+      "status": "PASS",
+      "samples": 24340,
+      "dt_s": 0.001,
+      "control_each_step": true,
+      "feedback_delay_s": 0.001,
+      "tail_speed_and_motion_recomputed": true,
+      "net_force_recomputed": true
+    },
+    "combined": {
+      "status": "PASS",
+      "samples": 24340,
+      "dt_s": 0.001,
+      "control_each_step": true,
+      "feedback_delay_s": 0.001,
+      "tail_speed_and_motion_recomputed": true,
+      "net_force_recomputed": true
+    }
+  },
+  "source_manifest": {
+    "sources": {
+      "src/compliant_docking/__init__.py": "5a4e0344a1f82298b8ae94b7ea62c2dc6e39aa657bc323a86652f541f397fd40",
+      "src/compliant_docking/assembly/__init__.py": "e9e95158cda90e88fb6e24062429d087296670136ffe11a24027ef4f22e6bb18",
+      "src/compliant_docking/assembly/audit.py": "6f0cc7e9320efde7ca5de91ea6c30ade0c2dc7a275ab0e9341356b9383fb74f2",
+      "src/compliant_docking/assembly/config.py": "67a565c26b83f2746952d7c61ca63701cf3378456de9f7244ae2e4c31fae1d42",
+      "src/compliant_docking/assembly/consistency.py": "a45d1d9d609a78095ac499fade06d4d8fcf4ac9698109b9cb51762a38813c610",
+      "src/compliant_docking/assembly/geometry.py": "ce9a8c55f604e664e4eebcedbe1baebda2bf8e40d895b60a57042380fd7b2394",
+      "src/compliant_docking/assembly/rendering.py": "2fb43bde3b16dcfdc0a72f627ff6a17691511fdda6c6227374ed7198946284a5",
+      "src/compliant_docking/assembly/runner.py": "5f0c0d305de4c1bc1b6950dbe045800f4a44b4a9a704e4fb74345ddf2ad3bd6d",
+      "src/compliant_docking/assembly/runtime.py": "a787760bb89c6fc292bd68aea2a677dce8dfbb33402d9c83702f5835de12ca8e",
+      "src/compliant_docking/assembly/sequence.py": "af7774ae0daa11347d5389cd4e8e1b9e0ed36e5400813d64a13710a0ab7e8714",
+      "src/compliant_docking/assembly/simulation.py": "3a96f72118e7b81cb3ae3030dcb4f86383accc11d121783c7eebf904d8ab16aa",
+      "src/compliant_docking/cli.py": "d396e379e424705d1f2fb51a3199ad9011e93fbe6d9c317a82ed103d1cc43f7b",
+      "src/compliant_docking/collision_geometry.py": "3e5a469962b31f84c9741d9ac741c98af6a048b781f7c5d427193f382cc6ad26",
+      "src/compliant_docking/config.py": "4807b26f9be5b82d5ef4e4c7b097765c6ffb7e40803449c6a37af1cc29076853",
+      "src/compliant_docking/contact_diagnostics.py": "2e9f864fc021fbf67c16e870fea8e74ab5341ffab1f4994fa3769e943c60df39",
+      "src/compliant_docking/control/__init__.py": "f5cceeec5c88a7a15acbd26ac37fc22b779eb8a96d236abb2454d2aba3687457",
+      "src/compliant_docking/control/contact_yaw.py": "b19594b49cf12e0b86b9d81202347611c4653d73e42e2d67d67103b5528257eb",
+      "src/compliant_docking/control/friction.py": "f3e0eae1cd90a44ccd7db0009acf93bd53f734e992b91e7be4cfa041b36f3ebe",
+      "src/compliant_docking/control/hqp_ac.py": "71a635e07846843a6fe7687b7dfc750ba10ef7cacb0592ddb37ac60bf3597272",
+      "src/compliant_docking/control/lie_se3.py": "506b3262c8565a407ccca146afa09a0454cb379053b58f323e2bad0d21f0c2ff",
+      "src/compliant_docking/control/momentum_observer.py": "d6ddf2cc3b7514717656b0163edb3e6aa30a5ecdba12aab555923358881bceca",
+      "src/compliant_docking/control/se3_impedance.py": "72b58e4aea6e27c949da22db6cfc50371245a3cd828dba6330d065c148e9c404",
+      "src/compliant_docking/control/task_space.py": "702880cac54fe0fccce50575eca3a6621a6cccdebf431d9c2d2e921dd6159361",
+      "src/compliant_docking/diagnostic_plots.py": "ef0b60dcf0c90045b57c2ce9bd5aa2e2394d5a0f19ea3fe58e5d51624add0b51",
+      "src/compliant_docking/docking_task.py": "8e53f95b5e471203ace837f40dc4cbb16d0b543a9a4dbdb9925222440a70e16a",
+      "src/compliant_docking/interface_geometry.py": "99c11f3ef2e1b664bedfe36869511713881fecc98f54cca3c4a287ff39677067",
+      "src/compliant_docking/metrics.py": "53e9982c24a80eb7cf874ea0d95cee0e292df32e3b67286f3cf6607ccd646c8e",
+      "src/compliant_docking/models.py": "67d26e3203d3b4f79177c440311f5ee8e66a1b122d1d17c46adee1b02e3a4e7f",
+      "src/compliant_docking/orchestration/__init__.py": "b193f4055faff3b2b8872457b4ec16e71f6c217ca061384666d1aab1ccb1ea3f",
+      "src/compliant_docking/orchestration/run_docking.py": "1e25316007fd15fb842921f1f049b09037918ee4aa48014049a29447e5fc0428",
+      "src/compliant_docking/petal_geometry.py": "31c9cd3694c9323174f871f50d9ee7710ccbf05a4aa2c7a31bdfc64870d92578",
+      "src/compliant_docking/planning/__init__.py": "9a4208c42357aeba411e7a5e4c2917244e9a785ec12d1543f60c32d185cb032d",
+      "src/compliant_docking/planning/kinematics.py": "669b1e14f8a3d92cc87cd43eb96cb73cd993ab6d95ebb8749962651de424b225",
+      "src/compliant_docking/planning/motion_reference.py": "b6ef3ce30f60496af83031d2e797d1642081b9f97269026f3a611b760a887798",
+      "src/compliant_docking/planning/se3_topp.py": "e5b7eb000137c60d94ca3866234e84d0510ef4991d933b206b33b7bf6e27a189",
+      "src/compliant_docking/planning/trajectory.py": "8150ceb5f34c0390ed450b145217029b5fb648365221a9ddb37444f2c2fa24e8",
+      "src/compliant_docking/planning/waypoints.py": "072bf959d04ad8029a7ff4c6caf1eb3c793648808e84e1b42d8fe0862d5fda42",
+      "src/compliant_docking/plotting.py": "0e8ebfa05cd72bbf99153c9af226df498a66468993f83558088cfac18ce38d7b",
+      "src/compliant_docking/rendering.py": "62b6a234b4efea13a687992543facfb94d0c172a0b71c728d07cfb641d6fc6b3",
+      "src/compliant_docking/research/__init__.py": "3ffd085e86c49b11dc24cf6e78d2ef43d8d3ab2b4adfd834220941bfa1ad2824",
+      "src/compliant_docking/research/cases.py": "8f8f62a71a46da1d5b174e48d75f88e59ec440871ba16618c9b8dd368d7d4883",
+      "src/compliant_docking/research/petal_trials.py": "50c6fee7f05b958500f4019e9a3b3e48db914335616d5fc7a3da57e99748fb3d",
+      "src/compliant_docking/research/protocols.py": "a6959885e759c9a0f11667785cbb504b62a86037d87bd0ff4b3d0768de09043d",
+      "src/compliant_docking/research/rollout.py": "6a0e3d2be9211c72049e7a86ddd9351813235f898e3166c577ceb131f0d0ada4",
+      "src/compliant_docking/scene.py": "a4a789adbe58284be28a82b2a83cddaba2e79cd4258f53f666bc59f0c6bf83ac",
+      "src/compliant_docking/simulation/__init__.py": "41e20f0bcd5f5169ba7e22798d97bdd55c104afef53d46d3d4e55d92c91d9ca9",
+      "src/compliant_docking/simulation/consistency.py": "ddc1a44f448b7f2d910af3e6112d25e17d1c31757ee88050894451c69b3238a3",
+      "src/compliant_docking/simulation/mujoco_env.py": "0468e15bb19907d7f7acc94c19b140222be30d578a0b99e0f8d8f1c76a022905",
+      "src/compliant_docking/simulation/pinocchio_sim.py": "80414c3fef16bcd6c8ecfd776048290c3b2ed69e1d60542aa35d61a40a71d5e6",
+      "src/compliant_docking/telemetry.py": "8ce4c84cda33d06f60ee91fde295dc8b6cf40f531b971b0d1365a916ead69334",
+      "src/compliant_docking/wrench.py": "c9fbb08b34c15478140da7086c0be351b92b5a41abe7ffd0996c98f8222f4117",
+      "experiments/models_interfaces/crown_sdf_dynamic_check.py": "ffcaf838dbd9e6934363c71cbb92f6d759bb7eacb1d7dbe3edf22f3fb848d328",
+      "experiments/insertion_suite.py": "622f6b5a2c7747cda37c4099b9cc25f718a208810503344184c13c6fc5319ac4",
+      "scenes/iiwa14_compliant_insertion.yaml": "2cb1763224e7729b27ad02c762bda3e160653d370474854dd74d9890d3b0b410"
+    },
+    "assets": {
+      "/home/xiao/workspace/maintained/compliant_docking_simulation/assets/iiwa14/assets/dock_1_17_new.STL": "8a00264e0255f12d938ae1f14527fbb54e1bb4ab153b599227bfdfd049005789",
+      "/home/xiao/workspace/maintained/compliant_docking_simulation/assets/interfaces/female_socket.xml": "e9af0fe74ab66e3196541ef3e6799b50a6ee9198bb767b313d909250c7b19a95",
+      "/home/xiao/workspace/maintained/compliant_docking_simulation/assets/interfaces/male_cone.xml": "9212365b52467320b11f9ff5a6298f8d56dd11f72f2e6edd4a932e9c3836c8b2"
+    },
+    "geometry_reference_sha256": "51738d408d6ee17704bda05d5a815bf3191dfa78601dceb3596031243806187f"
+  },
+  "run_file_sha256": {
+    "combined.contacts.npz": "4de9f798435ff49164ab52e9f62783710e1c2319140f73b3cf87fb4bd5743f0d",
+    "combined.json": "8a91528244b99a40ffd5f92f6a0d3c455280535b8405723c06109a125ccd5be3",
+    "combined.log": "1b347110b9079a64774eb0eeefc48f9795b230b42046b7f4149f6b4b15c156b9",
+    "combined.npz": "31cb458af9d3deb446b6fa49f0ab0ae356c7fb7e2c03bdb345d3fd178d207c66",
+    "combined_evaluation.json": "45d1126b8609ed86b496ecd256d211ec5e9f7cf979d51f0ed768d375f17bddd4",
+    "geometry_reference.json": "200574fa09aab7e099dc61e6e2877bd6aa38b055985e266a0320be980eb2a4d0",
+    "nominal.contacts.npz": "4de9f798435ff49164ab52e9f62783710e1c2319140f73b3cf87fb4bd5743f0d",
+    "nominal.json": "afc5c4fd403f41d3e0e1d1edc859c081caae542fd7a1995d039e120c8aeddf83",
+    "nominal.log": "1470660de9ef1f253ca1baa9e488620f7b78c4098e32f6f1b1cb6851d632b591",
+    "nominal.npz": "a49e03a8525941018bcd0897e687320a84f687dd765edffb7362b8c9940c58e6",
+    "nominal_evaluation.json": "61a65ae1807f8e712642e4e98beca46978f4d79c1260645b2a782e4c57a6f7a5",
+    "plan.json": "49420b581fcd4d8621dd5f66bb3154b521a85032cb3589dd3e92d58e0608c8c6",
+    "source_manifest.json": "782a5568342014767f004cc753e029e9f5ffad927c305f18ffdf372301659405",
+    "summary.json": "5668ccf17ea164ac79c60a9a76822cddd8b9e931b20c5c68824419f24afb85b9",
+    "xy.contacts.npz": "4de9f798435ff49164ab52e9f62783710e1c2319140f73b3cf87fb4bd5743f0d",
+    "xy.json": "e360d310a15e9f0b8d7cf16e704a4090434604e870743766803b149e7949d531",
+    "xy.log": "feccb0ac1d68e6c1cb6ee7d7ebd229a69343692633eea5b4424254e0cab8e32c",
+    "xy.npz": "011f9b0474c8b259e9331e8e250179c8b24f79fa56c3fbbe934b086d0a4b1ea8",
+    "xy_evaluation.json": "74a79608493b33e072a72c820df587901412c9ee17f15ab1976c87d87528187c"
+  },
+  "scope": "有限三工况动态观测；提前接触不作为不稳定判据；未证明数学稳定性或真实锁紧。"
+}

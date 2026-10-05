@@ -5,14 +5,20 @@
 
 | 层次 | 记录 | 证据用途 |
 |---|---|---|
+| 模型/接口 | [angle1 有限 SDF 对照](../results/angle1_sdf_compare_20261005.md) | 单进程计时；凸块 3/3、SDF 0/3；保留凸块默认 |
+| 模型/接口 | [angle1 1 ms 九点任务验证](../results/angle1_task_1ms_20261005.md) | 自由空间提速、9/9 落座与载荷门槛、时序和运动限制审计 |
 | 模型/接口 | [原版接入](../results/petal_iiwa14_validation.md) | 同源模型与固定刚度首轮 |
 | 模型/接口 | [导向几何](../results/petal_guidance_geometry_validation.md) | 独立轮廓矩阵 |
-| 模型/接口 | [候选步长](../results/petal_angle1_blend030_dtcheck_20261003.md) | `angle1_blend030` 仍未晋升 |
+| 模型/接口 | [候选步长](../results/petal_angle1_blend030_dtcheck_20261003.md) | 当时未晋升；当前按新 1 ms 协议设为默认 |
+| 模型/接口 | [原冠形 SDF 动态核对](../results/crown_sdf_dynamic_20261005.md) | 三点末段平稳；两点落座候选；2 N·m 作为依据不足的历史载荷提示 |
+| 模型/接口 | [原冠形 SDF 首触核对](../results/crown_sdf_onset_20261005.md) | 同姿态完整 STL 首触，区分正常导向与额外 SDF 偏差 |
 | 模型/接口 | [凸碰撞](../results/convex_collision_iiwa14.md) | 原冠形碰撞表示对照；默认仍保留 SDF |
 | 控制 | [绕轴释放](../results/petal_contact_control_validation.md) | 固定模型、同点绕轴策略 |
 | 控制 | [横向配对](../results/petal_lateral_control_validation.md) | 九个离散点、组合卡滞与数值敏感性 |
 | 控制 | [捕获网格](../results/petal_capture_grid_validation.md) | 原策略离散误差范围 |
 | 控制 | [框架与自由空间复现](experiments.md) | 原协议下的方法/实现验证 |
+| 系统 | [HexFrame 实际位姿偏差](../results/hexframe_pose_check_20261005.md) | 名义完整通过；三个偏差点未落座，保留失败与独立核对 |
+| 系统 | [HexFrame 两种接口移植](../results/hexframe_interfaces_20261005.md) | 花瓣名义通过；偏差与冠形移植保留失败，提供同源视频供人工评判 |
 | 系统 | [HexFrame 正式流程](hexframe_assembly.md) | 当前导纳流程验收 |
 | 归档 | [接口阶段收尾](stage_closeout_20261003.md) | 阶段状态、失败与未晋升结论 |
 

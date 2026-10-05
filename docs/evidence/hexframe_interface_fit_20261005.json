@@ -1,0 +1,88 @@
+{
+  "method": "真实接收接口1到移动接口4的相对位姿，按资源声明配合变换计算；不是轨迹跟踪误差。",
+  "nominal_root_gap_mm": 46.4,
+  "nominal_pair_rotation": [
+    [
+      0.7071067811865475,
+      0.7071067811865476,
+      0.0
+    ],
+    [
+      0.7071067811865476,
+      -0.7071067811865475,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      -1.0
+    ]
+  ],
+  "samples": "保存的最后一个100Hz状态；偏差组46.99s，名义组53s",
+  "results": {
+    "nominal": {
+      "recorded_time_s": 53.0,
+      "lateral_residual_mm": 0.0005860473605988582,
+      "axial_gap_above_nominal_mm": 0.0008103529264349985,
+      "tilt_residual_deg": 0.002304848259053224,
+      "mating_phase_residual_deg": 5.225637698913488e-05,
+      "relative_root_position_receiver_frame_mm": [
+        -0.0002563921215310343,
+        -0.0005269863270348703,
+        46.400810352926435
+      ],
+      "input_sha256": {
+        "model.xml": "37d73d6bcbca346537ed3fd2cd27e0f603a411dbaf5c4ce175089ce5f394087b",
+        "rollout.npz": "94b26a62c5a3508c361735e3ebba60e46de0595c6f819503e311771ef81d4c00"
+      }
+    },
+    "xy": {
+      "recorded_time_s": 46.99,
+      "lateral_residual_mm": 1.8866644649391604,
+      "axial_gap_above_nominal_mm": 3.5083855073030494,
+      "tilt_residual_deg": 0.010427629899125284,
+      "mating_phase_residual_deg": -0.02298925374321925,
+      "relative_root_position_receiver_frame_mm": [
+        0.7215822473083247,
+        -1.7432216909026907,
+        49.908385507303045
+      ],
+      "input_sha256": {
+        "model.xml": "b5df71403ce8d6f6abc920913164bf1f7767055bcf1151c4c7bcf45e12cce70a",
+        "rollout.npz": "dc6815a5cd953965e6cb1a8b696a963345aab33bd9397c04b8e16304a4df461b"
+      }
+    },
+    "yaw": {
+      "recorded_time_s": 46.99,
+      "lateral_residual_mm": 0.00010776944988339019,
+      "axial_gap_above_nominal_mm": 5.5111166147210895,
+      "tilt_residual_deg": 0.0001257803026900265,
+      "mating_phase_residual_deg": -4.900950146249762,
+      "relative_root_position_receiver_frame_mm": [
+        5.143528971932469e-05,
+        -9.470303743628123e-05,
+        51.91111661472109
+      ],
+      "input_sha256": {
+        "model.xml": "aadf11e6e1f885b6fc530b6ca1abcf011377549d1c029e88892c9d4c8d24a192",
+        "rollout.npz": "9d35684e17974cff3003ca0366953fbd0303754427897f306249a36524da787d"
+      }
+    },
+    "combined": {
+      "recorded_time_s": 46.99,
+      "lateral_residual_mm": 2.5205543151269065,
+      "axial_gap_above_nominal_mm": 10.299589083283989,
+      "tilt_residual_deg": 0.048567927959495404,
+      "mating_phase_residual_deg": -5.232968260892598,
+      "relative_root_position_receiver_frame_mm": [
+        0.8074647394972599,
+        -2.3877174770004705,
+        56.69958908328398
+      ],
+      "input_sha256": {
+        "model.xml": "90fe75e16fc7bc96ac7dec81ecb814d3186509e121918ec7a7143697351f12ea",
+        "rollout.npz": "888fdd41b91e721f90551fed88cee16bf84b15f41c95e26827137b61439a8136"
+      }
+    }
+  }
+}

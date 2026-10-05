@@ -116,7 +116,7 @@ def run_study(args):
     from experiments.petal_guidance_geometry import DIRECTORIES, validate
     out = args.out
     out.mkdir(parents=True,exist_ok=True)
-    base = load_scene("scenes/iiwa14_petal_insertion.yaml")
+    base = load_scene("scenes/iiwa14_petal_original_insertion.yaml")
     manifest = grid.source_manifest(base)
     for filename in ("petal_guidance_study.py","prepare_petal_guidance.py","petal_guidance_geometry.py",
                      "petal_lateral_study.py"):

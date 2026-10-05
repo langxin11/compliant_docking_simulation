@@ -9,7 +9,7 @@ Pinocchio 提供运动学和控制侧刚体动力学。
 | [柔顺控制算法研究](control_research.md) | RQ1 绕轴释放、RQ2 横向释放、同点矩阵、失败与数值复核 |
 | [完整对接/装配](system_validation.md) | 全流程验收、交接与同一记录的 Demo 回放 |
 
-先阅读[研究范围](research_scope.md)，再选择[分层入口](experiment_entrypoints.md)。
+先阅读[当前主线与收束决策](research_focus.md)、[研究范围](research_scope.md)，再选择[分层入口](experiment_entrypoints.md)。
 HexFrame 当前使用独立关节伺服与接触导纳，尚未集成 SE(3) 研究策略。
 模型检查、落座候选和系统通过分别使用其声明范围的证据。
 

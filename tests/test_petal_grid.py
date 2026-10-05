@@ -27,7 +27,7 @@ def record(ok, lateral=.1, stop=1.):
 @pytest.mark.parametrize("case", list(legacy.CASES))
 @pytest.mark.parametrize("profile", ["stiff", "compliant", "released"])
 def test_presets_retain_exact_effective_configuration(case, profile):
-    base=load_scene("scenes/iiwa14_petal_insertion.yaml")
+    base=load_scene("scenes/iiwa14_petal_original_insertion.yaml")
     before=legacy.variant(base,case,"compliant" if profile=="released" else profile)
     before=replace(before,name=f"{base.name}_{case}_{profile}",
                    se3_impedance=replace(before.se3_impedance,
@@ -42,7 +42,7 @@ def test_presets_retain_exact_effective_configuration(case, profile):
 
 
 def test_grid_errors_do_not_change_physics_or_leak_truth_to_planner():
-    base=load_scene("scenes/iiwa14_petal_insertion.yaml")
+    base=load_scene("scenes/iiwa14_petal_original_insertion.yaml")
     scene=suite.variant(base,"arbitrary","released",(-.006,.006,-15.))
     np.testing.assert_allclose(scene.docking.estimate_pos,[-.006,.506,.35],atol=1e-15)
     assert scene.docking.estimate_yaw_deg==-15.
@@ -86,7 +86,7 @@ def test_half_step_requires_equal_status_and_original_peak_limits():
 
 
 def test_reuse_checks_controller_sources_and_entire_assessment_body(tmp_path):
-    base=load_scene("scenes/iiwa14_petal_insertion.yaml")
+    base=load_scene("scenes/iiwa14_petal_original_insertion.yaml")
     current=grid.source_manifest(base)
     snapshot=tmp_path/'source_snapshot/src/compliant_docking/research'
     snapshot.mkdir(parents=True)
@@ -106,7 +106,7 @@ def test_reuse_checks_controller_sources_and_entire_assessment_body(tmp_path):
 
 
 def test_lateral_profiles_only_change_declared_axes_and_optional_speed():
-    base=load_scene('scenes/iiwa14_petal_insertion.yaml')
+    base=load_scene('scenes/iiwa14_petal_original_insertion.yaml')
     for profile,after in [('lateral_released',0.),('lateral_soft',20.)]:
         scene=suite.variant(base,'combined',profile)
         assert scene.se3_impedance.contact_yaw.lateral_stiffness_after==after
@@ -127,7 +127,7 @@ def test_lateral_profiles_only_change_declared_axes_and_optional_speed():
 def test_current_controller_cannot_reuse_historical_archive():
     import json
 
-    current = grid.source_manifest(load_scene("scenes/iiwa14_petal_insertion.yaml"))
+    current = grid.source_manifest(load_scene("scenes/iiwa14_petal_original_insertion.yaml"))
     previous_dir = grid.REPO_ROOT / "runs/petal_contact_control_20261002_v2"
     previous = json.loads((previous_dir / "source_manifest.json").read_text())
     assert not grid.reusable_sources(previous, current, previous_dir)

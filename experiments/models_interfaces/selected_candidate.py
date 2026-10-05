@@ -37,7 +37,7 @@ def configure():
 
 def run_one(out, case, setting):
     configure()
-    return study.run_one(out, load_scene("scenes/iiwa14_petal_insertion.yaml"),
+    return study.run_one(out, load_scene("scenes/iiwa14_petal_original_insertion.yaml"),
                          "selected", case, setting, "representative_user_design")
 
 
@@ -45,7 +45,7 @@ def archived_references(out):
     """Verify the archived inputs and compare commands at each matching timestep."""
     baseline = json.loads((BASELINE / "source_manifest.json").read_text())
     current = json.loads((out / "source_manifest.json").read_text())
-    original = grid.source_manifest(load_scene("scenes/iiwa14_petal_insertion.yaml"))
+    original = grid.source_manifest(load_scene("scenes/iiwa14_petal_original_insertion.yaml"))
     if any(baseline["sources"].get(p) != digest for p, digest in original["sources"].items()):
         raise ValueError("Historical reference sources differ after migration; use archived source_snapshot or a separately reviewed fresh-reference protocol")
     assert all(current["sources"][p] == digest for p, digest in original["sources"].items())
@@ -110,7 +110,7 @@ def finish(out):
 
 def run(out, workers):
     configure()
-    base = load_scene("scenes/iiwa14_petal_insertion.yaml")
+    base = load_scene("scenes/iiwa14_petal_original_insertion.yaml")
     previous = json.loads((BASELINE / "source_manifest.json").read_text())
     current = grid.source_manifest(base)
     if any(previous["sources"].get(p) != digest for p, digest in current["sources"].items()):

@@ -1,0 +1,818 @@
+{
+  "plan": {
+    "scene": "scenes/hexframe_assembly.yaml",
+    "controller": "原 MuJoCo 偏置补偿关节伺服＋接触导纳",
+    "nominal_planner_and_controller_reference_unchanged": true,
+    "injection": "规划后变换真实 seed_station 固定子树；接收几何与评分锚点共同变化",
+    "truth_minus_estimate": {
+      "nominal": {
+        "world_x_mm": 0,
+        "world_y_mm": 0,
+        "world_yaw_deg": 0
+      },
+      "xy": {
+        "world_x_mm": 2,
+        "world_y_mm": 0,
+        "world_yaw_deg": 0
+      },
+      "yaw": {
+        "world_x_mm": 0,
+        "world_y_mm": 0,
+        "world_yaw_deg": 5
+      },
+      "combined": {
+        "world_x_mm": 2,
+        "world_y_mm": 0,
+        "world_yaw_deg": 5
+      }
+    },
+    "physics_timestep_s": 0.001,
+    "joint_servo_and_axial_admittance_period_s": 0.001,
+    "contact_reference_ik_period_s": 0.01,
+    "planned_duration_s": 53,
+    "seating_gate": "raw_strict，原条件保留；未采用单接口的 2 N·m 判定",
+    "scope": "四个代表点，逐工况完整交接验收；失败保留，不改参数或扩展矩阵",
+    "performance_comparison": false
+  },
+  "results": {
+    "nominal": {
+      "validation": {
+        "status": "PASS",
+        "faults": [],
+        "events": [
+          {
+            "t": 10.4,
+            "event": "grip_on",
+            "error_m": 2.9808605364911454e-10,
+            "gripper_constraint_force_n": 0.0,
+            "unloaded_dwell_s": 0.0
+          },
+          {
+            "t": 11.601,
+            "event": "rack_off",
+            "error_m": 1.7640286875241605e-12,
+            "gripper_constraint_force_n": 1.1681213240335533e-08,
+            "unloaded_dwell_s": 0.0
+          },
+          {
+            "t": 36.611000000000004,
+            "event": "assembly_on",
+            "force_n": 0.39835813075253157,
+            "dwell_s": 0.5000000000000003
+          },
+          {
+            "t": 47.6,
+            "event": "grip_off",
+            "error_m": 1.4539019570251606e-08,
+            "gripper_constraint_force_n": 0.016228488826528213,
+            "unloaded_dwell_s": 10.98799999999935
+          }
+        ],
+        "peak_axial_force_n": 1.8550067626648206,
+        "max_penetration_mm": 0.002164953330996348,
+        "final_module_error_mm": 0.005054356134462048,
+        "first_contact_s": 35.112,
+        "lock_time_s": 36.611000000000004,
+        "module_mass_kg": 3.5082656535035275,
+        "module_inertia_kg_m2": [
+          0.08170264681269242,
+          0.04708360733018978,
+          0.04708156735345088
+        ],
+        "duration_s": 53.0,
+        "contact_force_target_n": 0.4,
+        "seating_gate": "raw_strict",
+        "force_noise_sigma_n": 0.0,
+        "noise_seed": 0,
+        "scope": "fixed-base zero-gravity arm/module dynamics; real guide/stop contact; ideal weld locks; MuJoCo bias-compensated joint servo",
+        "storage_interface": {
+          "module_port": "module1_port_4",
+          "storage_port": "storage_dock_port",
+          "peak_contact_force_n": 0.0018567539922487294,
+          "max_penetration_mm": 3.4228802431313136e-07,
+          "final_clearance_m": 0.7530420947525788
+        },
+        "module_asset": "hexframe",
+        "planning": {
+          "ik_samples": 1591,
+          "fk_max_error_m": 9.965383862553621e-08,
+          "spline_joint_limit_margin_rad": 0.09400431341606375,
+          "joint_limits": [
+            [
+              -2.967059728390001,
+              -2.09439510239,
+              -2.967059728390001,
+              -2.09439510239,
+              -2.967059728390001,
+              -2.09439510239,
+              -3.05432619099
+            ],
+            [
+              2.967059728390001,
+              2.09439510239,
+              2.967059728390001,
+              2.09439510239,
+              2.967059728390001,
+              2.09439510239,
+              3.05432619099
+            ]
+          ],
+          "rejected_unsafe_events": [
+            "grip_on",
+            "rack_off",
+            "grip_off"
+          ]
+        }
+      },
+      "independent_metrics": {
+        "prelock_last_second": {
+          "position_error_mm": [
+            0.005081619536997467,
+            0.016696305609381012
+          ],
+          "angle_error_deg": [
+            0.0023195883998936495,
+            0.006379594243736122
+          ],
+          "loaded_stop_fraction": 0.974,
+          "max_relative_speed_mm_s": 0.03608783290594599
+        },
+        "actual_trace_end_s": 53.0,
+        "recorded_state_end_s": 53.0,
+        "planned_duration_s": 53.0,
+        "complete_duration": true,
+        "final_error_against_original_true_anchor_mm": 0.005054356134462048,
+        "final_angle_against_original_true_anchor_deg": 0.002305440888450485,
+        "tail_max_relative_speed_mm_s": 2.3730760718068903e-06,
+        "tail_max_relative_spin_deg_s": 1.305183115531854e-07,
+        "tail_position_error_range_mm": [
+          1.3258283295521789e-05,
+          1.3290479758432847e-05
+        ],
+        "tail_angle_error_range_deg": [
+          0.002305440535451576,
+          0.002305442626200005
+        ],
+        "tail_loaded_stop_fraction": 1.0,
+        "longest_original_eligible_dwell_ms": 500,
+        "max_contact_moment_Nm": 0.07680934735549566,
+        "joint_position_margin_rad": 0.09399875131225288,
+        "sampled_joint_velocity_max_rad_s": [
+          0.4634371431138994,
+          0.3164227075493435,
+          0.4116036200409552,
+          0.6231795373086593,
+          0.24162527651001253,
+          0.6065252008781877,
+          0.7351952358298546
+        ],
+        "urdf_velocity_limits_rad_s": [
+          10.0,
+          10.0,
+          10.0,
+          10.0,
+          10.0,
+          10.0,
+          10.0
+        ],
+        "sampled_joint_velocity_violation": false,
+        "final_locks": [
+          false,
+          false,
+          true
+        ],
+        "finite": true,
+        "nominal_plan_and_phases_equal": true,
+        "source_hashes_verified": 575,
+        "original_full_audit": {
+          "final_retreat_clearance_verified": true,
+          "status": "PASS",
+          "module": "HexFrame",
+          "geometry_mass_and_port_mapping_verified": true,
+          "handover_and_unload_verified": true,
+          "prelock_physical_samples_recomputed": 500,
+          "loaded_stop_continuous_dwell_verified": true,
+          "prelocked_base_interface_verified": true,
+          "storage_unlock_after_grip_verified": true,
+          "storage_extraction_clearance_verified": true
+        }
+      },
+      "perturbation": null
+    },
+    "xy": {
+      "validation": {
+        "status": "FAIL",
+        "faults": [
+          "contact seating timeout",
+          "final module position",
+          "incomplete handover"
+        ],
+        "events": [
+          {
+            "t": 10.4,
+            "event": "grip_on",
+            "error_m": 2.9808605364911454e-10,
+            "gripper_constraint_force_n": 0.0,
+            "unloaded_dwell_s": 0.0
+          },
+          {
+            "t": 11.601,
+            "event": "rack_off",
+            "error_m": 1.7640286875241605e-12,
+            "gripper_constraint_force_n": 1.1681213240335533e-08,
+            "unloaded_dwell_s": 0.0
+          }
+        ],
+        "peak_axial_force_n": 0.8361320958038754,
+        "max_penetration_mm": 0.002809356187275634,
+        "final_module_error_mm": 3.985731852451121,
+        "first_contact_s": 31.392,
+        "lock_time_s": null,
+        "module_mass_kg": 3.5082656535035275,
+        "module_inertia_kg_m2": [
+          0.08170264681269242,
+          0.04708360733018978,
+          0.04708156735345088
+        ],
+        "duration_s": 53.0,
+        "contact_force_target_n": 0.4,
+        "seating_gate": "raw_strict",
+        "force_noise_sigma_n": 0.0,
+        "noise_seed": 0,
+        "scope": "fixed-base zero-gravity arm/module dynamics; real guide/stop contact; ideal weld locks; MuJoCo bias-compensated joint servo",
+        "storage_interface": {
+          "module_port": "module1_port_4",
+          "storage_port": "storage_dock_port",
+          "peak_contact_force_n": 0.0018567539922487294,
+          "max_penetration_mm": 3.4228802431313136e-07,
+          "final_clearance_m": 0.7544415661516082
+        },
+        "module_asset": "hexframe",
+        "planning": {
+          "ik_samples": 1591,
+          "fk_max_error_m": 9.965383862553621e-08,
+          "spline_joint_limit_margin_rad": 0.09400431341606375,
+          "joint_limits": [
+            [
+              -2.967059728390001,
+              -2.09439510239,
+              -2.967059728390001,
+              -2.09439510239,
+              -2.967059728390001,
+              -2.09439510239,
+              -3.05432619099
+            ],
+            [
+              2.967059728390001,
+              2.09439510239,
+              2.967059728390001,
+              2.09439510239,
+              2.967059728390001,
+              2.09439510239,
+              3.05432619099
+            ]
+          ],
+          "rejected_unsafe_events": [
+            "grip_on",
+            "rack_off",
+            "grip_off"
+          ]
+        }
+      },
+      "independent_metrics": {
+        "prelock_last_second": {
+          "position_error_mm": [
+            3.98669238818707,
+            4.986682136086167
+          ],
+          "angle_error_deg": [
+            0.02305924169836582,
+            0.09025698081946024
+          ],
+          "loaded_stop_fraction": 0.0,
+          "max_relative_speed_mm_s": 1.2533650010853796
+        },
+        "actual_trace_end_s": 46.999,
+        "recorded_state_end_s": 46.99,
+        "planned_duration_s": 53.0,
+        "complete_duration": false,
+        "final_error_against_original_true_anchor_mm": 3.995439136641924,
+        "final_angle_against_original_true_anchor_deg": 0.02524387363352005,
+        "tail_max_relative_speed_mm_s": 1.2533650010853796,
+        "tail_max_relative_spin_deg_s": 0.17137115456773744,
+        "tail_position_error_range_mm": [
+          3.98669238818707,
+          4.986682136086167
+        ],
+        "tail_angle_error_range_deg": [
+          0.02305924169836582,
+          0.09025698081946024
+        ],
+        "tail_loaded_stop_fraction": 0.0,
+        "longest_original_eligible_dwell_ms": 0,
+        "max_contact_moment_Nm": 0.1107434387486542,
+        "joint_position_margin_rad": 0.09399875131225288,
+        "sampled_joint_velocity_max_rad_s": [
+          0.4634371431138994,
+          0.3164227075493435,
+          0.4116036200409552,
+          0.6231795373086593,
+          0.24162527651001253,
+          0.6065252008781877,
+          0.7351952358298546
+        ],
+        "urdf_velocity_limits_rad_s": [
+          10.0,
+          10.0,
+          10.0,
+          10.0,
+          10.0,
+          10.0,
+          10.0
+        ],
+        "sampled_joint_velocity_violation": false,
+        "final_locks": [
+          false,
+          true,
+          false
+        ],
+        "finite": true,
+        "nominal_plan_and_phases_equal": true,
+        "source_hashes_verified": 579,
+        "original_full_audit": null
+      },
+      "perturbation": {
+        "truth_minus_estimate": {
+          "world_xy_m": [
+            0.002,
+            0.0
+          ],
+          "world_yaw_deg": 0.0
+        },
+        "pivot_world_m": [
+          -0.34,
+          0.35,
+          0.19500000000000003
+        ],
+        "nominal_install_tip_m": [
+          -0.34,
+          0.35,
+          0.7034921938165306
+        ],
+        "nominal_module_center_m": [
+          -0.34,
+          0.35,
+          0.5185281292110204
+        ],
+        "actual_module_center_m": [
+          -0.338,
+          0.35,
+          0.5185281292110204
+        ],
+        "actual_receiver_center_m": [
+          -0.338,
+          0.35,
+          0.19500000000000003
+        ],
+        "nominal_reference_unchanged": true,
+        "storage_and_grasp_unchanged": true,
+        "masses_inertias_friction_unchanged": true,
+        "receiver_geometry_and_scoring_anchor_transformed_together": true
+      }
+    },
+    "yaw": {
+      "validation": {
+        "status": "FAIL",
+        "faults": [
+          "contact seating timeout",
+          "final module position",
+          "incomplete handover"
+        ],
+        "events": [
+          {
+            "t": 10.4,
+            "event": "grip_on",
+            "error_m": 2.9808605364911454e-10,
+            "gripper_constraint_force_n": 0.0,
+            "unloaded_dwell_s": 0.0
+          },
+          {
+            "t": 11.601,
+            "event": "rack_off",
+            "error_m": 1.7640286875241605e-12,
+            "gripper_constraint_force_n": 1.1681213240335533e-08,
+            "unloaded_dwell_s": 0.0
+          }
+        ],
+        "peak_axial_force_n": 0.9698861772069594,
+        "max_penetration_mm": 0.0024406648963349944,
+        "final_module_error_mm": 5.511107283696126,
+        "first_contact_s": 29.488,
+        "lock_time_s": null,
+        "module_mass_kg": 3.5082656535035275,
+        "module_inertia_kg_m2": [
+          0.08170264681269242,
+          0.04708360733018978,
+          0.04708156735345088
+        ],
+        "duration_s": 53.0,
+        "contact_force_target_n": 0.4,
+        "seating_gate": "raw_strict",
+        "force_noise_sigma_n": 0.0,
+        "noise_seed": 0,
+        "scope": "fixed-base zero-gravity arm/module dynamics; real guide/stop contact; ideal weld locks; MuJoCo bias-compensated joint servo",
+        "storage_interface": {
+          "module_port": "module1_port_4",
+          "storage_port": "storage_dock_port",
+          "peak_contact_force_n": 0.0018567539922487294,
+          "max_penetration_mm": 3.4228802431313136e-07,
+          "final_clearance_m": 0.7554249790405728
+        },
+        "module_asset": "hexframe",
+        "planning": {
+          "ik_samples": 1591,
+          "fk_max_error_m": 9.965383862553621e-08,
+          "spline_joint_limit_margin_rad": 0.09400431341606375,
+          "joint_limits": [
+            [
+              -2.967059728390001,
+              -2.09439510239,
+              -2.967059728390001,
+              -2.09439510239,
+              -2.967059728390001,
+              -2.09439510239,
+              -3.05432619099
+            ],
+            [
+              2.967059728390001,
+              2.09439510239,
+              2.967059728390001,
+              2.09439510239,
+              2.967059728390001,
+              2.09439510239,
+              3.05432619099
+            ]
+          ],
+          "rejected_unsafe_events": [
+            "grip_on",
+            "rack_off",
+            "grip_off"
+          ]
+        }
+      },
+      "independent_metrics": {
+        "prelock_last_second": {
+          "position_error_mm": [
+            5.511108217975585,
+            5.512051911875653
+          ],
+          "angle_error_deg": [
+            4.900942491282102,
+            4.9018016501422075
+          ],
+          "loaded_stop_fraction": 0.0,
+          "max_relative_speed_mm_s": 0.0009549834761278555
+        },
+        "actual_trace_end_s": 46.999,
+        "recorded_state_end_s": 46.99,
+        "planned_duration_s": 53.0,
+        "complete_duration": false,
+        "final_error_against_original_true_anchor_mm": 5.511116628880326,
+        "final_angle_against_original_true_anchor_deg": 4.900950147866455,
+        "tail_max_relative_speed_mm_s": 0.0009549834761278555,
+        "tail_max_relative_spin_deg_s": 0.0008701268638135472,
+        "tail_position_error_range_mm": [
+          5.511108217975585,
+          5.512051911875653
+        ],
+        "tail_angle_error_range_deg": [
+          4.900942491282102,
+          4.9018016501422075
+        ],
+        "tail_loaded_stop_fraction": 0.0,
+        "longest_original_eligible_dwell_ms": 0,
+        "max_contact_moment_Nm": 0.05335052215426875,
+        "joint_position_margin_rad": 0.09399875131225288,
+        "sampled_joint_velocity_max_rad_s": [
+          0.4634371431138994,
+          0.3164227075493435,
+          0.4116036200409552,
+          0.6231795373086593,
+          0.24162527651001253,
+          0.6065252008781877,
+          0.7351952358298546
+        ],
+        "urdf_velocity_limits_rad_s": [
+          10.0,
+          10.0,
+          10.0,
+          10.0,
+          10.0,
+          10.0,
+          10.0
+        ],
+        "sampled_joint_velocity_violation": false,
+        "final_locks": [
+          false,
+          true,
+          false
+        ],
+        "finite": true,
+        "nominal_plan_and_phases_equal": true,
+        "source_hashes_verified": 579,
+        "original_full_audit": null
+      },
+      "perturbation": {
+        "truth_minus_estimate": {
+          "world_xy_m": [
+            0.0,
+            0.0
+          ],
+          "world_yaw_deg": 5.0
+        },
+        "pivot_world_m": [
+          -0.34,
+          0.35,
+          0.19500000000000003
+        ],
+        "nominal_install_tip_m": [
+          -0.34,
+          0.35,
+          0.7034921938165306
+        ],
+        "nominal_module_center_m": [
+          -0.34,
+          0.35,
+          0.5185281292110204
+        ],
+        "actual_module_center_m": [
+          -0.34,
+          0.35,
+          0.5185281292110203
+        ],
+        "actual_receiver_center_m": [
+          -0.34,
+          0.35,
+          0.19499999999999995
+        ],
+        "nominal_reference_unchanged": true,
+        "storage_and_grasp_unchanged": true,
+        "masses_inertias_friction_unchanged": true,
+        "receiver_geometry_and_scoring_anchor_transformed_together": true
+      }
+    },
+    "combined": {
+      "validation": {
+        "status": "FAIL",
+        "faults": [
+          "contact load or penetration limit",
+          "contact seating timeout",
+          "final module position",
+          "incomplete handover"
+        ],
+        "events": [
+          {
+            "t": 10.4,
+            "event": "grip_on",
+            "error_m": 2.9808605364911454e-10,
+            "gripper_constraint_force_n": 0.0,
+            "unloaded_dwell_s": 0.0
+          },
+          {
+            "t": 11.601,
+            "event": "rack_off",
+            "error_m": 1.7640286875241605e-12,
+            "gripper_constraint_force_n": 1.1681213240335533e-08,
+            "unloaded_dwell_s": 0.0
+          }
+        ],
+        "peak_axial_force_n": 10.700712390807134,
+        "max_penetration_mm": 0.120605112811948,
+        "final_module_error_mm": 10.566577013295525,
+        "first_contact_s": 29.0,
+        "lock_time_s": null,
+        "module_mass_kg": 3.5082656535035275,
+        "module_inertia_kg_m2": [
+          0.08170264681269242,
+          0.04708360733018978,
+          0.04708156735345088
+        ],
+        "duration_s": 53.0,
+        "contact_force_target_n": 0.4,
+        "seating_gate": "raw_strict",
+        "force_noise_sigma_n": 0.0,
+        "noise_seed": 0,
+        "scope": "fixed-base zero-gravity arm/module dynamics; real guide/stop contact; ideal weld locks; MuJoCo bias-compensated joint servo",
+        "storage_interface": {
+          "module_port": "module1_port_4",
+          "storage_port": "storage_dock_port",
+          "peak_contact_force_n": 0.0018567539922487294,
+          "max_penetration_mm": 3.4228802431313136e-07,
+          "final_clearance_m": 0.7580001863112135
+        },
+        "module_asset": "hexframe",
+        "planning": {
+          "ik_samples": 1591,
+          "fk_max_error_m": 9.965383862553621e-08,
+          "spline_joint_limit_margin_rad": 0.09400431341606375,
+          "joint_limits": [
+            [
+              -2.967059728390001,
+              -2.09439510239,
+              -2.967059728390001,
+              -2.09439510239,
+              -2.967059728390001,
+              -2.09439510239,
+              -3.05432619099
+            ],
+            [
+              2.967059728390001,
+              2.09439510239,
+              2.967059728390001,
+              2.09439510239,
+              2.967059728390001,
+              2.09439510239,
+              3.05432619099
+            ]
+          ],
+          "rejected_unsafe_events": [
+            "grip_on",
+            "rack_off",
+            "grip_off"
+          ]
+        }
+      },
+      "independent_metrics": {
+        "prelock_last_second": {
+          "position_error_mm": [
+            10.56756337986642,
+            10.695448528615348
+          ],
+          "angle_error_deg": [
+            5.2308016092651926,
+            5.461793816351644
+          ],
+          "loaded_stop_fraction": 0.0,
+          "max_relative_speed_mm_s": 0.9858205813026021
+        },
+        "actual_trace_end_s": 46.999,
+        "recorded_state_end_s": 46.99,
+        "planned_duration_s": 53.0,
+        "complete_duration": false,
+        "final_error_against_original_true_anchor_mm": 10.57630272083147,
+        "final_angle_against_original_true_anchor_deg": 5.2331996336102415,
+        "tail_max_relative_speed_mm_s": 0.9858205813026021,
+        "tail_max_relative_spin_deg_s": 0.2839103951594406,
+        "tail_position_error_range_mm": [
+          10.56756337986642,
+          10.695448528615348
+        ],
+        "tail_angle_error_range_deg": [
+          5.2308016092651926,
+          5.461793816351644
+        ],
+        "tail_loaded_stop_fraction": 0.0,
+        "longest_original_eligible_dwell_ms": 0,
+        "max_contact_moment_Nm": 0.7916409874445527,
+        "joint_position_margin_rad": 0.09399875131225288,
+        "sampled_joint_velocity_max_rad_s": [
+          0.4634371431138994,
+          0.3164227075493435,
+          0.4116036200409552,
+          0.6231795373086593,
+          0.24162527651001253,
+          0.6065252008781877,
+          0.7351952358298546
+        ],
+        "urdf_velocity_limits_rad_s": [
+          10.0,
+          10.0,
+          10.0,
+          10.0,
+          10.0,
+          10.0,
+          10.0
+        ],
+        "sampled_joint_velocity_violation": false,
+        "final_locks": [
+          false,
+          true,
+          false
+        ],
+        "finite": true,
+        "nominal_plan_and_phases_equal": true,
+        "source_hashes_verified": 579,
+        "original_full_audit": null
+      },
+      "perturbation": {
+        "truth_minus_estimate": {
+          "world_xy_m": [
+            0.002,
+            0.0
+          ],
+          "world_yaw_deg": 5.0
+        },
+        "pivot_world_m": [
+          -0.34,
+          0.35,
+          0.19500000000000003
+        ],
+        "nominal_install_tip_m": [
+          -0.34,
+          0.35,
+          0.7034921938165306
+        ],
+        "nominal_module_center_m": [
+          -0.34,
+          0.35,
+          0.5185281292110204
+        ],
+        "actual_module_center_m": [
+          -0.338,
+          0.35,
+          0.5185281292110203
+        ],
+        "actual_receiver_center_m": [
+          -0.338,
+          0.35,
+          0.19499999999999995
+        ],
+        "nominal_reference_unchanged": true,
+        "storage_and_grasp_unchanged": true,
+        "masses_inertias_friction_unchanged": true,
+        "receiver_geometry_and_scoring_anchor_transformed_together": true
+      }
+    }
+  },
+  "full_passes": 1,
+  "total": 4,
+  "scope": "四点固定基座零重力观察，不代表连续捕获范围；载荷和阈值仅按既有系统协议解释。",
+  "evidence_files": {
+    "runs/hexframe_pose_check_20261005_v2/analyze_saved.py": "9a36437a8989738bf2df13614f3ff164e11b9b75a9a256ad6f09d7fff23f886d",
+    "runs/hexframe_pose_check_20261005_v2/summary.json": "afb1d44478046d7a97f5590979991f7464f03885dcc33b8b581214073c2cbcb0",
+    "runs/hexframe_pose_check_20261005_v2/plan.json": "145cbdbf5117ddee8db1ae7432af53c0e2393a3e3a996da63b13e312ea0570b5",
+    "runs/hexframe_pose_check_20261005_v2/combined/geometry_check.json": "ac35fb9408b10fce78b97145abcf083e75b0f2234d5ea815ba64b68262e64392",
+    "runs/hexframe_pose_check_20261005_v2/combined/rollout.npz": "888fdd41b91e721f90551fed88cee16bf84b15f41c95e26827137b61439a8136",
+    "runs/hexframe_pose_check_20261005_v2/combined/contact_trace.npz": "d66a4d6ce331426d4ea29920b72693aa007e3481835a1569c327c302d49beee9",
+    "runs/hexframe_pose_check_20261005_v2/combined/source_manifest.json": "4bb25898f30b1f3bbc7de4f7b4012e0ee25e3bb5de48c1c7d1787043f6535316",
+    "runs/hexframe_pose_check_20261005_v2/combined/nominal_model.xml": "37d73d6bcbca346537ed3fd2cd27e0f603a411dbaf5c4ce175089ce5f394087b",
+    "runs/hexframe_pose_check_20261005_v2/combined/carried_model.xml": "ef7edc2c5936ebc23688603d3fc31c16cfffc341eca62f3b614ece273ba01121",
+    "runs/hexframe_pose_check_20261005_v2/combined/phases.json": "d739e9c39b7d56ba228f4c0213eecdc41f7f1abbf15015fddcda8731ba384ad2",
+    "runs/hexframe_pose_check_20261005_v2/combined/perturbation.json": "63fdbe470b704fc51b5a009405df5ac6242d586be14f36c82fe92ccf7f935173",
+    "runs/hexframe_pose_check_20261005_v2/combined/arm_tool_model.xml": "fd73eed9215af196d086e075e7e465cc968b6c30fef291b859a2a467d478cabe",
+    "runs/hexframe_pose_check_20261005_v2/combined/validation.json": "13f60211f9428741c0f6dc2c298fb7c9b7f606ed5913de2e0a76da2b15f8d892",
+    "runs/hexframe_pose_check_20261005_v2/combined/runtime.json": "bd76fd98ffdd3e57df4dc242762bc07df283bcda2bc74ea917f38ae9203521a8",
+    "runs/hexframe_pose_check_20261005_v2/combined/model.xml": "90fe75e16fc7bc96ac7dec81ecb814d3186509e121918ec7a7143697351f12ea",
+    "runs/hexframe_pose_check_20261005_v2/combined/accepted_anchor.json": "4cabe42e8b0d99bd439719bbcad68aed739f3fa09065534aeab7cf2b0bd39192",
+    "runs/hexframe_pose_check_20261005_v2/combined/planning.json": "596b180541f4295fc1e5732cf2055a5b8072c919e1d6f48dfd9061bf51749a47",
+    "runs/hexframe_pose_check_20261005_v2/combined/storage_trace.npz": "164d7f48e5f023391509771fb64a36accf877abef0de36e4ff51b70b19af3b34",
+    "runs/hexframe_pose_check_20261005_v2/combined/model_consistency.json": "73cfbc5b86a5604e265cd55b6e4774943b6d45d619daa635dfeb3581b3cae29e",
+    "runs/hexframe_pose_check_20261005_v2/yaw/geometry_check.json": "ac35fb9408b10fce78b97145abcf083e75b0f2234d5ea815ba64b68262e64392",
+    "runs/hexframe_pose_check_20261005_v2/yaw/rollout.npz": "9d35684e17974cff3003ca0366953fbd0303754427897f306249a36524da787d",
+    "runs/hexframe_pose_check_20261005_v2/yaw/contact_trace.npz": "c651037ebb8d669c9dabd9731b1d761c54c9cf54439d9ace87ed848ccef4a2d0",
+    "runs/hexframe_pose_check_20261005_v2/yaw/source_manifest.json": "0790c0c4869054c650c19f3324690206c1487e3211d881f9ef3b4a172f54ea86",
+    "runs/hexframe_pose_check_20261005_v2/yaw/nominal_model.xml": "37d73d6bcbca346537ed3fd2cd27e0f603a411dbaf5c4ce175089ce5f394087b",
+    "runs/hexframe_pose_check_20261005_v2/yaw/carried_model.xml": "ef7edc2c5936ebc23688603d3fc31c16cfffc341eca62f3b614ece273ba01121",
+    "runs/hexframe_pose_check_20261005_v2/yaw/phases.json": "d739e9c39b7d56ba228f4c0213eecdc41f7f1abbf15015fddcda8731ba384ad2",
+    "runs/hexframe_pose_check_20261005_v2/yaw/perturbation.json": "263d0edc8c8a61a723f03cbcf40fca825ffc5913904115baa54444b9a8410797",
+    "runs/hexframe_pose_check_20261005_v2/yaw/arm_tool_model.xml": "fd73eed9215af196d086e075e7e465cc968b6c30fef291b859a2a467d478cabe",
+    "runs/hexframe_pose_check_20261005_v2/yaw/validation.json": "ae228214db43848cf25ee4998355741a0ebd9a88d244e2e86099414237fba84d",
+    "runs/hexframe_pose_check_20261005_v2/yaw/runtime.json": "2e5c32820d5166bb931a284a4988513830d7caa34ca241b3ca005167e63bd280",
+    "runs/hexframe_pose_check_20261005_v2/yaw/model.xml": "aadf11e6e1f885b6fc530b6ca1abcf011377549d1c029e88892c9d4c8d24a192",
+    "runs/hexframe_pose_check_20261005_v2/yaw/accepted_anchor.json": "4cabe42e8b0d99bd439719bbcad68aed739f3fa09065534aeab7cf2b0bd39192",
+    "runs/hexframe_pose_check_20261005_v2/yaw/planning.json": "596b180541f4295fc1e5732cf2055a5b8072c919e1d6f48dfd9061bf51749a47",
+    "runs/hexframe_pose_check_20261005_v2/yaw/storage_trace.npz": "f8e383a0a20c9117838f9554eed121ecde8c2de6fa90756bcf444a0a3213f0be",
+    "runs/hexframe_pose_check_20261005_v2/yaw/model_consistency.json": "73cfbc5b86a5604e265cd55b6e4774943b6d45d619daa635dfeb3581b3cae29e",
+    "runs/hexframe_pose_check_20261005_v2/nominal/geometry_check.json": "e90553fe49c4aef1e2f6302ae75b985dd9cfcf47e44a4314dc8969a26ad0d928",
+    "runs/hexframe_pose_check_20261005_v2/nominal/rollout.npz": "94b26a62c5a3508c361735e3ebba60e46de0595c6f819503e311771ef81d4c00",
+    "runs/hexframe_pose_check_20261005_v2/nominal/contact_trace.npz": "e8edd7a779c26b970f70928e2992ef616013c06896703abbccaecc35055184dc",
+    "runs/hexframe_pose_check_20261005_v2/nominal/audit.json": "0c6e7076c6367cef76105f8ba2a7eb260d0ef0811568aca2898f139f16bbce6f",
+    "runs/hexframe_pose_check_20261005_v2/nominal/source_manifest.json": "47f1ade13e9b67ff8a6e38fc67b6c7e30b5ba60baec0e1cd6e7acb3acc30ce0f",
+    "runs/hexframe_pose_check_20261005_v2/nominal/carried_model.xml": "ef7edc2c5936ebc23688603d3fc31c16cfffc341eca62f3b614ece273ba01121",
+    "runs/hexframe_pose_check_20261005_v2/nominal/phases.json": "d739e9c39b7d56ba228f4c0213eecdc41f7f1abbf15015fddcda8731ba384ad2",
+    "runs/hexframe_pose_check_20261005_v2/nominal/arm_tool_model.xml": "fd73eed9215af196d086e075e7e465cc968b6c30fef291b859a2a467d478cabe",
+    "runs/hexframe_pose_check_20261005_v2/nominal/validation.json": "93aabca113686690d470dbac633eeca91e073241e041d2c6d58146e716c4a89f",
+    "runs/hexframe_pose_check_20261005_v2/nominal/runtime.json": "39c92f0e2992f781dad8284923212c7570883ee19d4a3d8c103242abbc9ca63e",
+    "runs/hexframe_pose_check_20261005_v2/nominal/model.xml": "37d73d6bcbca346537ed3fd2cd27e0f603a411dbaf5c4ce175089ce5f394087b",
+    "runs/hexframe_pose_check_20261005_v2/nominal/accepted_anchor.json": "e28be408742117e3150634c708c7c3c0bf38375e7986babcbc332c08fe7be548",
+    "runs/hexframe_pose_check_20261005_v2/nominal/planning.json": "596b180541f4295fc1e5732cf2055a5b8072c919e1d6f48dfd9061bf51749a47",
+    "runs/hexframe_pose_check_20261005_v2/nominal/storage_trace.npz": "2ffe5f6bfba254edbf2d8b340eef411bbcf29dbf95975e04d480a04004fcb81b",
+    "runs/hexframe_pose_check_20261005_v2/nominal/model_consistency.json": "73cfbc5b86a5604e265cd55b6e4774943b6d45d619daa635dfeb3581b3cae29e",
+    "runs/hexframe_pose_check_20261005_v2/xy/geometry_check.json": "d111c5314ffafe0cd8fd15f21abf646649c82b8571d4c8ae6d201719aaf29a3f",
+    "runs/hexframe_pose_check_20261005_v2/xy/rollout.npz": "dc6815a5cd953965e6cb1a8b696a963345aab33bd9397c04b8e16304a4df461b",
+    "runs/hexframe_pose_check_20261005_v2/xy/contact_trace.npz": "7d08a9338e4740f5336afaff1b64cea6e96e392f3f0ee97fab45c629268cedb0",
+    "runs/hexframe_pose_check_20261005_v2/xy/source_manifest.json": "3726bba33a29efccaf239c4ba01e8f98de246e17713893562b97b32c20eb559c",
+    "runs/hexframe_pose_check_20261005_v2/xy/nominal_model.xml": "37d73d6bcbca346537ed3fd2cd27e0f603a411dbaf5c4ce175089ce5f394087b",
+    "runs/hexframe_pose_check_20261005_v2/xy/carried_model.xml": "ef7edc2c5936ebc23688603d3fc31c16cfffc341eca62f3b614ece273ba01121",
+    "runs/hexframe_pose_check_20261005_v2/xy/phases.json": "d739e9c39b7d56ba228f4c0213eecdc41f7f1abbf15015fddcda8731ba384ad2",
+    "runs/hexframe_pose_check_20261005_v2/xy/perturbation.json": "74d5619f2a04ad006addc6f58ba63930cc4b3d4ba0489d416156546076121b75",
+    "runs/hexframe_pose_check_20261005_v2/xy/arm_tool_model.xml": "fd73eed9215af196d086e075e7e465cc968b6c30fef291b859a2a467d478cabe",
+    "runs/hexframe_pose_check_20261005_v2/xy/validation.json": "4b2029f22817d36f58ac1691b25860b89a9188914d2a0be12aa922cf188dbc0b",
+    "runs/hexframe_pose_check_20261005_v2/xy/runtime.json": "d682aa28b0c5d704accad99cc27a76455d921abd88b522e21f8c6878d092c133",
+    "runs/hexframe_pose_check_20261005_v2/xy/model.xml": "b5df71403ce8d6f6abc920913164bf1f7767055bcf1151c4c7bcf45e12cce70a",
+    "runs/hexframe_pose_check_20261005_v2/xy/accepted_anchor.json": "4cabe42e8b0d99bd439719bbcad68aed739f3fa09065534aeab7cf2b0bd39192",
+    "runs/hexframe_pose_check_20261005_v2/xy/planning.json": "596b180541f4295fc1e5732cf2055a5b8072c919e1d6f48dfd9061bf51749a47",
+    "runs/hexframe_pose_check_20261005_v2/xy/storage_trace.npz": "14f44ab015a101154bbd47509988ddda51779335fbce23cc7b20ba77dc22b1e7",
+    "runs/hexframe_pose_check_20261005_v2/xy/model_consistency.json": "73cfbc5b86a5604e265cd55b6e4774943b6d45d619daa635dfeb3581b3cae29e"
+  }
+}
