@@ -123,8 +123,7 @@ def boundary_points(records, pairs, limit):
 def source_manifest(base):
     """读取共享代码、入口、场景和资产清单，返回版本及 SHA-256 来源记录。"""
     files = sorted((REPO_ROOT/"src").rglob("*.py")) + [
-        REPO_ROOT/"experiments/petal_insertion_suite.py", REPO_ROOT/"experiments/petal_capture_grid.py",
-        REPO_ROOT/"experiments/run_docking.py", REPO_ROOT/"experiments/insertion_suite.py",
+        REPO_ROOT/"experiments/petal_insertion_suite.py", REPO_ROOT/"experiments/insertion_suite.py",
         REPO_ROOT/"pyproject.toml", REPO_ROOT/"uv.lock", base.path]
     files += sorted(p for layer in ("control", "models_interfaces", "system") for p in (REPO_ROOT/"experiments"/layer).rglob("*.py"))
     return dict(mujoco_version=mujoco.__version__, pinocchio_version=pin.__version__,

@@ -43,7 +43,7 @@ class HQPAdaptiveController:
 
     与 TaskSpaceController 鸭子类型兼容：提供同签名的
     ``compute_control_task_space_with_orientation_and_imp`` 与
-    ``get_task_space_state``，可在 experiments/run_docking.py 中直接互换。
+    ``get_task_space_state``，可在主仿真编排（orchestration/run_docking.py）中直接互换。
     """
 
     def __init__(self, robot_model: pin.Model, dt: float,

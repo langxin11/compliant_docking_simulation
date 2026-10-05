@@ -19,8 +19,6 @@ os.environ.setdefault("MPLBACKEND", "Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-import experiments.petal_capture_grid as grid
-import experiments.petal_guidance_study as study
 import experiments.petal_insertion_suite as suite
 from compliant_docking.contact_diagnostics import evaluate_contact_load
 from compliant_docking.docking_task import target_rotation
@@ -28,6 +26,8 @@ from compliant_docking.petal_geometry import evaluate_petal_seating
 from compliant_docking.plotting import apply_style
 from compliant_docking.research.cases import POINTS
 from compliant_docking.scene import REPO_ROOT, load_scene
+from experiments.control import capture_range as grid
+from experiments.models_interfaces import petal_guidance as study
 from experiments.petal_guidance_geometry import DIRECTORIES
 
 LABELS = {"original": "原轮廓", "narrow": "窄平顶 + 角向斜坡", "radial": "角向 + 径向导面"}

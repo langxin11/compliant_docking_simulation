@@ -231,7 +231,7 @@ def main(argv=None):
     parser.add_argument("--reanalyze", action="store_true", help="Rebuild diagnostic gates and figures from saved data; never rerun physics")
     args = parser.parse_args(argv)
     args.diagnose |= args.sensitivity or args.reanalyze
-    source_files = sorted((REPO_ROOT / "src").rglob("*.py")) + [Path(__file__), REPO_ROOT / "experiments/run_docking.py"]
+    source_files = sorted((REPO_ROOT / "src").rglob("*.py")) + [Path(__file__)]
     sources_at_start = {str(p.relative_to(REPO_ROOT)): hashlib.sha256(p.read_bytes()).hexdigest()
                         for p in source_files}
     base = load_scene(args.scene)

@@ -13,9 +13,9 @@ if __package__ in (None, ""):
 import matplotlib.pyplot as plt
 import numpy as np
 
-import experiments.petal_selected_study as selected
 import experiments.prepare_petal_guidance as geometry
 from compliant_docking.plotting import apply_style
+from experiments.models_interfaces import selected_candidate as selected
 
 
 def save(fig, out, name):

@@ -13,7 +13,7 @@ from compliant_docking.scene import load_scene
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/"experiments"))
 generate = importlib.import_module("prepare_petal_guidance")
-study = importlib.import_module("petal_guidance_study")
+study = importlib.import_module("experiments.models_interfaces.petal_guidance")
 suite = importlib.import_module("petal_insertion_suite")
 
 

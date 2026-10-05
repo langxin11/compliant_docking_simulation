@@ -10,8 +10,11 @@ import pytest
 from compliant_docking.docking_task import build_docking_trajectory
 from compliant_docking.scene import load_scene
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]/"experiments"))
-grid = importlib.import_module("petal_capture_grid")
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+grid = importlib.import_module("experiments.control.capture_range")
+# petal_insertion_suite / insertion_suite 是仍在 experiments 根目录的历史研究入口，
+# 按裸名导入以保持其原有命令行用法不变。
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
 suite = importlib.import_module("petal_insertion_suite")
 legacy = importlib.import_module("insertion_suite")
 

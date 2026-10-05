@@ -53,12 +53,7 @@ select = ["E", "F", "W", "I", "UP", "B"]
 ignore = ["E501"]
 
 [tool.pytest.ini_options]
-testpaths = [
-    "tests",
-    "archive/orbital_showcase/test_hexframe_integration.py",
-    "archive/orbital_showcase/contact_force_study",
-    "archive/orbital_showcase/crown_seating",
-]
+testpaths = ["tests"]
 markers = [
     "slow: long physics regression runs",
 ]

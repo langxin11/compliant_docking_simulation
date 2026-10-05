@@ -24,9 +24,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from compliant_docking.metrics import DockingMetrics, compute_metrics  # noqa: E402
 from compliant_docking.models import load_pin_model  # noqa: E402
+from compliant_docking.orchestration.run_docking import main  # noqa: E402
 from compliant_docking.scene import Scene, TrajectorySpec, load_scene  # noqa: E402
 from compliant_docking.telemetry import Log  # noqa: E402
-from experiments.run_docking import main  # noqa: E402
 
 REPO = Path(__file__).resolve().parents[1]
 RESULTS = REPO / "runs" / "framework_comparison"

@@ -56,7 +56,7 @@ class Log:
 
         # SE(3) Lie 控制器逐步诊断（仅 --controller se3_lie 时填充；每元素为
         # 控制器 latest_diagnostics 的标量子集 + torque_saturated，见
-        # experiments/run_docking.py）。旧控制器路径不触碰该列表。
+        # src/compliant_docking/orchestration/run_docking.py）。旧控制器路径不触碰该列表。
         self.se3_diagnostics = []
         self.docking_samples = []
         self.docking_joint_limit_violation = False
