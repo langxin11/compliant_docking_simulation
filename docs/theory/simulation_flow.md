@@ -1,6 +1,6 @@
 # 主仿真理论与数据流
 
-本文档梳理柔顺对接主仿真（`experiments/run_docking.py`）的控制理论基础与
+本文档梳理柔顺对接主仿真（`src/compliant_docking/orchestration/run_docking.py`）的控制理论基础与
 端到端数据流。整体架构见 [架构总览](../architecture.md)；与论文公式的逐条
 对应见 [论文-代码对照](../paper_mapping.md)。
 

@@ -47,7 +47,7 @@ def error_tuple(point):
 ## 维护方式
 
 先更新本次改动涉及的接口说明，再处理独立的整批规范化任务。
-不修改第三方导入、`results/`、`archive/` 中冻结证据及 `source_snapshot/` 来统一语言。
+不修改第三方导入、`results/` 冻结证据及 `source_snapshot/` 来统一语言。
 迁移锚点中的函数若要求 AST 原样保留，可先用邻近注释补充契约。
 
 注释修订应与行为修改清楚区分。去除 docstring 后 AST 相等只能证明没有语法层面的执行逻辑变更，

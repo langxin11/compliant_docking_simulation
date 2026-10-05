@@ -53,6 +53,9 @@ select = ["E", "F", "W", "I", "UP", "B"]
 ignore = ["E501"]
 
 [tool.pytest.ini_options]
+# tests 直接导入 experiments.* 分层入口；把仓库根加入 sys.path，
+# 使 `uv run pytest` 与 IDE/`python -m pytest` 行为一致。
+pythonpath = ["."]
 testpaths = ["tests"]
 markers = [
     "slow: long physics regression runs",

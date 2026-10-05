@@ -1,8 +1,8 @@
 """docking 命令行入口：参数化运行七自由度机械臂柔顺对接仿真实验。
 
 仅使用标准库 argparse；实验编排逻辑唯一来源于
-src/compliant_docking/orchestration/run_docking.py（experiments/run_docking.py
-保留为兼容薄壳），惰性导入以保持启动时的环境变量设置顺序。
+src/compliant_docking/orchestration/run_docking.py，惰性导入以保持启动时的
+环境变量设置顺序。
 
 用法示例 / Examples:
     docking --quick                 # 2 秒快速冒烟（无渲染、无录帧）

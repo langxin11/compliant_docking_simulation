@@ -120,9 +120,11 @@ def run(out, workers):
     if manifest_path.exists() or study.read_records(out):
         raise ValueError("Study already started; use --audit to finish or choose a new directory")
     manifest = grid.source_manifest(base)
-    for filename in ("petal_guidance_study.py", "prepare_petal_guidance.py", "petal_guidance_geometry.py",
-                     "petal_guidance_report.py", "petal_lateral_study.py", "prepare_petal_design.py",
-                     "petal_designer.py", "petal_selected_study.py"):
+    # source_manifest 只覆盖 src/、三个分层入口和两个根目录研究入口；这里补上
+    # 本研究用到的根目录工具脚本。分层内的入口已由 rglob 计入，不再重复列出。
+    for filename in ("prepare_petal_guidance.py", "petal_guidance_geometry.py",
+                     "petal_guidance_report.py", "prepare_petal_design.py",
+                     "petal_designer.py"):
         path = REPO_ROOT / "experiments" / filename
         manifest["sources"][str(path.relative_to(REPO_ROOT))] = hashlib.sha256(path.read_bytes()).hexdigest()
     manifest["geometry_assets"] = {"selected": json.loads((MODEL / "manifest.json").read_text())}

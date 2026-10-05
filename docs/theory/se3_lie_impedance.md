@@ -46,7 +46,7 @@ A，平移阶跃超调 0%/0%/**48.6%**（A=0.5/5/100，理论值 48.6%）——�
 
 ## 主循环接线
 
-`experiments/run_docking.py` 在 `--controller se3_lie` 下使用独立的 SE(3) 通道：
+主仿真编排 `orchestration/run_docking.py` 在 `--controller se3_lie` 下使用独立的 SE(3) 通道：
 
 1. `planning.motion_reference.get_motion_reference` 采样 `(T_d,V_d,Vdot_d)`；
 2. `SE3ToppTrajectory.get_motion_state` 可直接给出常螺旋段的 body 运动量，其他

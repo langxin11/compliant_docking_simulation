@@ -118,8 +118,8 @@ def run_study(args):
     out.mkdir(parents=True,exist_ok=True)
     base = load_scene("scenes/iiwa14_petal_original_insertion.yaml")
     manifest = grid.source_manifest(base)
-    for filename in ("petal_guidance_study.py","prepare_petal_guidance.py","petal_guidance_geometry.py",
-                     "petal_lateral_study.py"):
+    # 补上研究用到的根目录工具脚本；分层入口本身已由 source_manifest 的 rglob 计入。
+    for filename in ("prepare_petal_guidance.py","petal_guidance_geometry.py"):
         path = REPO_ROOT/"experiments"/filename
         manifest["sources"][str(path.relative_to(REPO_ROOT))] = hashlib.sha256(path.read_bytes()).hexdigest()
     manifest["geometry_assets"] = {g:json.loads((DIRECTORIES[g]/"manifest.json").read_text()) for g in GEOMETRIES}
