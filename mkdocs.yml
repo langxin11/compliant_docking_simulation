@@ -71,14 +71,13 @@ nav:
   - 理论基础:
       - 阻抗控制: theory/impedance_control.md
       - SE(3) Lie 阻抗: theory/se3_lie_impedance.md
-      - 选择性柔顺: theory/selective_compliance.md
       - 仿真理论与数据流: theory/simulation_flow.md
 
   - 三层研究:
       - 模型与接口: models_interfaces.md
-      - 控制研究协议: control_research.md
-      - 控制主结果: control_main_results.md
-      - 系统验证: system_validation.md
+      - 接触阶段控制实验: control_research.md
+      - 控制实验结果: control_main_results.md
+      - 完整系统验证: system_validation.md
 
   - 实验复现: experiments.md
   - HexFrame 正式组装: hexframe_assembly.md

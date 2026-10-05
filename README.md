@@ -13,30 +13,29 @@ Pinocchio 提供运动学与控制侧刚体动力学；内置 KUKA iiwa14 与 Fr
 几何导向接口，以及 HexFrame 完整组装任务，逐步从论文复现成长为自己的研究平台。
 这段历史见[项目演化](docs/project_evolution.md)。
 
-当前主线（2026-10 收束）：在声明的定位误差与固定模型条件下，柔顺策略对对接完成、
-最终误差、完成时间与失败边界的影响，以及如何接入完整装配，见
-[研究主线](docs/research_focus.md)。这一主线的机制表述是 **geometry-informed
-selective compliance（几何引导的自由度选择性柔顺）**——接触以后哪些自由度应保持
-约束、哪些应允许接口被动自对准；该表述来自收束期间的讨论与文档整理，不是项目
-立项时的研究目标。实验中把自对准方向刚度释放到 0 是分离机制的极端对照，不是理论
-最优刚度为零的主张，见[选择性柔顺](docs/theory/selective_compliance.md)。
+当前仓库继续围绕机器人柔顺对接与完整装配展开。在已有规划、柔顺控制和接口模型
+基础上，当前工作重点是保持方法可复现、接口实验可解释，并推进完整 HexFrame 装配
+验证（见[研究主线](docs/research_focus.md)）。仓库中还保留两组小型接触机制实验
+（RQ1/RQ2），用于分析典型定位误差下刚度设置与卡滞之间的关系；其中释放到零刚度
+是移除恢复力的极端实验点，不是最优刚度为零的主张。
 
 ## 🧭 三层研究结构
 
-| 层次 | 核心问题 | 入口与说明 |
+| 层次 | 核心问题 | 内容与入口 |
 |---|---|---|
-| 研究对象与物理基线 | 我们在什么模型、接口和接触条件下研究？ | [模型基线](docs/models_interfaces.md)、`experiments/models_interfaces/` |
-| 对接方法与接触柔顺 | 我们怎样控制机器人完成对接？ | [论文对照](docs/paper_mapping.md)、[RQ1/RQ2 协议](docs/control_research.md)、`experiments/control/` |
-| 完整装配与系统验证 | 单接口上的策略进入完整装配流程后是否仍有效？ | [系统验证](docs/system_validation.md)、`experiments/system/` |
+| 模型与接口 | 我们在什么机器人、接口和接触条件下研究？ | 模型一致性、接口几何、接触模型——[模型基线](docs/models_interfaces.md)、`experiments/models_interfaces/` |
+| 规划与柔顺控制 | 我们怎样完成机器人柔顺对接？ | SE(3)-TOPP、阻抗、HQP-AC、SE(3) impedance、局部控制实验——[论文对照](docs/paper_mapping.md)、[接触阶段控制实验](docs/control_research.md) |
+| 完整装配系统 | 已有方法能否进入完整装配流程？ | HexFrame 抓取、转运、接触、锁定、释放、撤离——[系统验证](docs/system_validation.md)、`experiments/system/` |
 
-第二层覆盖方法层面的三个问题，前两个来自主要参考文献：
+方法演化的主干来自两篇主要参考文献，仓库在其上做扩展：
 
-1. 在轨机器人进行模块对接时，怎样把轨迹规划和柔顺控制统一起来，使整个接触装配
-   过程既能完成，又满足安全约束？（Ren & Shan，复现于 SE(3)-TOPP + HQP-AC）
-2. 机器人末端位姿本来位于非欧氏的 SE(3) 空间中，怎样才能用最小参数、保持正确
-   几何结构，并且系统地设计一个真正的六自由度阻抗控制器？（Kim et al.，复现于
-   `se3_lie` §III-A 标称阻抗）
-3. 接触以后，各自由度的柔顺应怎样按接口几何分配？（当前机制表述，收束期间引入）
+```text
+Ren & Shan —— 任务级：planning + compliant control 支持在轨装配
+        ↓
+Kim et al. —— 控制方法级：SE(3) 上统一的 6-DoF impedance
+        ↓
+本仓库扩展 —— 新接口 + 小型控制实验 + HexFrame 完整装配
+```
 
 三层结构是当前为了建立清晰证据边界采用的研究组织方式，不是项目的开发顺序。
 单接口默认采用 `angle1_blend030` 凸块模型（物理/控制/反馈延迟均为 1 ms），
@@ -81,7 +80,7 @@ OPENBLAS_NUM_THREADS=1 MUJOCO_GL=egl uv run python -m experiments.system.hexfram
 ## 📊 去哪里看结果
 
 - `results/` —— 冻结的轻量结论摘要与支撑图表，按原协议解释，不续写旧结果。
-- `docs/control_main_results.md` —— 当前控制主结果与失败边界。
+- `docs/control_main_results.md` —— 当前控制实验结果与失败边界。
 - `docs/historical_evidence.md` —— 按问题分类的历史证据索引。
 - 新运行数据一律写 `runs/`（Git 忽略）。
 
@@ -137,9 +136,8 @@ runs/                            本地运行输出（Git 忽略）
 
 建议阅读顺序：[项目演化](docs/project_evolution.md) → [当前研究主线](docs/research_focus.md) →
 [研究范围与三层结构](docs/research_scope.md) → [阻抗控制基础](docs/theory/impedance_control.md) →
-[SE(3) Lie 阻抗](docs/theory/se3_lie_impedance.md) → [选择性柔顺](docs/theory/selective_compliance.md) →
-[RQ1/RQ2 协议](docs/control_research.md) → [控制主结果](docs/control_main_results.md) →
-[HexFrame 系统验证](docs/system_validation.md)。在线文档见
+[SE(3) Lie 阻抗](docs/theory/se3_lie_impedance.md) → [接触阶段控制实验](docs/control_research.md) →
+[控制实验结果](docs/control_main_results.md) → [HexFrame 系统验证](docs/system_validation.md)。在线文档见
 [langxin11.github.io/compliant_docking_simulation](https://langxin11.github.io/compliant_docking_simulation/)；
 其他入口：[架构](docs/architecture.md) · [实验复现手册](docs/experiments.md) ·
 [论文对照](docs/paper_mapping.md) · [API](docs/api/control.md)。

@@ -1,9 +1,8 @@
 # 论文-代码对照表
 
 本页记录仓库中**历史论文复现与方法来源**，不代表当前研究问题与这些论文完全相同：
-论文复现 ≠ 仓库当前研究贡献。当前研究主线（geometry-informed selective compliance）
-是复现工作之后、由接口实验暴露出的新问题，见[研究主线](research_focus.md)与
-[项目演化](project_evolution.md)。
+论文复现 ≠ 仓库当前研究贡献。当前主线与仓库自身的扩展工作见
+[研究主线](research_focus.md)与[项目演化](project_evolution.md)。
 
 复现对象：**Ren, Q. & Shan, J. (2026). A unified framework for compliant control and
 trajectory planning in robotic in-orbit assembly. _Acta Astronautica_ 243, 32–45.**
@@ -103,7 +102,7 @@ NRIC 当前不实现的理由：本仿真中 MuJoCo 物理世界与 Pinocchio �
 | 功能 | 位置 |
 |---|---|
 | SE(3) Lie 群标称阻抗（Kim et al. 2025 §III-A，见上节） | `control/se3_impedance.py`、`control/lie_se3.py`；完整 `log6`/`dexp`/惯量重塑链路 |
-| 几何引导的选择性柔顺研究（RQ1/RQ2 的机制表述） | `experiments/control/rq1_yaw.py`、`rq2_lateral.py`；理论见[选择性柔顺](theory/selective_compliance.md) |
+| 接触阶段绕轴/横向刚度机制实验（RQ1/RQ2） | `experiments/control/rq1_yaw.py`、`rq2_lateral.py`；协议见[接触阶段控制实验](control_research.md) |
 | SE(3) body 运动参考适配 | `planning/motion_reference.py`；SE(3)-TOPP 透传，纯位置轨迹结合固定姿态补齐 |
 | sensor-site → EE-body wrench 变换 | `wrench.py`；同时处理坐标旋转和参考点平移矩 |
 | 力矩方向摩擦前馈（零速死区补偿，`friction_comp: torque`） | `control/task_space.py`、`control/hqp_ac.py`；FR3 对接横向偏差 5.19→2.10 mm |
