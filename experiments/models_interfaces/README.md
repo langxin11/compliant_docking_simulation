@@ -1,5 +1,18 @@
 # models_interfaces
 
-baseline qualifies original Petal assets; petal_guidance runs the independent geometry matrix. selected_candidate strictly rejects migrated historical references; reproduce those with archived snapshots. Asset generators remain at their unique original paths.
+这里放模型资格检查、接口候选与几何对照的编排入口。
 
-Run from repository root with `uv run python -m experiments.models_interfaces.<entry> --help`.
+- `baseline.py`：默认 Petal 固定模型的资格检查（双引擎一致性、初值、哈希）；
+- `petal_guidance.py`：三个几何候选的横向释放 rollout；
+- `selected_candidate.py`：已保存 1°/0.3 导向设计的代表点复核；
+- `angle1_task_check.py`：选定接口的九点任务验证（1 ms 时序）；
+- `angle1_sdf_compare.py`：凸块与花瓣 SDF 原型的三点对照；
+- `crown_sdf_onset_check.py` / `crown_sdf_dynamic_check.py`：原冠形 STL 与 SDF 的静态首触、三点动态核对。
+
+从仓库根目录运行：
+
+```bash
+uv run python -m experiments.models_interfaces.baseline --out runs/model_baseline_my_run
+```
+
+输出只写入 `runs/` 的新目录；经审查的唯一模型才进入 `assets/`。

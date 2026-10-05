@@ -18,7 +18,7 @@ MuJoCo 提供物理世界，Pinocchio 提供运动学与控制侧刚体动力学
 单接口默认采用 `angle1_blend030` 凸块模型（物理/控制/反馈延迟均为 1 ms），
 入口为 `scenes/iiwa14_petal_insertion.yaml`；HexFrame 正式场景仍用旧接口。
 
-## 安装与冒烟
+## 🚀 安装与冒烟
 
 ```bash
 git clone https://github.com/langxin11/compliant_docking_simulation.git
@@ -30,7 +30,7 @@ uv run pytest -m 'not slow' -q
 
 无显示环境设 `MUJOCO_GL=egl`；Ubuntu 需要 `libegl1`、`libegl-dev`。
 
-## 三类实验怎么跑
+## 🧪 三类实验怎么跑
 
 ```bash
 # 模型与接口：固定基线的双引擎、关节与初始接触检查
@@ -54,14 +54,14 @@ OPENBLAS_NUM_THREADS=1 MUJOCO_GL=egl uv run python -m experiments.system.hexfram
 `audit.json` 均通过，预检为 `INCOMPLETE`。完整命令、退出语义与历史研究入口见
 [实验复现手册](docs/experiments.md)。
 
-## 去哪里看结果
+## 📊 去哪里看结果
 
 - `results/` —— 冻结的轻量结论摘要与支撑图表，按原协议解释，不续写旧结果。
 - `docs/control_main_results.md` —— 当前控制主结果与失败边界。
 - `docs/historical_evidence.md` —— 按问题分类的历史证据索引。
 - 新运行数据一律写 `runs/`（Git 忽略）。
 
-## 演示
+## 🎬 演示
 
 | iiwa14 经典阻抗 | FR3 摩擦场景 | iiwa14 SE(3) Lie |
 |---|---|---|
@@ -71,7 +71,32 @@ SE(3) 自由空间验证覆盖惯量重塑、179° 姿态与零刚度方向：
 
 ![SE(3) 自由空间验证](demo/se3_free_space_validation.png)
 
-## 目录与文档
+## 🧱 仿真架构
+
+```mermaid
+flowchart LR
+    YAML[场景 YAML] --> SCENE[Scene / MjSpec 装配]
+    SCENE --> MJ[MuJoCo 物理世界]
+    SCENE --> PIN[Pinocchio 动力学模型]
+    PLAN[轨迹规划器] --> REF[运动参考<br/>pos/vel/acc 或 T_d/V_d/Vdot_d]
+    REF --> CTRL{控制器}
+    PIN --> CTRL
+    CTRL -->|关节力矩 tau| MJ
+    MJ -->|q, v| PIN
+    MJ -->|F/T 传感| W[wrench 坐标与参考点变换]
+    W --> CTRL
+    MJ --> LOG[telemetry]
+    CTRL --> LOG
+    LOG --> OUT[指标 / 门禁 / PNG / PDF / MP4]
+```
+
+关键边界是：控制器不读取 MuJoCo 的内部动力学量。MuJoCo 只接收关节力矩并返回
+状态与传感器数据，Pinocchio 独立计算控制所需模型量，与真实机器人上
+“物理本体 + 模型基控制器”的部署结构一致；`simulation/consistency.py`
+通过质量矩阵和前向动力学交叉验证保证两套模型同源。
+模块职责与 SE(3) body 数据流详见[架构总览](docs/architecture.md)。
+
+## 🧭 目录与文档
 
 ```text
 assets/                          模型资产、许可与来源记录（唯一来源）
@@ -86,7 +111,8 @@ demo/                            精选展示图件与视频
 runs/                            本地运行输出（Git 忽略）
 ```
 
-深入阅读：[架构](docs/architecture.md) · [实验复现手册](docs/experiments.md) ·
+深入阅读：[在线文档](https://langxin11.github.io/compliant_docking_simulation/) ·
+[架构](docs/architecture.md) · [实验复现手册](docs/experiments.md) ·
 [论文对照](docs/paper_mapping.md) · [SE(3) 理论](docs/theory/se3_lie_impedance.md) ·
 [API](docs/api/control.md)。编码代理先读 [AGENTS.md](AGENTS.md)；
 贡献与检查要求见[贡献指南](CONTRIBUTING.md)与[变更记录](CHANGELOG.md)。

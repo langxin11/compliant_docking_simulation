@@ -1,23 +1,25 @@
-name: Research proposal
-description: Propose a controlled experiment or an integration task
+name: 研究提案
+description: 提出一个受控实验；一个实验尽量只回答一个问题
 title: "[Research] "
 body:
   - type: textarea
     id: question
     attributes:
-      label: Question, hypothesis and project layer
+      label: 研究问题与假设
+      description: 想回答什么问题，预期结论方向是什么。一个实验尽量只回答一个问题。
     validations:
       required: true
   - type: textarea
     id: factors
     attributes:
-      label: Primary variable and fixed conditions
-      description: Specify model version, controller, trajectory, feedback timing, physics and paired cases.
+      label: 唯一主要变量与固定条件
+      description: 主要变量只有一个；说明模型版本、控制器、轨迹、反馈时序、物理步长和配对工况中哪些保持不变。
     validations:
       required: true
   - type: textarea
     id: validation
     attributes:
-      label: Criteria, failure definitions, execution budget and claim scope
+      label: 评价与必要性
+      description: 用什么指标和失败定义评价；现有结果是否已能回答这个问题，是否真的需要新实验。
     validations:
       required: true

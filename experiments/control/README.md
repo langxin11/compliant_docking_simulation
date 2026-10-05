@@ -1,5 +1,16 @@
 # control
 
-Fixed original Petal baseline: rq1_yaw, rq2_lateral and capture_range isolate declared control factors. Free-space validation remains at its preserved legacy scripts.
+这里放柔顺控制策略的对照实验，固定原版 Petal 接口（original 场景）。
 
-Run from repository root with `uv run python -m experiments.control.<entry> --help`.
+- `rq1_yaw.py`：固定接口，只比较绕轴刚度策略（stiff / compliant / released）；
+- `rq2_lateral.py`：固定绕轴释放后，同点比较 XY 保持与释放；
+- `capture_range.py`：有限的离散误差工况地图，不对采样点之间做插值声明。
+
+从仓库根目录运行：
+
+```bash
+OPENBLAS_NUM_THREADS=1 uv run python -m experiments.control.rq1_yaw \
+  --case combined --setting baseline --out runs/rq1_my_run
+```
+
+一个实验只回答一个问题；评价读各组 JSON 的 `assessment`，成功退出不表示所有工况通过。

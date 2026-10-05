@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- 清理 `runs/` 中零引用的纯构建与迁移脚手架（17 项，约 100 MB）：旧 MkDocs 输出 `docs_site/`、迁移期 `generated_archive/`、`archive_workspaces/`、`archived_outputs/`（已删除 orbital_showcase 的旧输出）、`generated_policy_20261004_*`、`directory_cleanup_20261004_*`、基线 16a54d4 的 `restructuring_20261004_{model_baseline,precheck,checks}`、smoke 输出及其 source_check JSON，以及无 rollout 的 `angle1_nine_20261005/`、被 v3 取代的 `hexframe_interface_precheck_20261005/`、`narrow_default_check_20261004/`。冻结报告明文保留的首次/INCOMPLETE 目录与重构等价性对照核实后未动；`runs/` 不进入 Git，删除前整体备份于本机 `~/runs_cleanup_backup_20261005.tar.gz`，逐项记录见 `runs/README.md`。
+- 文档输出恢复 MkDocs 默认 `site/` 目录：删除 `mkdocs.yml` 中的 `site_dir: runs/docs_site`，`runs/` 回归纯科研运行产物；Pages workflow 补 `actions/configure-pages@v5`、升级 `upload-pages-artifact@v4` 并增加 `site/index.html` 构建后检查。main 上此前发布失败的直接原因是旧版 `docs/_repository_reports.py` 未重写 `development_plan.md` 中的 `../results/` 链接，strict 构建中止；本分支 hook 已将该页纳入重写名单，本地 strict 构建通过。
+- 整理贡献与协作外围：CONTRIBUTING.md 重组为环境安装、三层实验、验证与研究约定；AGENTS.md 的 CHANGELOG 规则放宽为仅记录影响使用方式、协议、默认行为或阶段性结果的改动；Issue/PR 模板改为面向中文用户的精简结构。README 主要二级标题加入少量 Emoji 并补在线文档链接；三层实验 README 改为短中文说明；统一“仿真研究仓库”表述（mkdocs site_description 与 docs 首页）。
+
 - 将 GLM 编码委派内容清理出仓库：删除 `docs/glm_bridge.md` 与 mkdocs 导航条目，AGENTS.md 移除“GLM 编码委派”章节及外部编码代理条目；桥接脚本此前已迁至本机 `~/.codex/mcp/` 独立维护，仓库不再保存其使用规则。
 
 - 减法重构：`archive/` 整体退出运行路径（pytest 只收集 `tests/`，目录删除，Git 历史可恢复）；删除 `experiments/orbital_showcase/`、`experiments/hexframe_validation/`、`experiments/_archive_compat.py` 及根目录 5 个转发 wrapper（`run_docking.py`、`petal_capture_grid.py` 等）、`check_env.py`、一次性冻结工具 `petal_guidance_freeze.py`。引用方改为直接使用分层正式入口；未新增任何替代目录或清单。

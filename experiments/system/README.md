@@ -1,9 +1,15 @@
 # system
 
-hexframe precheck is INCOMPLETE, accept requires full validation and audit, replay uses saved states. validation/ contains P0/P1/P2, separate from formal acceptance and control research.
+`hexframe` 是 HexFrame 正式入口：预检（prequal）结果为 INCOMPLETE，验收（accept）
+要求完整 validation 与独立 audit 同时通过，回放（replay）使用已保存状态。
+`validation/` 放 P0/P1/P2 扩展工况，与正式验收和控制研究分开。
 
-Run from repository root with `uv run python -m experiments.system.<entry> --help`.
+从仓库根目录运行：
 
+```bash
+OPENBLAS_NUM_THREADS=1 MUJOCO_GL=egl uv run python -m experiments.system.hexframe \
+  accept --out runs/hexframe_my_run
+```
 
 ## 有限接收位姿偏差
 
@@ -19,7 +25,6 @@ OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 uv run python -m experiments.system.hex
 输出包含实际与名义模型、偏差核对、接触记录、原验收结果和来源指纹。
 运行失败保留原记录；完整通过后运行独立交接审计。
 原系统就位条件与单接口 2 N·m 历史参考值不同；此入口没有引入该参考值。
-
 
 ## 人工评判视频
 

@@ -1,25 +1,38 @@
-name: Bug report
-description: Report a reproducible simulation or documentation failure
+name: Bug 报告
+description: 报告可复现的仿真或文档问题
 title: "[Bug] "
 body:
   - type: dropdown
     id: layer
     attributes:
-      label: Project layer
-      options: [Models and interfaces, Control research, System validation, Shared tooling or docs]
+      label: 所属层次
+      options: [模型与接口, 控制研究, 系统验证, 共享工具或文档]
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 发生了什么
+      description: 实际观察到的错误行为、异常数值或构建失败。
     validations:
       required: true
   - type: textarea
     id: reproduction
     attributes:
-      label: Reproduction and expected behavior
-      description: Include exact command, scene, output status and the expected result.
+      label: 如何复现
+      description: 给出确切的命令、场景文件、输出目录和状态。
     validations:
       required: true
   - type: textarea
-    id: evidence
+    id: expected
     attributes:
-      label: Environment and evidence
-      description: Include commit, dependency versions, relevant JSON/logs and source fingerprints. Do not overwrite an archive to reproduce.
+      label: 预期行为
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: 环境与日志
+      description: commit、依赖版本、相关 JSON/日志或截图；说明能否稳定复现。
     validations:
       required: true

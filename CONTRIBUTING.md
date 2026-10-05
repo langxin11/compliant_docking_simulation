@@ -1,50 +1,66 @@
 # 贡献指南
 
-请先说明变更属于模型与接口、控制研究或完整系统，具体触发条件和预期结果。
-缺陷修复可直接提交 PR；研究协议或大范围物理变更先在 issue 中描述研究问题和主要变量。
+本仓库研究机械臂柔顺对接与装配。贡献前先读[当前主线](docs/research_focus.md)与
+[研究范围](docs/research_scope.md)，再决定改动属于哪一层。
 
-## 代理与注释
-
-编码代理先读取根目录 `AGENTS.md`，所有项目自有代码遵循 [代码与注释规范](docs/coding_style.md)。
-公共接口需说明职责和副作用；物理量说明单位、形状、坐标系与时间约定。
-本次修改涉及的接口同步补齐注释，不改写第三方或冻结源码快照。
-研究范围和停止条件按[当前主线](docs/research_focus.md)，不因辅助峰值敏感性自动扩展实验。
-
-## 开发与检查
+## 环境安装
 
 ```bash
-uv sync --frozen --dev
+git clone https://github.com/langxin11/compliant_docking_simulation.git
+cd compliant_docking_simulation
+uv sync --frozen --dev        # 推荐 uv；标准环境可用 python -m pip install -e .
+uv run docking --quick        # 2 s 链路检查，确认环境可用
+```
+
+无显示环境设 `MUJOCO_GL=egl`；Ubuntu 需要 `libegl1`、`libegl-dev`。
+
+## 三层实验与研究数据
+
+研究分三层，新实验入口放进对应层的目录：
+
+- `experiments/models_interfaces/` —— 模型资格检查、接口候选与几何编排；
+- `experiments/control/` —— RQ1/RQ2、误差范围等柔顺控制对照实验；
+- `experiments/system/` —— HexFrame 正式验收、预检、回放与扩展工况。
+
+`experiments/` 只负责实验编排，共享实现放 `src/compliant_docking/`，不能反向导入
+实验入口。从仓库根目录运行：`uv run python -m experiments.<层>.<入口> --help`。
+
+新运行数据一律写 `runs/` 下的新目录（Git 忽略）；正式模型在 `assets/`，
+冻结证据在 `results/`，精选展示在 `demo/`。不用 `git add -f` 加入被忽略的产物。
+完整命令、退出语义与默认输出位置见[实验复现手册](docs/experiments.md)。
+
+## 修改后跑什么
+
+```bash
 uv run ruff check .
 uv run pytest -m 'not slow' -q
 uv run mkdocs build --strict
 ```
 
-修改控制、采样、模型或系统编排时运行受影响的数值锚点。正式系统变更还需完整 53 s
-HexFrame 流程和独立审计；回放改动需从同一状态记录验证。慢速套件使用 `uv run pytest -m slow -q`。
-CI 使用上述静态/快速检查、严格文档构建和完整系统验收。请在 PR 记录实际运行命令与结果。
+按改动范围选择：纯文档改动跑文档构建和静态检查；控制、采样、模型或系统编排
+改动加跑受影响的数值锚点；正式装配行为改动才需要完整 53 s HexFrame 验收和
+独立审计。慢速接触回归用 `uv run pytest -m slow -q`。请在 PR 中记录实际运行的
+命令与结果，不把未执行的验证写成通过。
 
-## 研究与数据
+## 研究约定
 
-- 对照声明唯一主要变量和固定条件；物理步长、控制周期、减速、接口几何分别立项。
-- 保存有效配置、失败原因、运行环境、来源哈希、状态与评价；新运行写 `runs/` 的新目录。
-- 临时候选保存在 `runs/designs/`，生成模型先放 `runs/generated_assets/`；经审查的唯一模型纳入 `assets/`，冻结证据摘要纳入 `results/`。
-- 不再运行的历史代码直接删除，需要时从 Git 历史恢复；不建立 archive 目录或第二套兼容入口。
-- 不改旧结果/源码快照/哈希以通过检查；不把不同矩阵合成统一成功率。
-- 模型/资产保留唯一来源、许可与导入清单；候选不未经验证替代基线。
-- 共享库不导入实验脚本；算法不依赖 Demo 布局；旧入口兼容与变更记录一起提交。
+- 一个实验回答一个问题：声明唯一主要变量和固定条件，不把不同矩阵合成统一成功率。
+- 不修改历史结果、验收阈值和来源指纹；历史协议按原口径解释，失败工况是研究结果。
+- 不新增 pipeline / manager / registry 之类的抽象层；优先修改现有文件，不再运行的
+  旧代码直接删除（Git 历史可恢复），不建 archive 目录或第二套兼容入口。
 
-结构变更需要新旧有效配置、退出语义和多进程入口检查。指纹变化无法证明安全复用时拒绝复用。
-视频由验收记录回放；预检与渲染成功不代表系统通过。
+## 代码与注释
 
-## 采用的开源习惯
+编码代理先读根目录 [AGENTS.md](AGENTS.md)。项目自有代码遵循
+[代码与注释规范](docs/coding_style.md)：注释面向中文用户，物理量说明单位、形状、
+坐标系与时间约定；公共接口用 Google 风格 Args / Returns / Raises。第三方资产与
+冻结源码快照不做格式或语言改写。
 
-本项目参考 [MuJoCo Menagerie 的贡献流程](https://github.com/google-deepmind/mujoco_menagerie/blob/main/CONTRIBUTING.md)
-统一本地/CI 检查及变更记录，并保持模型来源和许可；参考
-[robosuite 的模块划分](https://github.com/ARISE-Initiative/robosuite/blob/master/README.md)
-区分模型、控制、任务和回放。这里采用职责与复现习惯，不引入它们的框架依赖。
+## 变更记录
 
-提交时更新 `CHANGELOG.md` 的 Unreleased 项，避免将未执行验证写为通过。
+只有影响使用方式、实验协议、默认行为、默认模型/接口或重要研究阶段的改动才更新
+[CHANGELOG.md](CHANGELOG.md)；注释、typo 和局部清理不必记录。
 
-程序生成数据默认写 `runs/` 并忽略；模型必需资源与人工选择的冻结证据按用途维护。
-CI 拒绝已跟踪但命中忽略规则的文件，人工发布需记录来源并添加具体 allowlist，
-不用 `git add -f` 绕过。各工具的默认输出位置见[实验复现手册](docs/experiments.md)。
+本项目参考 [MuJoCo Menagerie](https://github.com/google-deepmind/mujoco_menagerie/blob/main/CONTRIBUTING.md)
+的贡献流程与许可习惯、[robosuite](https://github.com/ARISE-Initiative/robosuite/blob/master/README.md)
+的模块划分，只采用职责与复现习惯，不引入它们的框架依赖。
