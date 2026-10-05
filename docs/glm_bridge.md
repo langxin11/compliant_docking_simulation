@@ -5,7 +5,8 @@
 
 ## 本机接入
 
-服务名为 `glm_coder`，入口 `scripts/glm_mcp.mjs`，需要 Node.js 22 或更新版本。
+服务名为 `glm_coder`，入口为本机开发工具 `~/.codex/mcp/glm_mcp.mjs`（2026-10-05 从仓库 `scripts/` 迁出，
+不再属于研究仓库），需要 Node.js 22 或更新版本。
 已在本机 Codex 用户配置中注册，并设置本项目的绝对路径 `GLM_WORKSPACE`。
 重启 Codex 或重新加载 MCP 后，让主代理调用 `glm_status` 检查连接。
 本会话启动时已加载的工具列表不会因文件配置修改而立即增加工具。
@@ -76,7 +77,7 @@ Coding Plan 的真实模型输出与编码端到端仍未验证；该套餐额�
 离线验证命令：
 
 ```bash
-node --test tests/test_glm_mcp.mjs
+node --test ~/.codex/mcp/test_glm_mcp.mjs
 ```
 
 14 项检查覆盖凭据格式、路径/符号链接限制、模型选择、输出校验、输入变更、提案持久化、
