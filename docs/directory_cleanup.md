@@ -49,14 +49,13 @@
 
 ## 复现与检查
 
-维护检查 `scripts/check_restructuring.py` 保留 8 个研究函数的 `16a54d4` AST 等价检查，
-控制/装配/规划/仿真实现严格不变。配置只允许 `assembly.resource` 路径迁移；编排只允许
-`plot_results` 和视频保存的默认目录变化；既有资产及搬迁资源按原 Git blob 逐文件校验。
-归档映射另以本轮 `c640a13` 树核对字节，不要求克隆携带忽略的本地原始通道。
-需要本地 Git 历史中的这两个基线提交才能重查。
+迁移当日由时点检查工具（2026-10-05 已从仓库移除，存于 Git 历史）完成核对：8 个研究
+函数 `16a54d4` AST 等价、控制/装配/规划/仿真实现严格不变，配置仅允许 `assembly.resource`
+路径迁移、编排仅允许 `plot_results` 和视频保存目录变化，既有资产及搬迁资源按原 Git blob
+逐文件校验。完整口径见[原验证记录](restructuring_validation.md)；需要本地 Git 历史中的
+基线提交才能重查。
 
 ```bash
-uv run python scripts/check_restructuring.py --out runs/directory_cleanup_source_check.json
 uv run ruff check .
 uv run pytest -m 'not slow' -q
 uv run mkdocs build --strict

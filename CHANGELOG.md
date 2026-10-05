@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- 移除三层迁移的时点检查工具 `scripts/check_restructuring.py`：其冻结基线（`16a54d4`）已被后续功能提交合法越过，检查不再可运行；`scripts/` 目录随之取消，验证口径保留在带日期的记录文档中，工具本体存于 Git 历史。
+
 - 将 GLM 编码桥接移出研究仓库：`glm_mcp.mjs` 及其 14 项边界测试迁至本机 `~/.codex/mcp/`，Codex 注册路径同步更新，`scripts/` 仅保留迁移检查工具；桥接行为与文档（`docs/glm_bridge.md`）中的本机接入说明不变。
 
 - 将 PetalDock 交互加固移植到三层项目结构：保持 `runs/designs/petal_guidance` 输出与冻结候选来源，补齐预览版本、保存原子发布、输入和协议校验；默认半角1°/过渡0.3，移除普通界面的径向参数。

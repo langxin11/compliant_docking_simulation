@@ -58,15 +58,12 @@ CAD/CoACD/Blender 依赖属于离线资产工具，不新增到普通仿真运�
 
 ## 验证与版本控制
 
-维护检查继续比较 8 个迁移研究函数的 AST、控制/装配/规划源码，以及全部保留的模型资源。
-仿真模块仅允许两个手动录像路径和手动绘图路径的精确改动，`MujRobot`、`RobotController`
-与资产 demo 的 `ModuleDemo` 类 AST 不变；两个导入 CAD 生成器的几何/MJCF函数 AST 不变。
-20 个移出项必须与原 Git blob 和前一阶段映射一致，实际正式目录不得残留它们；本地保存
-文件存在时还会核对哈希。已记录的维护源码只允许清单中的精确编辑，额外资源或代码变化
-会失败。忽略的本地文件不是克隆/CI 的必需输入。
+上述迁移等价性（研究函数 AST、源码字节、生成产物退出正式目录与资源清单）由 2026-10-04
+迁移当日的时点检查工具核对并留档；该工具已随迁移完成于 2026-10-05 从仓库移除，
+完整口径见[迁移验证记录](restructuring_validation.md)与[目录归档记录](directory_cleanup.md)。
+后续改动由下方常规检查覆盖；忽略的本地文件不是克隆/CI 的必需输入。
 
 ```bash
-uv run python scripts/check_restructuring.py --out runs/generated_artifacts_source_check.json
 uv run ruff check .
 uv run pytest -m 'not slow' -q
 uv run mkdocs build --strict
