@@ -4,17 +4,41 @@
 ![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-基于 MuJoCo / Pinocchio 的七自由度机械臂柔顺对接与装配仿真研究仓库。
-MuJoCo 提供物理世界，Pinocchio 提供运动学与控制侧刚体动力学；内置 KUKA iiwa14 与 Franka FR3。
-当前主线：固定模型与声明条件下，柔顺策略对对接完成、最终误差、完成时间和失败边界的影响，
-以及完整装配集成。见[研究主线](docs/research_focus.md)与[研究范围](docs/research_scope.md)。
+本项目面向机器人模块化在轨装配中的**柔顺对接**问题，建立一个可以研究轨迹规划、
+柔顺控制、接口接触以及完整装配流程的可复现仿真平台。MuJoCo 提供物理世界，
+Pinocchio 提供运动学与控制侧刚体动力学；内置 KUKA iiwa14 与 Franka FR3。
 
-| 层次 | 回答的问题 | 入口与说明 |
+项目起源于 Ren & Shan（2026, Acta Astronautica）规划—柔顺控制统一框架的复现，
+随后加入 Kim et al.（2025, IEEE T-RO）的 SE(3) 阻抗控制、Petal / Crown / angle1 等
+几何导向接口，以及 HexFrame 完整组装任务，逐步从论文复现成长为自己的研究平台。
+这段历史见[项目演化](docs/project_evolution.md)。
+
+当前主线（2026-10 收束）：在声明的定位误差与固定模型条件下，柔顺策略对对接完成、
+最终误差、完成时间与失败边界的影响，以及如何接入完整装配，见
+[研究主线](docs/research_focus.md)。这一主线的机制表述是 **geometry-informed
+selective compliance（几何引导的自由度选择性柔顺）**——接触以后哪些自由度应保持
+约束、哪些应允许接口被动自对准；该表述来自收束期间的讨论与文档整理，不是项目
+立项时的研究目标。实验中把自对准方向刚度释放到 0 是分离机制的极端对照，不是理论
+最优刚度为零的主张，见[选择性柔顺](docs/theory/selective_compliance.md)。
+
+## 🧭 三层研究结构
+
+| 层次 | 核心问题 | 入口与说明 |
 |---|---|---|
-| 模型与接口 | 研究对象、坐标、接触条件是否明确且一致？ | [模型基线](docs/models_interfaces.md)、`experiments/models_interfaces/` |
-| 柔顺控制算法研究 | 固定接口下，绕轴或横向释放改变了什么？ | [RQ1/RQ2 协议](docs/control_research.md)、`experiments/control/` |
-| 完整对接/装配 | 规划、控制、状态切换与交接能否完成任务？ | [系统验证](docs/system_validation.md)、`experiments/system/` |
+| 研究对象与物理基线 | 我们在什么模型、接口和接触条件下研究？ | [模型基线](docs/models_interfaces.md)、`experiments/models_interfaces/` |
+| 对接方法与接触柔顺 | 我们怎样控制机器人完成对接？ | [论文对照](docs/paper_mapping.md)、[RQ1/RQ2 协议](docs/control_research.md)、`experiments/control/` |
+| 完整装配与系统验证 | 单接口上的策略进入完整装配流程后是否仍有效？ | [系统验证](docs/system_validation.md)、`experiments/system/` |
 
+第二层覆盖方法层面的三个问题，前两个来自主要参考文献：
+
+1. 在轨机器人进行模块对接时，怎样把轨迹规划和柔顺控制统一起来，使整个接触装配
+   过程既能完成，又满足安全约束？（Ren & Shan，复现于 SE(3)-TOPP + HQP-AC）
+2. 机器人末端位姿本来位于非欧氏的 SE(3) 空间中，怎样才能用最小参数、保持正确
+   几何结构，并且系统地设计一个真正的六自由度阻抗控制器？（Kim et al.，复现于
+   `se3_lie` §III-A 标称阻抗）
+3. 接触以后，各自由度的柔顺应怎样按接口几何分配？（当前机制表述，收束期间引入）
+
+三层结构是当前为了建立清晰证据边界采用的研究组织方式，不是项目的开发顺序。
 单接口默认采用 `angle1_blend030` 凸块模型（物理/控制/反馈延迟均为 1 ms），
 入口为 `scenes/iiwa14_petal_insertion.yaml`；HexFrame 正式场景仍用旧接口。
 
@@ -96,7 +120,7 @@ flowchart LR
 通过质量矩阵和前向动力学交叉验证保证两套模型同源。
 模块职责与 SE(3) body 数据流详见[架构总览](docs/architecture.md)。
 
-## 🧭 目录与文档
+## 📚 目录与文档
 
 ```text
 assets/                          模型资产、许可与来源记录（唯一来源）
@@ -111,15 +135,21 @@ demo/                            精选展示图件与视频
 runs/                            本地运行输出（Git 忽略）
 ```
 
-深入阅读：[在线文档](https://langxin11.github.io/compliant_docking_simulation/) ·
-[架构](docs/architecture.md) · [实验复现手册](docs/experiments.md) ·
-[论文对照](docs/paper_mapping.md) · [SE(3) 理论](docs/theory/se3_lie_impedance.md) ·
-[API](docs/api/control.md)。编码代理先读 [AGENTS.md](AGENTS.md)；
-贡献与检查要求见[贡献指南](CONTRIBUTING.md)与[变更记录](CHANGELOG.md)。
+建议阅读顺序：[项目演化](docs/project_evolution.md) → [当前研究主线](docs/research_focus.md) →
+[研究范围与三层结构](docs/research_scope.md) → [阻抗控制基础](docs/theory/impedance_control.md) →
+[SE(3) Lie 阻抗](docs/theory/se3_lie_impedance.md) → [选择性柔顺](docs/theory/selective_compliance.md) →
+[RQ1/RQ2 协议](docs/control_research.md) → [控制主结果](docs/control_main_results.md) →
+[HexFrame 系统验证](docs/system_validation.md)。在线文档见
+[langxin11.github.io/compliant_docking_simulation](https://langxin11.github.io/compliant_docking_simulation/)；
+其他入口：[架构](docs/architecture.md) · [实验复现手册](docs/experiments.md) ·
+[论文对照](docs/paper_mapping.md) · [API](docs/api/control.md)。
+编码代理先读 [AGENTS.md](AGENTS.md)；贡献与检查要求见
+[贡献指南](CONTRIBUTING.md)与[变更记录](CHANGELOG.md)。
 
 ## 许可与参考
 
 项目代码使用 [MIT](LICENSE)，导入资产遵循各资产目录内的许可与来源清单。
-控制方法参考 Kim et al. (2025, IEEE T-RO) 与 Ren & Shan (2026, Acta Astronautica)，
+控制方法参考 Ren & Shan (2026, Acta Astronautica) 与 Kim et al. (2025, IEEE T-RO)；
+SE(3) 部分实现的是 Kim 论文的 §III-A 标称阻抗，§III-B NRIC 未实现，
 对应关系见[论文对照](docs/paper_mapping.md)。项目目前仅有仿真证据，未验证实机、
 制造公差或真实锁紧。

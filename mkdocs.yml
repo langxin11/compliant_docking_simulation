@@ -62,25 +62,32 @@ plugins:
 
 nav:
   - 首页: index.md
+
+  - 项目与研究:
+      - 项目演化: project_evolution.md
+      - 当前研究主线: research_focus.md
+      - 研究范围与三层结构: research_scope.md
+
+  - 理论基础:
+      - 阻抗控制: theory/impedance_control.md
+      - SE(3) Lie 阻抗: theory/se3_lie_impedance.md
+      - 选择性柔顺: theory/selective_compliance.md
+      - 仿真理论与数据流: theory/simulation_flow.md
+
   - 三层研究:
-      - 当前主线与停止条件: research_focus.md
-      - 范围与依赖: research_scope.md
       - 模型与接口: models_interfaces.md
       - 控制研究协议: control_research.md
-      - 控制主结果与集成选择: control_main_results.md
-      - 系统验证与 Demo: system_validation.md
-      - 历史证据索引: historical_evidence.md
-  - 架构总览: architecture.md
-  - 代码与注释规范: coding_style.md
-  - 论文-代码对照: paper_mapping.md
-  - 理论:
-      - 阻抗控制基础: theory/impedance_control.md
-      - SE(3) Lie 群阻抗控制器: theory/se3_lie_impedance.md
-      - 主仿真理论与数据流: theory/simulation_flow.md
-  - 实验复现手册: experiments.md
+      - 控制主结果: control_main_results.md
+      - 系统验证: system_validation.md
+
+  - 实验复现: experiments.md
+  - HexFrame 正式组装: hexframe_assembly.md
   - 接口交互调形: petal_designer.md
-  - HexFrame 正式组装场景: hexframe_assembly.md
+  - 论文与代码来源: paper_mapping.md
+  - 历史证据索引: historical_evidence.md
+  - 架构总览: architecture.md
   - 完善方案与组合对接: development_plan.md
+  - 代码与注释规范: coding_style.md
   - API 参考:
       - 控制器与力学工具: api/control.md
       - 轨迹与运动参考: api/planning.md

@@ -43,8 +43,11 @@ def on_files(files, config):
 
 def on_page_markdown(markdown, page, config, files):
     # 源文档使用可在仓库中打开的相对链接，构建站点时转向生成的历史证据页。
-    if page.file.src_uri in {"control_research.md", "models_interfaces.md",
-                             "historical_evidence.md", "development_plan.md",
-                             "control_main_results.md"}:
+    uri = page.file.src_uri
+    if uri in {"control_research.md", "models_interfaces.md",
+               "historical_evidence.md", "development_plan.md",
+               "control_main_results.md"}:
         return markdown.replace("(../results/", "(reports/")
+    if uri == "theory/selective_compliance.md":
+        return markdown.replace("(../../results/", "(../reports/")
     return markdown

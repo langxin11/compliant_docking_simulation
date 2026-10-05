@@ -1,11 +1,16 @@
 # 论文-代码对照表
 
+本页记录仓库中**历史论文复现与方法来源**，不代表当前研究问题与这些论文完全相同：
+论文复现 ≠ 仓库当前研究贡献。当前研究主线（geometry-informed selective compliance）
+是复现工作之后、由接口实验暴露出的新问题，见[研究主线](research_focus.md)与
+[项目演化](project_evolution.md)。
+
 复现对象：**Ren, Q. & Shan, J. (2026). A unified framework for compliant control and
 trajectory planning in robotic in-orbit assembly. _Acta Astronautica_ 243, 32–45.**
 
 图例：✅ 已复现 · ⚠️ 部分复现/等效替代 · ❌ 未复现 · ➕ 本仓库扩展（论文之外）。
 
-## 总览：论文三大贡献
+## 总览：Ren & Shan 论文的主要方法组件及仓库复现状态
 
 | 贡献 | 状态 | 落点 |
 |---|---|---|
@@ -71,11 +76,34 @@ trajectory planning in robotic in-orbit assembly. _Acta Astronautica_ 243, 32–
 
 **重要差异**：论文规划器基线（Decoupled Planner）比对接限速更激进，规划器贡献显著；本仓库单段五次基线本身慢于对接限速，故规划器贡献在时长上不显（SE(3)-TOPP 对两段式五次为 -39% 时长，见上）。
 
+## Kim et al. 2025 T-RO 的复现状态
+
+**J. Kim, M. Sung, Y. Choi, J. Park, W. K. Chung, "Impedance Control Design Framework
+Using Commutative Map Between SE(3) and se(3)", _IEEE T-RO_, Vol. 41, 2025.**
+
+| 论文组件 | 状态 | 仓库落点 |
+|---|---|---|
+| §II-C/II-D 数学工具（\(\operatorname{dexp}\) 及其导数、Adjoint） | ✅ | `control/lie_se3.py`；`tests/test_lie_se3.py`（63 项） |
+| §III-A nominal SE(3) impedance（Eq. 44-66 控制律） | ✅ | `control/se3_impedance.py`（CLI `--controller se3_lie`）；数学细节见[SE(3) Lie 群阻抗](theory/se3_lie_impedance.md) |
+| §III-B NRIC 鲁棒内环（模型失配 \(\Delta M,\Delta C,\Delta g\) 补偿） | ❌ 未实现 | 无对应代码；不新增 `experiments/nric/` 或 NRIC × impedance × geometry 矩阵 |
+
+准确表述是：**实现并验证了 Kim et al. 的 nominal SE(3) impedance formulation；NRIC
+鲁棒内环未纳入当前研究主线。** 不描述为"完整复现了 Kim T-RO 控制器"。
+
+NRIC 当前不实现的理由：本仿真中 MuJoCo 物理世界与 Pinocchio 控制模型使用同源质量
+惯量，且已有动力学一致性检查（质量矩阵相对误差 < 1e-10）；当前研究重点是接触后
+各自由度柔顺的分配，不是 \(\Delta M,\Delta C,\Delta g\) 导致的鲁棒性问题。NRIC 更适合
+模型参数失配、负载不确定、未建模摩擦、执行器动力学、外部扰动与真机 sim-to-real
+等场景。**NRIC 被保留为模型不确定性和实机鲁棒性方向的后续扩展，不作为当前接触柔顺
+研究的前置条件。** 仅在以下情况重新考虑实现：要声称完整复现 Kim T-RO、开始系统研究
+模型误差、或开始进入真机。
+
 ## ➕ 论文之外的扩展
 
 | 功能 | 位置 |
 |---|---|
-| SE(3) Lie 群标称阻抗（Kim et al. 2025 §III-A） | `control/se3_impedance.py`、`control/lie_se3.py`；完整 `log6`/`dexp`/惯量重塑链路 |
+| SE(3) Lie 群标称阻抗（Kim et al. 2025 §III-A，见上节） | `control/se3_impedance.py`、`control/lie_se3.py`；完整 `log6`/`dexp`/惯量重塑链路 |
+| 几何引导的选择性柔顺研究（RQ1/RQ2 的机制表述） | `experiments/control/rq1_yaw.py`、`rq2_lateral.py`；理论见[选择性柔顺](theory/selective_compliance.md) |
 | SE(3) body 运动参考适配 | `planning/motion_reference.py`；SE(3)-TOPP 透传，纯位置轨迹结合固定姿态补齐 |
 | sensor-site → EE-body wrench 变换 | `wrench.py`；同时处理坐标旋转和参考点平移矩 |
 | 力矩方向摩擦前馈（零速死区补偿，`friction_comp: torque`） | `control/task_space.py`、`control/hqp_ac.py`；FR3 对接横向偏差 5.19→2.10 mm |
