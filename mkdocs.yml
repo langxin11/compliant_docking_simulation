@@ -73,7 +73,6 @@ nav:
       - 历史证据索引: historical_evidence.md
   - 架构总览: architecture.md
   - 代码与注释规范: coding_style.md
-  - GLM 编码接入: glm_bridge.md
   - 论文-代码对照: paper_mapping.md
   - 理论:
       - 阻抗控制基础: theory/impedance_control.md

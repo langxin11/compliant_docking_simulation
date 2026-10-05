@@ -2,11 +2,13 @@
 
 ## Unreleased
 
+- 将 GLM 编码委派内容清理出仓库：删除 `docs/glm_bridge.md` 与 mkdocs 导航条目，AGENTS.md 移除“GLM 编码委派”章节及外部编码代理条目；桥接脚本此前已迁至本机 `~/.codex/mcp/` 独立维护，仓库不再保存其使用规则。
+
 - 减法重构：`archive/` 整体退出运行路径（pytest 只收集 `tests/`，目录删除，Git 历史可恢复）；删除 `experiments/orbital_showcase/`、`experiments/hexframe_validation/`、`experiments/_archive_compat.py` 及根目录 5 个转发 wrapper（`run_docking.py`、`petal_capture_grid.py` 等）、`check_env.py`、一次性冻结工具 `petal_guidance_freeze.py`。引用方改为直接使用分层正式入口；未新增任何替代目录或清单。
 
 - 删除一次性过程文档（迁移计划/验证、目录清理、handoff、阶段收尾等 7 篇）与 `docs/evidence/` 中 4 个过程 JSON；入口表与生成数据位置并入《实验复现手册》。`results/` 移除 stage closeout / git 审计 JSON、历史 orbital 证据与重复 manifest（`results/petal_angle1_blend030_20261003/` 保留报告、图件、摘要与步长记录）；冻结报告原文未改写。
 
-- AGENTS.md 压缩为 8 条工作规则加注释与 GLM 说明；README 重写为安装、三层实验、结果与文档导航。
+- AGENTS.md 压缩为 8 条工作规则加注释规范；README 重写为安装、三层实验、结果与文档导航。
 
 - `assembly/simulation.py` 关键英文注释改为解释物理含义的中文（接触导纳、伺服阻尼、落座门限、weld 锚点）；AST 对比确认除 docstring 外零行为变化，未重跑大型矩阵。
 
