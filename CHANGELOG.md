@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- 减法重构：`archive/` 整体退出运行路径（pytest 只收集 `tests/`，目录删除，Git 历史可恢复）；删除 `experiments/orbital_showcase/`、`experiments/hexframe_validation/`、`experiments/_archive_compat.py` 及根目录 5 个转发 wrapper（`run_docking.py`、`petal_capture_grid.py` 等）、`check_env.py`、一次性冻结工具 `petal_guidance_freeze.py`。引用方改为直接使用分层正式入口；未新增任何替代目录或清单。
+
+- 删除一次性过程文档（迁移计划/验证、目录清理、handoff、阶段收尾等 7 篇）与 `docs/evidence/` 中 4 个过程 JSON；入口表与生成数据位置并入《实验复现手册》。`results/` 移除 stage closeout / git 审计 JSON、历史 orbital 证据与重复 manifest（`results/petal_angle1_blend030_20261003/` 保留报告、图件、摘要与步长记录）；冻结报告原文未改写。
+
+- AGENTS.md 压缩为 8 条工作规则加注释与 GLM 说明；README 重写为安装、三层实验、结果与文档导航。
+
+- `assembly/simulation.py` 关键英文注释改为解释物理含义的中文（接触导纳、伺服阻尼、落座门限、weld 锚点）；AST 对比确认除 docstring 外零行为变化，未重跑大型矩阵。
+
+- pytest 增加 `pythonpath = ["."]`：修复最后几个本地提交新增测试在裸 `uv run pytest` 下无法导入 `experiments` 包的问题（此前仅在仓库根已入 sys.path 的环境中通过）。
+
 - 移除三层迁移的时点检查工具 `scripts/check_restructuring.py`：其冻结基线（`16a54d4`）已被后续功能提交合法越过，检查不再可运行；`scripts/` 目录随之取消，验证口径保留在带日期的记录文档中，工具本体存于 Git 历史。
 
 - 将 GLM 编码桥接移出研究仓库：`glm_mcp.mjs` 及其 14 项边界测试迁至本机 `~/.codex/mcp/`，Codex 注册路径同步更新，`scripts/` 仅保留迁移检查工具；桥接行为与文档（`docs/glm_bridge.md`）中的本机接入说明不变。
