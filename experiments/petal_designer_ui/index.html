@@ -16,7 +16,7 @@
   <div class="workspace">
     <aside aria-label="接口参数">
       <label class="preset-label" for="preset">起始轮廓</label>
-      <select id="preset"><option value="narrow">窄平顶＋角向斜坡</option><option value="radial">径向实验对照（载荷超限）</option><option value="custom" disabled>自定义参数</option></select>
+      <select id="preset"><option value="narrow">窄平顶＋角向斜坡（半角1°，过渡0.3）</option><option value="custom" disabled>自定义参数</option></select>
       <p class="fixed">外径100 mm · 导向环内径64 mm · 四花瓣</p>
       <div id="geometry-controls"></div>
       <details id="pose-controls"><summary>两侧偏差与接近距离</summary><div id="pose-fields"></div></details>
@@ -29,7 +29,7 @@
       <div class="viewport"><canvas id="preview" aria-label="可旋转、缩放的接口三维预览"></canvas><div class="viewport-hint">拖动旋转 · 滚轮缩放</div><div class="legend"><span class="dot fixed-side"></span>固定端 <span class="dot active-side"></span>机械臂端</div></div>
       <div class="live-strip" aria-live="polite"><span id="status">正在载入模型…</span><span>落座法兰间距 <b id="separation">—</b> mm</span><span>导面轴向余量 <b id="guide-clearance">—</b> mm</span></div>
       <div id="warnings" class="notes"></div>
-      <div class="plots"><figure><figcaption>角向轮廓 <span>灰：原轮廓　金：当前</span></figcaption><svg id="angular-plot" role="img" aria-label="角度与导面高度曲线"></svg></figure><figure><figcaption>径向轮廓 <span>实线：峰顶　虚线：谷底</span></figcaption><svg id="radial-plot" role="img" aria-label="半径与峰顶谷底高度曲线"></svg></figure></div>
+      <div class="plots"><figure><figcaption>角向轮廓 <span>灰：原轮廓　金：当前</span></figcaption><svg id="angular-plot" role="img" aria-label="角度与导面高度曲线"></svg></figure></div>
       <p class="scope">几何预览不运行接触仿真。保存的候选需检查公差、碰撞与载荷；轮廓曲线不含边缘圆滑，三维模型包含。</p>
       <div id="saved" aria-live="polite" hidden></div>
     </main>

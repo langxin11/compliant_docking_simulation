@@ -48,7 +48,7 @@ def test_private_policy_does_not_change_imported_generator(tmp_path):
         builder.build(source, out)
 
 
-def test_selected_preview_keeps_baseline_available(tmp_path, monkeypatch):
+def test_selected_preview_keeps_default_preset_available(tmp_path, monkeypatch):
     app = builder.designer
     monkeypatch.setattr(app, "PRESETS", dict(app.PRESETS))
     monkeypatch.setattr(app, "PRESET_LABELS", dict(app.PRESET_LABELS))
@@ -58,4 +58,5 @@ def test_selected_preview_keeps_baseline_available(tmp_path, monkeypatch):
     app.select_design(path)
     assert app.DEFAULT_PARAMETERS["guide_tip_half_angle_deg"] == 1.
     assert app.DEFAULT_PARAMETERS["guide_blend_fraction"] == .3
-    assert app.PRESETS["narrow"]["guide_tip_half_angle_deg"] == 4.21875
+    assert app.PRESETS["narrow"]["guide_tip_half_angle_deg"] == 1.
+    assert app.PRESETS["narrow"]["guide_blend_fraction"] == .3
