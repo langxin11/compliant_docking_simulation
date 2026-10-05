@@ -3,6 +3,52 @@
 所有命令在仓库根执行；无显示环境渲染加 `MUJOCO_GL=egl` 前缀。图件输出到
 `runs/figures/<场景名>/`，新运行数据落 `runs/`，冻结摘要纳入 `results/`。
 
+## 入口总览
+
+三层研究各有一个正式入口，从仓库根目录用 `python -m experiments.<层>.<入口>` 启动；
+每个入口只回答一个问题，不提供跨研究目的的任意切换。
+
+| 职责 | 入口 |
+|---|---|
+| 固定模型检查 | `models_interfaces.baseline` |
+| 绕轴策略 RQ1 | `control.rq1_yaw` |
+| 横向策略 RQ2 | `control.rq2_lateral` |
+| 离散误差范围 | `control.capture_range` |
+| 几何矩阵 | `models_interfaces.petal_guidance` |
+| 候选复核 | `models_interfaces.selected_candidate` |
+| 完整系统 | `system.hexframe precheck/accept/replay`，或 `docking --scene scenes/hexframe_assembly.yaml` |
+| P0/P1/P2 扩展 | `system.validation.run_halfstep/run_grid/run_noise` |
+
+仍在 `experiments/` 根目录的历史研究入口（`petal_insertion_suite.py` 的各子模式、
+`insertion_suite.py`、`se3_free_space.py`、`compare_frameworks.py` 等）与其历史协议
+保持原样，见下文各节；模型生成/调形脚本同样保留原位置及唯一资产来源。
+
+## 输出与退出语义
+
+新运行选择新的 `runs/<问题>_<日期>/` 目录；已存在来源清单必须逐项相等才能续跑，
+不将新输出续写进旧归档。控制计算完成退出 0 不等于对照组全通过，结论读取每组
+JSON 的 `assessment`；系统验收失败退出 2，预检为 INCOMPLETE，回放须先审计。
+生成视频与其验收目录关联，不以视频存在推断 PASS。
+
+## 生成数据的位置
+
+程序运行生成的日志、轨迹、NPZ、派生图、预览和报告构建文件默认进入 `runs/`
+（Git 忽略）；机械臂与对接件的模型文件保留在 `assets/`，冻结结论摘要进入
+`results/`。常用默认位置：
+
+| 工具或用途 | 默认输出 |
+|---|---|
+| HexFrame 模块 demo / 验证 / 预览（`assets/modules/hexframe/`） | `runs/hexframe_module/` |
+| HexFrame 模型与接口 CAD 生成器 | `runs/generated_assets/` |
+| Petal 接口导入/导向生成器 | `runs/generated_assets/petal_dock100/`、`runs/generated_assets/petal_guidance/` |
+| 冠形凸分解生成器（CoACD） | `runs/generated_assets/convex_crown/` |
+| 调形候选 | `runs/designs/petal_guidance/` |
+| 框架报告、一般图件与录像 | `runs/framework_comparison/`、`runs/figures/`、`runs/videos/` |
+| 候选报告后处理 | 指定运行目录中的 `report.md`，不覆写 `results/` 冻结报告 |
+
+冷克隆不需要历史运行文件即可加载正式模型并生成新 demo/验证/预览；
+CAD/CoACD/Blender 属于离线资产工具，不加入普通仿真依赖。
+
 新增组合接触实验使用独立的 `runs/compliant_insertion/` 输出目录：
 
 ```bash

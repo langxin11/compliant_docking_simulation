@@ -1,6 +1,6 @@
 # 历史证据索引
 
-原报告、资产来源、源码快照和结果内容保持原样；目录迁移见[归档记录](directory_cleanup.md)。本索引按问题分类，不重新评价历史结果。
+原报告、资产来源和结果内容保持原样。本索引按问题分类，不重新评价历史结果。
 本地 `runs/` 通道可能按数据策略精简；需要完整原始数据时按原协议重跑到新目录。
 
 | 层次 | 记录 | 证据用途 |
@@ -20,11 +20,11 @@
 | 系统 | [HexFrame 实际位姿偏差](../results/hexframe_pose_check_20261005.md) | 名义完整通过；三个偏差点未落座，保留失败与独立核对 |
 | 系统 | [HexFrame 两种接口移植](../results/hexframe_interfaces_20261005.md) | 花瓣名义通过；偏差与冠形移植保留失败，提供同源视频供人工评判 |
 | 系统 | [HexFrame 正式流程](hexframe_assembly.md) | 当前导纳流程验收 |
-| 归档 | [接口阶段收尾](stage_closeout_20261003.md) | 阶段状态、失败与未晋升结论 |
 
-P0/P1/P2 历史说明保存在仓库文件 `archive/hexframe_validation/README.md`；
-P2 包含判定策略变量，不能归因于单接口 SE(3) 控制。旧 orbital_showcase/冠形/接触力实验
-按其原协议复现，不能以历史视频替代正式系统验收。
+P0/P1/P2 的扩展验证入口在 `experiments/system/validation/`；
+P2 包含判定策略变量，不能归因于单接口 SE(3) 控制。旧 orbital_showcase/冠形/
+接触力历史实现已随 2026-10-05 清理从仓库移除，Git 历史可查；其结论按原协议
+解释，不能以历史视频替代正式系统验收。
 
 迁移后源码指纹发生变化。旧目录继续使用当时快照解释；当前指纹不匹配时拒绝续跑或复用。
-[入口映射](experiment_entrypoints.md)与[验证记录](restructuring_validation.md)明确可比条件。
+分层入口见[实验复现手册](experiments.md)。

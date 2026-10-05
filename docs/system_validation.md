@@ -41,8 +41,8 @@ MUJOCO_GL=egl uv run python -m experiments.system.hexframe replay --out runs/hex
 P0 中关节伺服、轴向导纳积分、滤波与测量判定仍每物理步运行，半步长同时改变这些离散更新频率。
 因此它是系统步长复核，不等同于 Petal 固定 0.5 ms 控制周期及反馈延迟的纯物理步长协议。
 
-入口位于 `experiments/system/validation/`。原 `experiments/hexframe_validation/` 命令继续兼容；
-[历史结果与复现](historical_evidence.md)保留。正式验收仍用 raw_strict，不自动晋升候选门禁。
+入口位于 `experiments/system/validation/`。
+[历史结果与复现](historical_evidence.md)保留；正式验收仍用 raw_strict，不自动晋升候选门禁。
 
 ## 待集成能力
 

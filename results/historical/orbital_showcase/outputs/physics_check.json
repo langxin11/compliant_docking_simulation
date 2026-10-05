@@ -1,9 +1,0 @@
-{
-  "status": "PASS",
-  "mass_matrix_max_error": 1.6117329693088323e-11,
-  "fk_max_error": 5.612774366423905e-12,
-  "reachable_path_samples": 50,
-  "module1_mass_kg": 2.0,
-  "all_ports_on_side_faces": true,
-  "rigid_chain": "arm -> M1:P1 -> M1:P4 -> M2:P1"
-}

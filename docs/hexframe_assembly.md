@@ -15,10 +15,6 @@ OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MUJOCO_GL=egl uv run docking \
 MUJOCO_GL=egl uv run docking --scene scenes/hexframe_assembly.yaml \
   --replay --record --out runs/hexframe_my_run
 
-# 原实验入口仍有效，默认委托正式场景；旧模块也保留
-uv run python experiments/orbital_showcase/crown_assembly.py --video
-uv run python experiments/orbital_showcase/crown_assembly.py --module legacy --video
-
 # 原主项目场景冒烟
 uv run docking --scene scenes/iiwa14_docking.yaml --quick
 uv run docking --scene scenes/fr3_docking.yaml --quick

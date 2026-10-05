@@ -58,8 +58,7 @@ uv run python -m experiments.models_interfaces.baseline --out runs/model_baselin
 它们属于模型层，不是控制入口选项。几何矩阵与候选复核入口位于 `experiments/models_interfaces/`。
 轮廓、物理步长或碰撞表示变化分别记入协议；与控制改进分开归因。
 
-[候选独立步长复核](../results/petal_angle1_blend030_dtcheck_20261003.md)保留未晋升结论，
-[接口阶段收尾](stage_closeout_20261003.md)保留历史状态。
+[候选独立步长复核](../results/petal_angle1_blend030_dtcheck_20261003.md)保留未晋升结论。
 [原版控制证据](control_research.md)与[历史模型证据](historical_evidence.md)分别引用。
 
 迁移后旧候选归档与当前源码指纹不同，候选入口会在仿真前拒绝复用。历史复现使用其归档

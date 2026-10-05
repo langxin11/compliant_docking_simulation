@@ -12,8 +12,6 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def on_files(files, config):
     sources = {p: "reports/"+p.name for p in (ROOT/"results").glob("*.md")}
-    sources[ROOT/"results/petal_stage_closeout_20261003.json"] = "reports/petal_stage_closeout_20261003.json"
-    sources[ROOT/"results/petal_git_integrity_audit_20261003.json"] = "reports/petal_git_integrity_audit_20261003.json"
     evidence = ROOT / "results/petal_angle1_blend030_20261003"
     for source in evidence.iterdir():
         if source.is_file():
@@ -45,8 +43,8 @@ def on_files(files, config):
 
 def on_page_markdown(markdown, page, config, files):
     # 源文档使用可在仓库中打开的相对链接，构建站点时转向生成的历史证据页。
-    if page.file.src_uri in {"git_stage_closeout_20261003.md", "control_research.md",
-                             "models_interfaces.md", "historical_evidence.md", "development_plan.md",
-                             "control_main_results.md", "handoff_20261004.md"}:
+    if page.file.src_uri in {"control_research.md", "models_interfaces.md",
+                             "historical_evidence.md", "development_plan.md",
+                             "control_main_results.md"}:
         return markdown.replace("(../results/", "(reports/")
     return markdown

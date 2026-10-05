@@ -1,9 +1,0 @@
-{
-  "status": "PASS",
-  "expected_duration_s": 49,
-  "handover_order_verified": true,
-  "prelock_samples_recomputed": 499,
-  "lock_boundary_dwell_s": 0.5000000000000003,
-  "unload_before_release_verified": true,
-  "source_hashes_verified": true
-}
