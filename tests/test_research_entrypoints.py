@@ -14,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from compliant_docking.research import protocols
 from compliant_docking.research.petal_trials import variant
 from compliant_docking.scene import load_scene
-from experiments.control import rq1_yaw, rq2_lateral
+from experiments.control import lateral_release, yaw_release
 
 
 def spawned_legacy_variant():
@@ -28,20 +28,20 @@ def spawned_legacy_variant():
 def test_control_entry_rejects_interface_and_other_control_factors():
     for args in (["--geometry-study"], ["--profile", "lateral_released"], ["--scene", "candidate.yaml"]):
         with pytest.raises(SystemExit) as error:
-            rq1_yaw.build_parser().parse_args(args)
+            yaw_release.build_parser().parse_args(args)
         assert error.value.code == 2
 
 
-def test_paired_rq2_never_schedules_numerics_or_speed(monkeypatch, tmp_path):
+def test_paired_lateral_release_never_schedules_numerics_or_speed(monkeypatch, tmp_path):
     scheduled = []
-    monkeypatch.setattr(rq2_lateral, "execute", lambda out, base, jobs, stage, workers: scheduled.extend((job, stage) for job in jobs))
-    monkeypatch.setattr(rq2_lateral, "compare_pairs", lambda out: None)
-    monkeypatch.setattr(rq2_lateral, "summarize", lambda out: {})
+    monkeypatch.setattr(lateral_release, "execute", lambda out, base, jobs, stage, workers: scheduled.extend((job, stage) for job in jobs))
+    monkeypatch.setattr(lateral_release, "compare_pairs", lambda out: None)
+    monkeypatch.setattr(lateral_release, "summarize", lambda out: {})
     from compliant_docking.research import petal_trials
     monkeypatch.setattr(petal_trials, "preflight", lambda base: {"status": "PASS"})
     monkeypatch.setattr(protocols, "source_manifest", lambda base: {"sources": {}})
-    rq2_lateral.run_study(SimpleNamespace(stage="paired", out=tmp_path, jobs=1))
-    assert len(scheduled) == 2 * len(rq2_lateral.POINTS)
+    lateral_release.run_study(SimpleNamespace(stage="paired", out=tmp_path, jobs=1))
+    assert len(scheduled) == 2 * len(lateral_release.POINTS)
     assert {job[1] for job, _ in scheduled} == {"released", "lateral_released"}
     assert {job[2] for job, _ in scheduled} == {"baseline"}
     assert {stage for _, stage in scheduled} == {"pilot", "extension"}
@@ -51,19 +51,19 @@ def test_default_matrix_passes_telemetry_by_keyword_without_becoming_error(monke
     calls = []
     def capture(out, base, case, profile, setting, preview=False, error=None, telemetry="auto"):
         calls.append((error, telemetry))
-    monkeypatch.setattr(rq1_yaw, "run_case", capture)
-    monkeypatch.setattr(rq1_yaw, "preflight", lambda base: {"status": "PASS"})
-    monkeypatch.setattr(rq1_yaw, "summarize", lambda out: None)
-    monkeypatch.setattr(rq1_yaw, "source_manifest", lambda base: {"sources": {}})
-    args = rq1_yaw.build_parser().parse_args(["--case", "nominal", "--profile", "released", "--telemetry", "core", "--out", str(tmp_path)])
-    rq1_yaw.run_matrix(args)
+    monkeypatch.setattr(yaw_release, "run_case", capture)
+    monkeypatch.setattr(yaw_release, "preflight", lambda base: {"status": "PASS"})
+    monkeypatch.setattr(yaw_release, "summarize", lambda out: None)
+    monkeypatch.setattr(yaw_release, "source_manifest", lambda base: {"sources": {}})
+    args = yaw_release.build_parser().parse_args(["--case", "nominal", "--profile", "released", "--telemetry", "core", "--out", str(tmp_path)])
+    yaw_release.run_matrix(args)
     assert calls == [(None, "core")]
 
 
 def test_new_manifest_covers_dependencies_and_canonical_implementations():
     manifest = protocols.source_manifest(load_scene("scenes/iiwa14_petal_insertion.yaml"))
     required = {"uv.lock", "pyproject.toml", "src/compliant_docking/research/petal_trials.py",
-                "src/compliant_docking/research/rollout.py", "experiments/control/rq1_yaw.py",
+                "src/compliant_docking/research/rollout.py", "experiments/control/yaw_release.py",
                 "experiments/models_interfaces/petal_guidance.py"}
     assert required <= manifest["sources"].keys()
 
@@ -104,9 +104,9 @@ def test_system_formal_entry_rejects_protocol_overrides():
         assert error.value.code == 2
 
 
-def test_rq2_speed_factor_rejects_paired_protocol_directory(tmp_path):
+def test_lateral_release_speed_factor_rejects_paired_protocol_directory(tmp_path):
     import json
-    (tmp_path / "study_plan.json").write_text(json.dumps({"protocol": "paired RQ2"}))
+    (tmp_path / "study_plan.json").write_text(json.dumps({"protocol": "paired lateral release"}))
     args = SimpleNamespace(stage="speed", out=tmp_path, jobs=1, speed_case="yaw_n15", setting=["baseline"])
     with pytest.raises(ValueError, match="separate new directory"):
-        rq2_lateral.run_study(args)
+        lateral_release.run_study(args)

@@ -1,12 +1,11 @@
 # 接触阶段控制实验
 
-本页记录单接口接触阶段的两组小型刚度机制实验（RQ1/RQ2）。历史协议固定原轮廓
-`scenes/iiwa14_petal_original_insertion.yaml`，不跟随 narrow 默认接口切换；
-模型版本见[模型基线](models_interfaces.md)。
+本页记录单接口接触阶段的两组小型刚度机制实验（绕轴释放与横向释放）的实验协议。
+历史协议固定原轮廓 `scenes/iiwa14_petal_original_insertion.yaml`，不跟随 narrow
+默认接口切换；模型版本见[模型基线](models_interfaces.md)。
 
-2026-10-04 收束：以下保留可复现协议，当前不要求把数值矩阵全部重跑。
-主结果是同点完成情况、误差与失败边界；峰值为辅助结果。新工作按[研究主线](research_focus.md)执行，
-历史载荷门槛与评价标签仍按原规则解释。
+本页保留可复现协议与判据，不要求把数值矩阵全部重跑；主结果是同点完成情况、
+误差与失败边界，峰值为辅助结果。历史载荷门槛与评价标签仍按原规则解释。
 
 ## 目的
 
@@ -14,7 +13,7 @@
 绕轴相位对准）。本实验通过逐轴刚度对照检查典型卡滞机制：改变某个方向的恢复
 刚度，观察卡滞、自对准与落座是否变化。
 
-RQ1/RQ2 中的刚度是**受控实验变量**。研究目标是观察恢复力变化是否改变接触失败
+绕轴/横向释放实验 中的刚度是**受控实验变量**。研究目标是观察恢复力变化是否改变接触失败
 机制，而不是提出一套新的刚度设计方法：
 
 ```text
@@ -27,7 +26,7 @@ RQ1/RQ2 中的刚度是**受控实验变量**。研究目标是观察恢复力�
 
 而不是调出一个成功的 K 再包装成新的控制器。实验不寻找最优刚度 \(K^{\star}\)，
 也不实现根据接口几何自动计算柔顺方向或刚度矩阵的方法。释放对象由任务理解
-人工选定：RQ1 选绕轴（相位自对准方向），RQ2 选 XY（横向自定心方向）；
+人工选定：绕轴释放实验 选绕轴（相位自对准方向），横向释放实验 选 XY（横向自定心方向）；
 轴向推进与倾斜抑制方向在两组实验中保持不动。
 
 ## 固定条件
@@ -35,12 +34,12 @@ RQ1/RQ2 中的刚度是**受控实验变量**。研究目标是观察恢复力�
 两组实验除各自声明的绕轴 / 横向策略变量外完全一致：
 
 - 场景与模型：原轮廓场景；接口、碰撞、摩擦、接触求解与评价设置固定；
-- 共同刚度：横向 80 N/m、轴向 1500 N/m、倾斜 25 N·m/rad（RQ1 中绕轴为变量，
-  RQ2 中横向为变量）；A/D、零空间阻尼、轨迹、初值和模型不变；
+- 共同刚度：横向 80 N/m、轴向 1500 N/m、倾斜 25 N·m/rad（绕轴释放实验 中绕轴为变量，
+  横向释放实验 中横向为变量）；A/D、零空间阻尼、轨迹、初值和模型不变；
 - 触发只在插入/保持阶段使用轴向 F/T：0.15 N，10 ms 滤波，20 ms 保持，
   250 ms 释放；真值不进入控制。
 
-## RQ1：绕轴刚度与相位自对准
+## 绕轴释放实验：绕轴刚度与相位自对准
 
 > 当目标偏航存在误差时，绕轴恢复力如何影响接口的相位自对准和稳定落座？
 
@@ -56,12 +55,12 @@ RQ1/RQ2 中的刚度是**受控实验变量**。研究目标是观察恢复力�
 主工况 nominal、xy=(2,-2) mm、combined=(2,-2) mm/+5°；同点比较三策略。
 
 ```bash
-OPENBLAS_NUM_THREADS=1 uv run python -m experiments.control.rq1_yaw \
+OPENBLAS_NUM_THREADS=1 uv run python -m experiments.control.yaw_release \
   --case combined --profile stiff compliant released --setting baseline dt_half \
-  --out runs/rq1_my_run --jobs 2
+  --out runs/yaw_release_my_run --jobs 2
 ```
 
-## RQ2：横向刚度与自定心
+## 横向释放实验：横向刚度与自定心
 
 > 当横向目标存在定位误差时，XY 恢复力如何影响接口的横向自定心和稳定落座？
 
@@ -72,9 +71,9 @@ OPENBLAS_NUM_THREADS=1 uv run python -m experiments.control.rq1_yaw \
 nominal、(2,-2) mm/+5°、零 XY/-15°。同点参考与触发前状态应完全一致。
 
 ```bash
-uv run python -m experiments.control.rq2_lateral --stage paired --jobs 3 --out runs/rq2_my_run
+uv run python -m experiments.control.lateral_release --stage paired --jobs 3 --out runs/lateral_release_my_run
 # 需要复现历史数值协议或诊断主结论时，显式运行；不是 paired 的自动后续
-uv run python -m experiments.control.rq2_lateral --stage numerics --jobs 3 --out runs/rq2_my_run
+uv run python -m experiments.control.lateral_release --stage numerics --jobs 3 --out runs/lateral_release_my_run
 ```
 
 主配对不自动追加减速。`--stage speed` 是独立因子，单独目录、同点同策略对照
@@ -97,6 +96,11 @@ uv run python -m experiments.control.rq2_lateral --stage numerics --jobs 3 --out
 名义间距偏差 ≤0.75 mm、承载止挡占比 ≥95%、线/角速度 ≤3 mm/s 与 2°/s。
 全程净接口接触力 ≤40 N、绕轴矩 ≤2 N·m，同时满足原进给、F/T、关节安全和静止门禁。
 无 weld 锁定，`CANDIDATE_PASS` 仅表示研究落座候选。未完成与规划不可达单独记录。
+
+其中 2 N·m 绕轴力矩阈值来自历史实验约定，仓库未记录对应的结构强度、硬件额定
+限制或标定依据，按载荷参考提示解释：不单凭超过它判定失稳、损坏或对接失败，
+也不以低于它证明安全。历史报告中的载荷 FAIL 表示未满足当时协议，并非已证实
+违反物理承载极限；原始载荷门禁与历史 `assessment` 不重写。
 
 遥测保存求解时刻状态、载荷、参考、触发与刚度；反馈独立审计核对时间年龄、body 变换和载荷平衡。
 物理步长 baseline/dt_half/dt_quarter 固定控制周期与延迟；比较状态及横/轴向 ≤0.1 mm、
@@ -124,5 +128,6 @@ uv run python -m experiments.control.rq2_lateral --stage numerics --jobs 3 --out
 两轮工况集合不同，不能合成统一成功率曲线。当前三控制器属于方法库；
 [框架历史对照](historical_evidence.md)与自由空间验证不替代接触实验。
 
-已完成[主结果、卡滞边界与集成选择](control_main_results.md)的摘要核对，下一步推进候选策略接入 HexFrame。
+已完成[接触阶段刚度实验结果](control_main_results.md)的摘要核对。绕轴/横向释放实验 的
+当前阶段工作到此为止，不继续追加刚度扫描或参数优化。
 精细步长、搜索、预紧或控制周期研究不自动追加；既有 SENSITIVE 结果作为补充限制保留。

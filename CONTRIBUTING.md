@@ -1,7 +1,8 @@
 # 贡献指南
 
-本仓库研究机械臂柔顺对接与装配。贡献前先读[当前主线](docs/research_focus.md)与
-[研究范围](docs/research_scope.md)，再决定改动属于哪一层。
+本仓库以论文复现为基础研究机械臂柔顺对接与装配，复现对象见
+[论文对照](docs/paper_mapping.md)。贡献前先读[研究组织与范围](docs/research_scope.md)，
+再决定改动属于哪一层。
 
 ## 环境安装
 
@@ -19,7 +20,7 @@ uv run docking --quick        # 2 s 链路检查，确认环境可用
 研究分三层，新实验入口放进对应层的目录：
 
 - `experiments/models_interfaces/` —— 模型资格检查、接口候选与几何编排；
-- `experiments/control/` —— RQ1/RQ2、误差范围等柔顺控制对照实验；
+- `experiments/control/` —— 绕轴/横向释放实验、误差范围等柔顺控制对照实验；
 - `experiments/system/` —— HexFrame 正式验收、预检、回放与扩展工况。
 
 `experiments/` 只负责实验编排，共享实现放 `src/compliant_docking/`，不能反向导入

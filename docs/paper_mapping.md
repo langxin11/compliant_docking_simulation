@@ -1,8 +1,8 @@
 # 论文-代码对照表
 
-本页记录仓库中**历史论文复现与方法来源**，不代表当前研究问题与这些论文完全相同：
-论文复现 ≠ 仓库当前研究贡献。当前主线与仓库自身的扩展工作见
-[研究主线](research_focus.md)与[项目演化](project_evolution.md)。
+本页是复现状态的**权威对照表**：本项目以复现下述两篇论文为基础并在此基础上适当
+拓展，本页逐条记录论文组件的复现状态与代码落点；仓库自身的扩展见
+"➕ 论文之外的扩展"一节，实际演化过程见[项目演化](project_evolution.md)。
 
 复现对象：**Ren, Q. & Shan, J. (2026). A unified framework for compliant control and
 trajectory planning in robotic in-orbit assembly. _Acta Astronautica_ 243, 32–45.**
@@ -87,22 +87,25 @@ Using Commutative Map Between SE(3) and se(3)", _IEEE T-RO_, Vol. 41, 2025.**
 | §III-B NRIC 鲁棒内环（模型失配 \(\Delta M,\Delta C,\Delta g\) 补偿） | ❌ 未实现 | 无对应代码；不新增 `experiments/nric/` 或 NRIC × impedance × geometry 矩阵 |
 
 准确表述是：**实现并验证了 Kim et al. 的 nominal SE(3) impedance formulation；NRIC
-鲁棒内环未纳入当前研究主线。** 不描述为"完整复现了 Kim T-RO 控制器"。
+鲁棒内环未纳入当前复现范围。** 不描述为"完整复现了 Kim T-RO 控制器"。
 
-NRIC 当前不实现的理由：本仿真中 MuJoCo 物理世界与 Pinocchio 控制模型使用同源质量
-惯量，且已有动力学一致性检查（质量矩阵相对误差 < 1e-10）；当前研究重点是接触后
-各自由度柔顺的分配，不是 \(\Delta M,\Delta C,\Delta g\) 导致的鲁棒性问题。NRIC 更适合
-模型参数失配、负载不确定、未建模摩擦、执行器动力学、外部扰动与真机 sim-to-real
-等场景。**NRIC 被保留为模型不确定性和实机鲁棒性方向的后续扩展，不作为当前接触柔顺
-研究的前置条件。** 仅在以下情况重新考虑实现：要声称完整复现 Kim T-RO、开始系统研究
-模型误差、或开始进入真机。
+NRIC 当前不实现的理由：当前仓库以论文复现为基础，拓展集中在接口与接触模型、
+小型控制实验和完整装配演示。当前仿真使用同源的 MuJoCo / Pinocchio 模型（质量矩阵相对误差
+< 1e-10），模型参数失配并不是当前主要研究变量，因此 \(\Delta M,\Delta C,\Delta g\)
+补偿与真机 sim-to-real 场景下的 NRIC 鲁棒内环暂不作为前置工作。
+
+仅在以下情况重新考虑 NRIC：
+
+1. 需要声明完整复现 Kim et al. 2025 T-RO；
+2. 开始系统研究模型失配、负载不确定和未建模动力学；
+3. 开始真机或 sim-to-real 工作。
 
 ## ➕ 论文之外的扩展
 
 | 功能 | 位置 |
 |---|---|
 | SE(3) Lie 群标称阻抗（Kim et al. 2025 §III-A，见上节） | `control/se3_impedance.py`、`control/lie_se3.py`；完整 `log6`/`dexp`/惯量重塑链路 |
-| 接触阶段绕轴/横向刚度机制实验（RQ1/RQ2） | `experiments/control/rq1_yaw.py`、`rq2_lateral.py`；协议见[接触阶段控制实验](control_research.md) |
+| 接触阶段绕轴/横向刚度机制实验 | `experiments/control/yaw_release.py`、`lateral_release.py`；协议见[接触阶段控制实验](control_research.md) |
 | SE(3) body 运动参考适配 | `planning/motion_reference.py`；SE(3)-TOPP 透传，纯位置轨迹结合固定姿态补齐 |
 | sensor-site → EE-body wrench 变换 | `wrench.py`；同时处理坐标旋转和参考点平移矩 |
 | 力矩方向摩擦前馈（零速死区补偿，`friction_comp: torque`） | `control/task_space.py`、`control/hqp_ac.py`；FR3 对接横向偏差 5.19→2.10 mm |

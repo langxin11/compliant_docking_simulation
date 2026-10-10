@@ -4,28 +4,29 @@
 ![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?logo=python&logoColor=white)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-本项目面向机器人模块化在轨装配中的**柔顺对接**问题，建立一个可以研究轨迹规划、
+本项目面向机器人模块化在轨装配中的**柔顺对接**问题，建立一个覆盖轨迹规划、
 柔顺控制、接口接触以及完整装配流程的可复现仿真平台。MuJoCo 提供物理世界，
 Pinocchio 提供运动学与控制侧刚体动力学；内置 KUKA iiwa14 与 Franka FR3。
 
-项目起源于 Ren & Shan（2026, Acta Astronautica）规划—柔顺控制统一框架的复现，
-随后加入 Kim et al.（2025, IEEE T-RO）的 SE(3) 阻抗控制、Petal / Crown / angle1 等
-几何导向接口，以及 HexFrame 完整组装任务，逐步从论文复现成长为自己的研究平台。
-这段历史见[项目演化](docs/project_evolution.md)。
+本项目**以论文复现为基础**：复现 Ren & Shan（2026, Acta Astronautica）在轨装配的
+规划—柔顺控制统一框架（SE(3)-TOPP 规划器 + HQP-AC 控制器）与 Kim et al.
+（2025, IEEE T-RO）的 SE(3) 阻抗控制设计框架（§III-A 标称阻抗），逐条对照见
+[论文对照](docs/paper_mapping.md)。在此基础上适当拓展：PetalDock / angle1 等
+几何导向接口与交互调形工具（[接口交互调形](docs/petal_designer.md)）、绕轴释放与
+横向释放两组小型接触机制实验，以及 HexFrame 完整装配演示。演化过程见
+[项目演化](docs/project_evolution.md)。
 
-当前仓库继续围绕机器人柔顺对接与完整装配展开。在已有规划、柔顺控制和接口模型
-基础上，当前工作重点是保持方法可复现、接口实验可解释，并推进完整 HexFrame 装配
-验证（见[研究主线](docs/research_focus.md)）。仓库中还保留两组小型接触机制实验
-（RQ1/RQ2），用于分析典型定位误差下刚度设置与卡滞之间的关系；其中释放到零刚度
-是移除恢复力的极端实验点，不是最优刚度为零的主张。
+绕轴释放与横向释放实验分析典型定位误差下刚度设置与卡滞之间的关系；其中释放到
+零刚度是移除恢复力的极端实验点，不是最优刚度为零的主张。仓库按三层组织已有能力，
+组织说明与证据规则见[研究组织与范围](docs/research_scope.md)。
 
-## 🧭 三层研究结构
+## 🧭 三层组织结构
 
-| 层次 | 核心问题 | 内容与入口 |
+| 层次 | 定位 | 内容与入口 |
 |---|---|---|
-| 模型与接口 | 我们在什么机器人、接口和接触条件下研究？ | 模型一致性、接口几何、接触模型——[模型基线](docs/models_interfaces.md)、`experiments/models_interfaces/` |
-| 规划与柔顺控制 | 我们怎样完成机器人柔顺对接？ | SE(3)-TOPP、阻抗、HQP-AC、SE(3) impedance、局部控制实验——[论文对照](docs/paper_mapping.md)、[接触阶段控制实验](docs/control_research.md) |
-| 完整装配系统 | 已有方法能否进入完整装配流程？ | HexFrame 抓取、转运、接触、锁定、释放、撤离——[系统验证](docs/system_validation.md)、`experiments/system/` |
+| 模型与接口 | 仿真平台基线 | 模型一致性、接口几何、接触模型——[模型基线](docs/models_interfaces.md)、`experiments/models_interfaces/` |
+| 规划与柔顺控制 | 论文复现与控制实验 | SE(3)-TOPP、阻抗、HQP-AC、SE(3) impedance、绕轴/横向释放实验——[论文对照](docs/paper_mapping.md)、[接触阶段控制实验](docs/control_research.md) |
+| 完整装配系统 | 完整装配演示（HexFrame） | HexFrame 抓取、转运、接触、锁定、释放、撤离——[系统验证](docs/system_validation.md)、`experiments/system/` |
 
 方法演化的主干来自两篇主要参考文献，仓库在其上做扩展：
 
@@ -37,7 +38,7 @@ Kim et al. —— 控制方法级：SE(3) 上统一的 6-DoF impedance
 本仓库扩展 —— 新接口 + 小型控制实验 + HexFrame 完整装配
 ```
 
-三层结构是当前为了建立清晰证据边界采用的研究组织方式，不是项目的开发顺序。
+三层结构是组织与导航骨架，与 `experiments/` 的目录划分一致，不是项目的开发顺序。
 单接口默认采用 `angle1_blend030` 凸块模型（物理/控制/反馈延迟均为 1 ms），
 入口为 `scenes/iiwa14_petal_insertion.yaml`；HexFrame 正式场景仍用旧接口。
 
@@ -59,15 +60,15 @@ uv run pytest -m 'not slow' -q
 # 模型与接口：固定基线的双引擎、关节与初始接触检查
 uv run python -m experiments.models_interfaces.baseline --out runs/model_baseline_my_run
 
-# RQ1：固定接口，仅比较绕轴策略
-OPENBLAS_NUM_THREADS=1 uv run python -m experiments.control.rq1_yaw \
-  --case combined --setting baseline --out runs/rq1_my_run
+# 绕轴释放实验：固定接口，仅比较绕轴策略
+OPENBLAS_NUM_THREADS=1 uv run python -m experiments.control.yaw_release \
+  --case combined --setting baseline --out runs/yaw_release_my_run
 
-# RQ2：固定绕轴释放，同点比较保持/释放 XY
-OPENBLAS_NUM_THREADS=1 uv run python -m experiments.control.rq2_lateral \
-  --stage paired --out runs/rq2_my_run --jobs 3
+# 横向释放实验：固定绕轴释放，同点比较保持/释放 XY
+OPENBLAS_NUM_THREADS=1 uv run python -m experiments.control.lateral_release \
+  --stage paired --out runs/lateral_release_my_run --jobs 3
 
-# 系统：完整 53 s HexFrame 装配 + 独立审计；同目录可回放生成视频
+# 系统：完整 53 s HexFrame 装配演示 + 独立审计；同目录可回放生成视频
 OPENBLAS_NUM_THREADS=1 MUJOCO_GL=egl uv run python -m experiments.system.hexframe \
   accept --out runs/hexframe_my_run
 ```
@@ -80,7 +81,7 @@ OPENBLAS_NUM_THREADS=1 MUJOCO_GL=egl uv run python -m experiments.system.hexfram
 ## 📊 去哪里看结果
 
 - `results/` —— 冻结的轻量结论摘要与支撑图表，按原协议解释，不续写旧结果。
-- `docs/control_main_results.md` —— 当前控制实验结果与失败边界。
+- `docs/control_main_results.md` —— 接触阶段刚度实验结果与失败边界。
 - `docs/historical_evidence.md` —— 按问题分类的历史证据索引。
 - 新运行数据一律写 `runs/`（Git 忽略）。
 
@@ -125,7 +126,7 @@ flowchart LR
 assets/                          模型资产、许可与来源记录（唯一来源）
 scenes/                          声明物理与控制配置的场景
 experiments/models_interfaces/   模型资格检查、接口候选与几何编排
-experiments/control/             RQ1/RQ2、误差范围与自由空间验证
+experiments/control/             绕轴/横向释放实验、误差范围与自由空间验证
 experiments/system/              HexFrame 正式验收、预检、回放与 P0/P1/P2 扩展
 src/compliant_docking/           共享模型、控制、规划、仿真与系统实现
 tests/                           数学、配置与行为回归
@@ -134,20 +135,20 @@ demo/                            精选展示图件与视频
 runs/                            本地运行输出（Git 忽略）
 ```
 
-建议阅读顺序：[项目演化](docs/project_evolution.md) → [当前研究主线](docs/research_focus.md) →
-[研究范围与三层结构](docs/research_scope.md) → [阻抗控制基础](docs/theory/impedance_control.md) →
+建议阅读顺序：[论文对照](docs/paper_mapping.md) → [项目演化](docs/project_evolution.md) →
+[研究组织与范围](docs/research_scope.md) → [阻抗控制基础](docs/theory/impedance_control.md) →
 [SE(3) Lie 阻抗](docs/theory/se3_lie_impedance.md) → [接触阶段控制实验](docs/control_research.md) →
-[控制实验结果](docs/control_main_results.md) → [HexFrame 系统验证](docs/system_validation.md)。在线文档见
+[接触刚度实验结果](docs/control_main_results.md) → [HexFrame 系统验证](docs/system_validation.md)。在线文档见
 [langxin11.github.io/compliant_docking_simulation](https://langxin11.github.io/compliant_docking_simulation/)；
 其他入口：[架构](docs/architecture.md) · [实验复现手册](docs/experiments.md) ·
-[论文对照](docs/paper_mapping.md) · [API](docs/api/control.md)。
+[接口交互调形](docs/petal_designer.md) · [API](docs/api/control.md)。
 编码代理先读 [AGENTS.md](AGENTS.md)；贡献与检查要求见
 [贡献指南](CONTRIBUTING.md)与[变更记录](CHANGELOG.md)。
 
 ## 许可与参考
 
 项目代码使用 [MIT](LICENSE)，导入资产遵循各资产目录内的许可与来源清单。
-控制方法参考 Ren & Shan (2026, Acta Astronautica) 与 Kim et al. (2025, IEEE T-RO)；
-SE(3) 部分实现的是 Kim 论文的 §III-A 标称阻抗，§III-B NRIC 未实现，
-对应关系见[论文对照](docs/paper_mapping.md)。项目目前仅有仿真证据，未验证实机、
-制造公差或真实锁紧。
+本项目复现 Ren & Shan (2026, Acta Astronautica) 与 Kim et al. (2025, IEEE T-RO)
+两篇论文并在其上适当拓展；SE(3) 部分实现的是 Kim 论文的 §III-A 标称阻抗，
+§III-B NRIC 未实现，逐项对应关系见[论文对照](docs/paper_mapping.md)。项目目前仅有
+仿真证据，未验证实机、制造公差或真实锁紧。

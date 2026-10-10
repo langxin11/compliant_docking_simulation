@@ -1,10 +1,11 @@
 # 项目代理工作规范
 
-适用于本仓库内的编码、实验、文档和数据维护。这是一个科研仓库：基于 MuJoCo / Pinocchio
-研究机械臂柔顺对接与装配，主线是柔顺策略对对接完成、最终误差、完成时间和失败边界的影响。
+适用于本仓库内的编码、实验、文档和数据维护。这是一个以论文复现为基础的科研仓库：
+基于 MuJoCo / Pinocchio 复现 Ren & Shan（规划—柔顺控制统一框架）与 Kim et al.
+（SE(3) 阻抗）两篇论文，并在此基础上适当拓展（接口、小型控制实验、完整装配演示）。
 研究结构分三层：`experiments/models_interfaces/`（模型与接口）→ `experiments/control/`
-（柔顺控制算法）→ `experiments/system/`（完整对接/装配）。先读 `docs/research_focus.md`
-与 `docs/research_scope.md` 了解当前主线，实验协议见对应层文档。
+（柔顺控制算法）→ `experiments/system/`（完整对接/装配）。先读 `docs/research_scope.md`
+了解项目组织与范围，实验协议见对应层文档。
 
 ## 工作规则
 
@@ -38,10 +39,9 @@
 ## 单接口与场景约定
 
 - 单接口默认采用 angle1_blend030 的凸块模型，物理/控制/反馈延迟均为 1 ms；
-  历史 RQ1/RQ2 与几何协议显式固定 original 场景。
-- SDF 仅为三工况对照原型，未经决定不替换默认凸块；HexFrame 正式默认仍保留旧接口，
-  新接口只完成独立实验适配（见 `results/hexframe_interfaces_20261005.md`），旧系统验收
-  不当作新接口证据。
+  历史绕轴/横向释放实验与几何协议显式固定 original 场景。
+- HexFrame 正式默认仍保留旧接口，新接口只完成独立实验适配
+  （见 `results/hexframe_interfaces_20261005.md`），旧系统验收不当作新接口证据。
 - 历史来源指纹不为了续跑而改写；注释变更也会改变源码哈希，新运行使用新目录。
 
 ## 检查与交付

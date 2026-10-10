@@ -5,14 +5,14 @@
 
 ## 入口总览
 
-三层研究各有一个正式入口，从仓库根目录用 `python -m experiments.<层>.<入口>` 启动；
+三层各有一个正式入口，从仓库根目录用 `python -m experiments.<层>.<入口>` 启动；
 每个入口只回答一个问题，不提供跨研究目的的任意切换。
 
 | 职责 | 入口 |
 |---|---|
 | 固定模型检查 | `models_interfaces.baseline` |
-| 绕轴策略 RQ1 | `control.rq1_yaw` |
-| 横向策略 RQ2 | `control.rq2_lateral` |
+| 绕轴释放实验 | `control.yaw_release` |
+| 横向释放实验 | `control.lateral_release` |
 | 离散误差范围 | `control.capture_range` |
 | 几何矩阵 | `models_interfaces.petal_guidance` |
 | 候选复核 | `models_interfaces.selected_candidate` |

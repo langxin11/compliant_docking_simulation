@@ -1,4 +1,4 @@
-"""RQ2：固定绕轴释放后的 XY 保持/释放同点对照。
+"""横向释放实验：固定绕轴释放后的 XY 保持/释放同点对照。
 
 POINTS 使用 (mm, mm, deg)，run_one 转为单次试验的 (m, m, deg)。
 默认 paired 阶段仅运行九点配对；numerics 和 speed 为显式补充阶段。
@@ -184,7 +184,7 @@ def run_study(args):
 
 
 def run_speed(args):
-    """Separate paired insertion-speed factor; never part of RQ2 primary pairs."""
+    """Separate paired insertion-speed factor; never part of lateral-release primary pairs."""
     from compliant_docking.research import protocols as grid
     from compliant_docking.research.petal_trials import preflight
     base = load_scene("scenes/iiwa14_petal_original_insertion.yaml")

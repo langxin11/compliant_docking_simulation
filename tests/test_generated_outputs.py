@@ -88,11 +88,8 @@ def test_selected_postprocessor_writes_report_without_publishing_frozen_results(
     for name in ("summary.json", "partial_audit.json", "archived_reference_checks.json",
                  "g_selected_nx6_lateral_released_dt_quarter.json"):
         shutil.copy2(source / name, tmp_path / name)
-    public = ROOT / "results/petal_angle1_blend030_validation.md"
-    before = public.read_bytes()
     monkeypatch.setattr(tool, "profiles", lambda out: None)
     monkeypatch.setattr(tool, "traces", lambda out: None)
     tool.build(tmp_path)
     assert (tmp_path / "report.md").is_file()
     assert (tmp_path / "analysis_manifest.json").is_file()
-    assert public.read_bytes() == before

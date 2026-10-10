@@ -2,10 +2,10 @@
 
 2026-10-05：按项目负责人决定，单接口默认场景 `scenes/iiwa14_petal_insertion.yaml`
 采用 **窄平顶＋角向斜坡（angle1_blend030 凸块模型）**，资产位于 `assets/interfaces/petal_guidance/angle1_blend030/`。
-默认采用已验证的自由空间提速和 1 ms 物理/控制/反馈延迟设置；SDF 原型对照保留这些设置及原摩擦、质量惯量与门槛。
+默认采用已验证的自由空间提速和 1 ms 物理/控制/反馈延迟设置。
 这次默认选择不等于证明最优或完成实机验证；新协议九点证据见[1 ms 任务验证](../results/angle1_task_1ms_20261005.md)。
 
-原轮廓保存为 `scenes/iiwa14_petal_original_insertion.yaml`；RQ1/RQ2、捕获范围和历史几何
+原轮廓保存为 `scenes/iiwa14_petal_original_insertion.yaml`；绕轴/横向释放实验、捕获范围和历史几何
 复现实验显式读取它。`iiwa14_petal_lateral_insertion.yaml` 仍是原轮廓的历史演示。
 `iiwa14_petal_guided_insertion.yaml` 是已有 narrow 组合偏差演示。
 旧 angle1 精细步长协议的未晋升判定保留历史口径；本次按用户决定设为新任务协议默认。
@@ -89,8 +89,3 @@ OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MUJOCO_GL=egl uv run python -m experime
 
 本轮 [1 ms 九点验证](../results/angle1_task_1ms_20261005.md) 已完成：9/9 通过原门槛及逐步审计。
 这是独立的新任务协议；旧精细步长研究判定按历史口径保留。
-
-## 有限 SDF 对照结论
-
-[三工况对照](../results/angle1_sdf_compare_20261005.md)：凸块 3/3 通过，当前花瓣 SDF＋原止挡原型 0/3 通过，
-存在提前接触、大穿透及明显载荷异常。默认保留 angle1_blend030 凸块模型，不替换为 SDF。

@@ -87,7 +87,7 @@ def main():
         run_study(args)
         return
     if args.lateral_study:
-        from experiments.control.rq2_lateral import run_study
+        from experiments.control.lateral_release import run_study
         if args.out == DEFAULT_OUT:
             args.out = REPO_ROOT / "runs/petal_lateral_control_20261003"
         run_study(args)
@@ -98,7 +98,7 @@ def main():
             args.out = REPO_ROOT / "runs/petal_capture_grid_current"
         run_grid(args)
         return
-    from experiments.control.rq1_yaw import run_matrix
+    from experiments.control.yaw_release import run_matrix
     run_matrix(args, legacy=True)
 
 
