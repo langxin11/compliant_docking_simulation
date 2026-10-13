@@ -109,14 +109,12 @@ XY 刚度从 `[80, 80]` N/m 降到零，绕轴刚度从 0.5 N·m/rad 降到零�
 源码、场景与测试快照保存在 `source_snapshot/`，固定计划保存在 `study_plan.json`。
 旧报告原文保存在 `history_documents/`，旧输出目录没有被重跑覆盖。
 
-## 使用与下一步
+## 复现与适用范围
 
-统一入口复现本轮矩阵（建议另选输出目录，源码/计划变化时拒绝在旧目录混跑）：
+当前使用分层横向入口，主配对、数值复核与减速为显式独立阶段。
+本轮旧的自动追加规则保留在源码快照中；当前入口不保证逐项重演该自动调度。
 
-```bash
-OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MUJOCO_GL=egl uv run python experiments/petal_insertion_suite.py \
-  --lateral-study --jobs 3 --out runs/petal_lateral_reproduction --resume
-```
+当前分层命令见[实验复现手册](../docs/experiments.md)。旧命令与精确协议使用当时源码快照解释；新运行使用新目录。
 
 单轴 −6 mm 演示场景为 `scenes/iiwa14_petal_lateral_insertion.yaml`，使用 0.25 ms 物理步长、
 0.5 ms 控制周期及原参考速度；除名称/文件路径外与本轮对应半步长组有效配置相同。
@@ -125,9 +123,8 @@ OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MUJOCO_GL=egl uv run python experiments
 MUJOCO_GL=egl uv run docking --scene scenes/iiwa14_petal_lateral_insertion.yaml --dt 0.00025
 ```
 
-下一步优先处理已保留的组合卡滞：先用可观测位姿进展和 F/T 检测停滞，再单独评估有限范围搜索、
-受限预紧与退出恢复。目标真值和止挡接触标签仍仅用于评分。尚未实施搜索或自动退回。
-扩大误差、新起点、重力/惯性补偿和其他机械臂需分别完整复核。mjviser 仍是可选被动回放后端。
+当前阶段已收尾，两个组合卡滞与数值敏感结果作为边界保留。搜索、预紧、退出恢复、
+新起点及重力扩展均未实施，若开展应作为独立实验声明协议。
 
 所有通过结果均只适用于零重力、固定母头、单一起点、声明几何和离散误差；没有焊接或模拟锁定，
 `CANDIDATE_PASS` 表示本研究落座候选，不能解释为锁紧或实机认证。

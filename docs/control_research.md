@@ -1,7 +1,7 @@
 # 接触阶段控制实验
 
 本页记录单接口接触阶段的两组小型刚度机制实验（绕轴释放与横向释放）的实验协议。
-历史协议固定原轮廓 `scenes/iiwa14_petal_original_insertion.yaml`，不跟随 narrow
+历史协议固定原轮廓 `scenes/iiwa14_petal_original_insertion.yaml`，不跟随 angle1_blend030
 默认接口切换；模型版本见[模型基线](models_interfaces.md)。
 
 本页保留可复现协议与判据，不要求把数值矩阵全部重跑；主结果是同点完成情况、
@@ -77,7 +77,7 @@ uv run python -m experiments.control.lateral_release --stage numerics --jobs 3 -
 ```
 
 主配对不自动追加减速。`--stage speed` 是独立因子，单独目录、同点同策略对照
-10/5 mm/s，不能替代横向配对或将卡滞改写为数值通过。旧 `--lateral-study` 仍执行历史完整协议。
+10/5 mm/s，不能替代横向配对或将卡滞改写为数值通过。旧聚合入口已删除；历史自动追加协议仅按当时快照解释。
 
 ## K=0 的解释
 

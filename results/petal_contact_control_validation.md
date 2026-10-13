@@ -49,21 +49,17 @@ nominal 无误差；xy 为 (2, −2) mm；combined 同时叠加 5° 偏航。几
 
 最终矩阵包含四组重新计算的释放策略和四组有效配置逐项一致的固定刚度对照。固定工况的回路、物理/模型、控制器、反馈、规划、日志源码及资产哈希相同，原始 NPZ 未改变；变化只涉及它们未启用的检测阈值和输出路径。JSON 的 `provenance` 与 `provenance/reuse_fixed.py` 保存校验逻辑和原始文件哈希。初版 0.3 N 试验另存，不混入最终释放策略。
 
-当前入口默认输出 `runs/petal_contact_control_20261002_v2/`。使用新目录复现完整八组：
-
-```bash
-OPENBLAS_NUM_THREADS=1 MUJOCO_GL=egl uv run python experiments/petal_insertion_suite.py \
-  --case combined --profile stiff compliant released --setting baseline dt_half \
-  --out runs/petal_contact_control_reproduction --jobs 2 --preview --resume
-OPENBLAS_NUM_THREADS=1 MUJOCO_GL=egl uv run python experiments/petal_insertion_suite.py \
-  --case nominal xy --profile released \
-  --out runs/petal_contact_control_reproduction --jobs 2 --resume
-```
+本轮历史输出为 `runs/petal_contact_control_20261002_v2/`。当前绕轴入口为
+`experiments.control.yaw_release`，默认输出 `runs/yaw_release_current/`；
+按当前显式矩阵运行时使用新目录，命令与计划约束见[控制实验协议](../docs/control_research.md)。
+当前分层命令见[实验复现手册](../docs/experiments.md)。旧命令与精确协议使用当时源码快照解释；新运行使用新目录。
 
 输出保留有效场景、路点、逐步 NPZ、独立动态/接触/几何验收、反馈审计、源码快照、环境和文件哈希。脚本结束仅表示计算完成，结论以 `assessment` 为准。首轮见 [固定刚度接入记录](petal_iiwa14_validation.md)。
 
 ![场景预览](../runs/petal_contact_control_20261002_v2/scene_preview.png)
 
-## 下一步
+## 后续记录
 
-在同一入口和采样协议内扩展 XY/yaw 网格，统计成功区域与边界失败原因；对边界工况继续核对步长，再比较减速、预紧或受限绕轴搜索。mjviser 可作为现有路点坐标系和日志的可选回放后端。重力、目标倾斜、实机与锁紧分别验证。
+离散误差范围验证已完成，见[捕获网格](petal_capture_grid_validation.md)；
+横向释放的同点对照见[横向配对](petal_lateral_control_validation.md)。
+本轮仍只支持上述固定工况，后续实验不追溯扩大本轮结论。当前不自动追加搜索、预紧或精细步长研究。

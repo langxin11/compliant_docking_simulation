@@ -115,14 +115,11 @@
 
 固定计划、运行源码快照、资产清单、环境、每组 JSON/NPZ/日志、静态检查、数据审计和数值对照一并保存。后处理源码单独记录，不属于冻结的物理运行源码。
 
-```bash
-MUJOCO_GL=egl uv run python experiments/petal_insertion_suite.py --geometry-study --jobs 3 --out runs/petal_guidance_reproduction --resume
-uv run python experiments/petal_guidance_report.py runs/petal_guidance_reproduction
-```
+当前分层命令见[实验复现手册](../docs/experiments.md)。旧命令与精确协议使用当时源码快照解释；新运行使用新目录。
 
 仅验证这些离散偏差、固定起点和零重力条件下的仿真落座候选；不声明连续捕获区域、真实硬件能力或锁紧完成。
 
-## 采用范围与下一步
+## 历史采用范围与后续记录
 
 原轮廓 7/9，角向候选 9/9，径向候选 6/9。追加的四个步长检查中 4/4 符合原差异门槛。
 可选独立场景 [iiwa14_petal_guided_insertion.yaml](../scenes/iiwa14_petal_guided_insertion.yaml) 使用 窄平顶 + 角向斜坡，复现 (0,−6) mm / +15° 的 0.25 ms 组；与记录有效参数完全一致。
@@ -133,8 +130,10 @@ MUJOCO_GL=egl uv run docking --scene scenes/iiwa14_petal_guided_insertion.yaml -
 
 该演示 CLI 的进给门禁不是完整几何验收；完整结论仍以矩阵 JSON 的 `assessment`、末段几何和全过程接触载荷为准。原接口场景和前轮模型未替换。
 
-下一步先将角向候选的偏差组合、接近起点和摩擦条件扩成独立矩阵；分别消融平顶宽度与斜坡曲线，找到稳健的参数窗口。再做碰撞离散加密，质量积分加密不能证明接触动力学已收敛。
-径向候选的两个大组合偏差和纯 −15° 偏航均出现超限载荷，暂不采用。需要重新设计过渡并核验碰撞离散与速度影响后，再与角向候选对照；不通过降低摩擦或放宽载荷门槛掩盖失败。
-重力场景、制造 STEP、公差/加工/强度和锁紧机构分别验证。停滞检测、有限搜索和安全退出仍是扩大捕获能力的后续方案，本轮没有增加这些控制逻辑。
+后续已完成 [angle1_blend030 代表验证](petal_angle1_blend030_20261003/report.md)、
+[步长复核](petal_angle1_blend030_dtcheck_20261003.md)及独立 [1 ms 九点任务验证](angle1_task_1ms_20261005.md)。
+本轮 narrow、radial 与 original 的结果仍按本轮协议解释，不与后续通过数量合并。
+径向候选的超限载荷保留；不再把扩大摩擦、起点或碰撞矩阵列为当前待办。
+制造、强度、公差与锁紧仍未验证。
 
 31 组记录已按源码与模型校验；冻结输出后拒绝在原目录继续运行。后处理命令只核验已有冻结材料，重新复现请使用新的输出目录。

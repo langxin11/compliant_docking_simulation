@@ -39,7 +39,7 @@
 
 粗网格中，偏航为零的八个非零 XY 点均仅因止挡未持续承载而失败；±15° 与非零 XY 叠加的十六个点还出现进给不足、横偏、倾斜及配合相位/高度问题。
 
-## 失败机制与下一步
+## 失败机制与后续记录
 
 ![保持状态对照](../runs/petal_capture_grid_20261003/failure_states.png)
 
@@ -49,7 +49,8 @@
 
 ![逐步相位、间隙、接触力和止挡承载](../runs/petal_capture_grid_20261003/failure_signals.png)
 
-下一步优先在同一入口比较接触后的横向柔顺：保持当前接近轨迹，利用现有 F/T 触发机制平滑降低 XY 刚度，保持倾斜约束，并在这些失败点与已通过点上做配对实验。先保持轴向预紧不变，以便识别横向柔顺的独立作用；若仍卡滞，再比较受限预紧或小范围搜索。增加进给停滞检测与退回策略时，只使用可观测位置进展和 F/T，不能用真值止挡作为控制条件。这些属于后续方案，本轮没有实施或调节控制器。
+后续已完成[横向释放配对](petal_lateral_control_validation.md)，单轴四点改善而两个大组合偏差仍卡滞。
+这些是独立的后续结果，不改写本轮网格判定；搜索、预紧和退出恢复尚未实现，也不列为当前自动追加任务。
 
 ## 物理步长复核
 
@@ -88,13 +89,7 @@
 
 仿真问题记录：无 MuJoCo 警告、非接口接触、关节越限或力矩饱和。238 项非慢速测试通过，4 项既有慢速测试未运行；7 条警告来自绘图依赖弃用提示。
 
-```bash
-OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MUJOCO_GL=egl uv run python experiments/petal_insertion_suite.py \
-  --grid --xy-mm -6 0 6 --yaw-deg -15 0 15 --jobs 3 \
-  --refine 4 --boundary-checks 4 \
-  --reuse-from runs/petal_contact_control_20261002_v2 \
-  --out runs/petal_capture_grid_reproduction --resume
-```
+当前分层命令见[实验复现手册](../docs/experiments.md)。旧命令与精确协议使用当时源码快照解释；新运行使用新目录。
 
 原网格完成后，将本轮 provenance/numerical_followup.py 复制到新输出目录的 provenance 文件夹，再运行该副本，即可复现敏感点追加复核。脚本根据原半步长比较选择敏感点；计划与比较另存 numerical_followup/plan.json 和 comparison.json。
 

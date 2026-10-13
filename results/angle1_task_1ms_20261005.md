@@ -38,4 +38,4 @@
 运行：`python -m experiments.models_interfaces.angle1_task_check --out runs/angle1_task_new --jobs 3`。
 本轮数据位于 `runs/angle1_task_1ms_20261005/`（受 Git 忽略），轻量结果与哈希位于 `docs/evidence/angle1_task_1ms_20261005.json`。35 项相关测试、静态检查通过。
 旧细步长重跑按用户指示停止，已完成六点记录保留于 `runs/angle1_nine_20261005_v2/`，标为 INTERRUPTED；没有拼入本轮 9/9，也没有改写旧协议判定。
-本轮不追求精确接触峰值，不声称相对 narrow 的性能优势、连续捕获范围、真实锁紧或实机能力。HexFrame 完整装配仍需独立适配与验收。
+本轮不追求精确接触峰值，不声称相对 narrow 的性能优势、连续捕获范围、真实锁紧或实机能力。后续已完成[HexFrame 独立移植实验](hexframe_interfaces_20261005.md)：angle1 名义完整通过、三个偏差点未落座；正式默认仍保留旧接口，不能用本轮单接口 9/9 替代系统验收。

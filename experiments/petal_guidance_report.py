@@ -19,11 +19,11 @@ os.environ.setdefault("MPLBACKEND", "Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-import experiments.petal_insertion_suite as suite
 from compliant_docking.contact_diagnostics import evaluate_contact_load
 from compliant_docking.docking_task import target_rotation
 from compliant_docking.petal_geometry import evaluate_petal_seating
 from compliant_docking.plotting import apply_style
+from compliant_docking.research import petal_trials as suite
 from compliant_docking.research.cases import POINTS
 from compliant_docking.scene import REPO_ROOT, load_scene
 from experiments.control import capture_range as grid
@@ -374,7 +374,7 @@ def report_text(out,records,summary,checked):
         "机器人资产的哈希另行补充保存；其文件修改时间早于本轮运行元数据创建，之后再次核验内容一致。",
         "软件检查：256 项非慢速测试通过，4 项慢速测试未运行；7 条为既有绘图库弃用警告。48 项针对控制、门禁和新几何的检查通过。","",
         "固定计划、运行源码快照、资产清单、环境、每组 JSON/NPZ/日志、静态检查、数据审计和数值对照一并保存。后处理源码单独记录，不属于冻结的物理运行源码。","",
-        "```bash","MUJOCO_GL=egl uv run python experiments/petal_insertion_suite.py --geometry-study --jobs 3 --out runs/petal_guidance_reproduction --resume",
+        "```bash","MUJOCO_GL=egl uv run python -m experiments.models_interfaces.petal_guidance --jobs 3 --out runs/petal_guidance_reproduction --resume",
         "uv run python experiments/petal_guidance_report.py runs/petal_guidance_reproduction","```","",
         "仅验证这些离散偏差、固定起点和零重力条件下的仿真落座候选；不声明连续捕获区域、真实硬件能力或锁紧完成。",""]
     return "\n".join(lines)

@@ -33,16 +33,23 @@ def build_parser():
     parser.add_argument("--jobs", type=int, choices=(1, 2, 3), default=1)
     return parser
 
-def run_matrix(args, *, legacy=False):
-    """校验来源和计划，写入快照并串行或并行执行矩阵；协议不匹配时拒绝续跑。"""
+def run_matrix(args):
+    """校验来源和固定计划，写入快照并串行或并行执行绕轴矩阵。
+
+    Args:
+        args: build_parser 返回的参数命名空间，明确工况、策略、步长和输出目录。
+
+    Returns:
+        None。向 out 写入计划、来源快照、运行记录和汇总。
+
+    Raises:
+        ValueError: 输出目录中的来源或矩阵计划与本次运行不符。
+    """
     base = load_scene("scenes/iiwa14_petal_original_insertion.yaml")
     manifest = source_manifest(base)
     plan = dict(cases=args.case, profiles=args.profile, settings=args.setting,
                 model="original PetalDock100 V2", primary_factor="yaw stiffness policy",
                 fixed_control_period_s=base.se3_impedance.control_period)
-    if legacy:
-        plan = dict(protocol="legacy-default matrix", model="original PetalDock100 V2",
-                    profile_selection="legacy CLI retains historical profiles and incremental runs")
     args.out.mkdir(parents=True, exist_ok=True)
     for filename, value in (("source_manifest.json", manifest), ("study_plan.json", plan)):
         path = args.out / filename

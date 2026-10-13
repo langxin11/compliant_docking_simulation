@@ -1,6 +1,5 @@
 """Layer isolation, keyword binding, strict provenance and spawned imports."""
 import ast
-import importlib
 import multiprocessing
 import sys
 from concurrent.futures import ProcessPoolExecutor
@@ -17,12 +16,10 @@ from compliant_docking.scene import load_scene
 from experiments.control import lateral_release, yaw_release
 
 
-def spawned_legacy_variant():
-    import sys
-    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
-    legacy = importlib.import_module("petal_insertion_suite")
-    scene = legacy.variant(load_scene("scenes/iiwa14_petal_insertion.yaml"), "nominal", "released")
-    return scene.name, scene.se3_impedance.k_diag, legacy.variant.__module__
+def spawned_variant():
+    """验证共享试验函数可在独立子进程导入并保持相同配置。"""
+    scene = variant(load_scene("scenes/iiwa14_petal_original_insertion.yaml"), "nominal", "released")
+    return scene.name, scene.se3_impedance.k_diag, variant.__module__
 
 
 def test_control_entry_rejects_interface_and_other_control_factors():
@@ -45,6 +42,31 @@ def test_paired_lateral_release_never_schedules_numerics_or_speed(monkeypatch, t
     assert {job[1] for job, _ in scheduled} == {"released", "lateral_released"}
     assert {job[2] for job, _ in scheduled} == {"baseline"}
     assert {stage for _, stage in scheduled} == {"pilot", "extension"}
+
+
+
+def test_sensitive_numerics_never_schedules_speed_factor(monkeypatch, tmp_path):
+    """即使细步长仍敏感且已落座，数值阶段也不能自动增加减速试验。"""
+    scheduled = []
+    records = {(case, profile, setting): {"assessment": {"status": "CANDIDATE_PASS"}}
+               for case in lateral_release.POINTS for profile in lateral_release.PROFILES
+               for setting in ("baseline", "dt_half", "dt_quarter")}
+    checks = {lateral_release.record_name(case, "lateral_released", setting): {"status": "SENSITIVE"}
+              for case in lateral_release.NUMERICAL for setting in ("baseline", "dt_half")}
+    monkeypatch.setattr(lateral_release, "read_records", lambda out: records)
+    monkeypatch.setattr(lateral_release, "summarize", lambda out: checks)
+    monkeypatch.setattr(lateral_release, "compare_pairs", lambda out: None)
+    monkeypatch.setattr(lateral_release, "execute", lambda out, base, jobs, stage, workers:
+                        scheduled.extend((job, stage) for job in jobs))
+    from compliant_docking.research import petal_trials
+    monkeypatch.setattr(petal_trials, "preflight", lambda base: {"status": "PASS"})
+    monkeypatch.setattr(protocols, "source_manifest", lambda base: {"sources": {}})
+    lateral_release.run_study(SimpleNamespace(stage="numerics", out=tmp_path, jobs=1))
+    quarter = [job for job, stage in scheduled if stage == "quarter_check"]
+    assert len(quarter) == len(lateral_release.NUMERICAL)
+    assert {stage for _, stage in scheduled} == {"pilot", "extension", "half_check", "quarter_check"}
+    assert all(job[1] != "lateral_released_slow" for job, _ in scheduled)
+    assert not (tmp_path / "slow_plan.json").exists()
 
 
 def test_default_matrix_passes_telemetry_by_keyword_without_becoming_error(monkeypatch, tmp_path):
@@ -86,11 +108,11 @@ def test_shared_research_library_never_imports_experiment_or_cli_entries():
                 assert all(not alias.name.startswith("experiments") for alias in node.names), path
 
 
-def test_legacy_function_survives_spawn_and_has_single_canonical_source():
+def test_shared_function_survives_spawn_and_has_single_canonical_source():
     context = multiprocessing.get_context("spawn")
     with ProcessPoolExecutor(max_workers=1, mp_context=context) as executor:
-        name, stiffness, module = executor.submit(spawned_legacy_variant).result(timeout=30)
-    expected = variant(load_scene("scenes/iiwa14_petal_insertion.yaml"), "nominal", "released")
+        name, stiffness, module = executor.submit(spawned_variant).result(timeout=30)
+    expected = variant(load_scene("scenes/iiwa14_petal_original_insertion.yaml"), "nominal", "released")
     assert name == expected.name
     assert stiffness == expected.se3_impedance.k_diag
     assert module == "compliant_docking.research.petal_trials"

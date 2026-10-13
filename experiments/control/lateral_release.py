@@ -2,7 +2,7 @@
 
 POINTS 使用 (mm, mm, deg)，run_one 转为单次试验的 (m, m, deg)。
 默认 paired 阶段仅运行九点配对；numerics 和 speed 为显式补充阶段。
-旧入口 legacy-full 保留历史追加规则。所有阶段写入计划、来源和评价，不修改冻结报告。
+三个阶段分别显式选择；数值复核不自动追加减速。所有阶段写入计划、来源和评价，不修改冻结报告。
 """
 from __future__ import annotations
 
@@ -111,10 +111,22 @@ def summarize(out):
 
 
 def run_study(args):
-    """按 paired/numerics/legacy-full 调度并持久化固定协议；新入口默认止于 paired。"""
+    """按显式阶段调度并持久化协议；数值复核不自动追加减速。
+
+    Args:
+        args: 参数命名空间，包含 stage、out、jobs；speed 阶段另需 speed_case、setting。
+
+    Returns:
+        None。向 out 写入计划、来源快照、运行记录和评价。
+
+    Raises:
+        ValueError: 阶段无效、既有来源或计划不匹配，或缺少主配对记录。
+    """
     from compliant_docking.research import protocols as grid
     from compliant_docking.research.petal_trials import preflight
-    stage = getattr(args, "stage", "legacy-full")
+    stage = args.stage
+    if stage not in {"paired", "numerics", "speed"}:
+        raise ValueError("Choose paired, numerics or speed")
     if stage == "speed":
         return run_speed(args)
     out = args.out
@@ -123,7 +135,7 @@ def run_study(args):
     plan = dict(points=POINTS, pilot=PILOT, profiles=PROFILES, numerical_cases=NUMERICAL,
                 physics_dt_s=base.physics.timestep, control_period_s=.0005, feedback_delay_s=.0005,
                 lateral_before_N_m=80., lateral_after_N_m=0., release_s=.25,
-                quarter_budget=3, slower_point_budget=1, slower_settings=["dt_half", "dt_quarter"],
+                quarter_budget=3,
                 claim="matched discrete trials; no truth in controller; no continuous capture claim")
     manifest = grid.source_manifest(base)
     manifest["sources"][str(Path(__file__).relative_to(REPO_ROOT))] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
@@ -165,21 +177,6 @@ def run_study(args):
         assert json.loads(path.read_text()) == quarter
     grid.write_json(path, quarter)
     execute(out, base, [(c, "lateral_released", "dt_quarter") for c in quarter], "quarter_check", args.jobs)
-    checks = summarize(out)
-    records = read_records(out)
-    if stage == "numerics":
-        return
-    slow = [case for case in quarter if checks[record_name(case, "lateral_released", "dt_half")]["status"] == "SENSITIVE"
-            and records[(case, "lateral_released", "dt_quarter")]["assessment"]["status"] == "CANDIDATE_PASS"]
-    # The slower trial isolates one trajectory factor at one already seated
-    # point. It never turns an unseated point into an accepted numeric result.
-    slow = sorted(slow, key=lambda case: (case != "yaw_n15", case))[:1]
-    path = out / "slow_plan.json"
-    if path.exists():
-        assert json.loads(path.read_text()) == slow
-    grid.write_json(path, slow)
-    execute(out, base, [(c, "lateral_released_slow", s) for c in slow for s in ("dt_half", "dt_quarter")],
-            "slow_factor", args.jobs)
     summarize(out)
 
 

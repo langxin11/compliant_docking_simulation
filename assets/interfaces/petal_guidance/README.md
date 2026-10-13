@@ -28,8 +28,8 @@
 统一对照入口：
 
 ```bash
-MUJOCO_GL=egl uv run python experiments/petal_insertion_suite.py \
-  --geometry-study --jobs 3 --out runs/petal_guidance_reproduction --resume
+MUJOCO_GL=egl uv run python -m experiments.models_interfaces.petal_guidance \
+  --jobs 3 --out runs/petal_guidance_reproduction --resume
 ```
 
 该入口沿用既有控制循环、摩擦和验收门槛，包含 27 次主对照及固定预算的 4 次
@@ -40,6 +40,6 @@ MUJOCO_GL=egl uv run python experiments/petal_insertion_suite.py \
 
 本轮主对照中，`narrow` 的九个工况全部达到落座候选，原轮廓为 7/9。
 `radial` 为 6/9，三个含 15° 偏航的工况虽然落座，但瞬态合力超限（最大约 244 N），
-因此当前使用角向候选。三个角向代表点的 0.25/0.125 ms 比较符合原差异门槛；
+因此本轮选择角向候选；当前单接口默认为后续 angle1_blend030，见[模型基线](../../../docs/models_interfaces.md)。三个角向代表点的 0.25/0.125 ms 比较符合原差异门槛；
 这不替代完整数值收敛、制造或实机验证。
 [完整验证](../../../results/petal_guidance_geometry_validation.md)。
