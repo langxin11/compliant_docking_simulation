@@ -107,7 +107,7 @@ def test_saved_sensor_pose_survives_mutation_and_transports_to_new_body():
 
 @pytest.mark.parametrize("dt", [.0005, .00025, .000125])
 def test_robot_feedback_delay_and_all_solve_telemetry_share_declared_timing(dt):
-    scene = load_scene("scenes/iiwa14_petal_insertion.yaml")
+    scene = load_scene("scenes/iiwa14_petal_original_insertion.yaml")
     scene = replace(scene, physics=replace(scene.physics, timestep=dt),
         se3_impedance=replace(scene.se3_impedance,
             contact_yaw=replace(scene.se3_impedance.contact_yaw, lateral_stiffness_after=0.)))

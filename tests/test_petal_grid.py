@@ -10,9 +10,11 @@ import pytest
 from compliant_docking.docking_task import build_docking_trajectory
 from compliant_docking.scene import load_scene
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]/"experiments"))
-grid = importlib.import_module("petal_capture_grid")
-suite = importlib.import_module("petal_insertion_suite")
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+grid = importlib.import_module("experiments.control.capture_range")
+# 冠形历史入口仍用于对照配置；Petal 直接使用共享试验实现。
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "experiments"))
+suite = importlib.import_module("compliant_docking.research.petal_trials")
 legacy = importlib.import_module("insertion_suite")
 
 
@@ -27,7 +29,7 @@ def record(ok, lateral=.1, stop=1.):
 @pytest.mark.parametrize("case", list(legacy.CASES))
 @pytest.mark.parametrize("profile", ["stiff", "compliant", "released"])
 def test_presets_retain_exact_effective_configuration(case, profile):
-    base=load_scene("scenes/iiwa14_petal_insertion.yaml")
+    base=load_scene("scenes/iiwa14_petal_original_insertion.yaml")
     before=legacy.variant(base,case,"compliant" if profile=="released" else profile)
     before=replace(before,name=f"{base.name}_{case}_{profile}",
                    se3_impedance=replace(before.se3_impedance,
@@ -42,7 +44,7 @@ def test_presets_retain_exact_effective_configuration(case, profile):
 
 
 def test_grid_errors_do_not_change_physics_or_leak_truth_to_planner():
-    base=load_scene("scenes/iiwa14_petal_insertion.yaml")
+    base=load_scene("scenes/iiwa14_petal_original_insertion.yaml")
     scene=suite.variant(base,"arbitrary","released",(-.006,.006,-15.))
     np.testing.assert_allclose(scene.docking.estimate_pos,[-.006,.506,.35],atol=1e-15)
     assert scene.docking.estimate_yaw_deg==-15.
@@ -86,18 +88,18 @@ def test_half_step_requires_equal_status_and_original_peak_limits():
 
 
 def test_reuse_checks_controller_sources_and_entire_assessment_body(tmp_path):
-    base=load_scene("scenes/iiwa14_petal_insertion.yaml")
+    base=load_scene("scenes/iiwa14_petal_original_insertion.yaml")
     current=grid.source_manifest(base)
-    snapshot=tmp_path/'source_snapshot/experiments'
+    snapshot=tmp_path/'source_snapshot/src/compliant_docking/research'
     snapshot.mkdir(parents=True)
     import shutil
-    shutil.copy2(grid.REPO_ROOT/'experiments/petal_insertion_suite.py',snapshot/'petal_insertion_suite.py')
+    shutil.copy2(grid.REPO_ROOT/'src/compliant_docking/research/petal_trials.py',snapshot/'petal_trials.py')
     assert grid.reusable_sources(current,current,tmp_path)
     changed=dict(current,sources=dict(current["sources"]))
     changed["sources"]["src/compliant_docking/control/contact_yaw.py"]="changed"
     assert not grid.reusable_sources(current,changed,tmp_path)
     import ast
-    source=snapshot/'petal_insertion_suite.py'
+    source=snapshot/'petal_trials.py'
     tree=ast.parse(source.read_text())
     run=next(f for f in tree.body if isinstance(f,ast.FunctionDef) and f.name=='run_case')
     run.body.append(ast.Pass())
@@ -106,7 +108,7 @@ def test_reuse_checks_controller_sources_and_entire_assessment_body(tmp_path):
 
 
 def test_lateral_profiles_only_change_declared_axes_and_optional_speed():
-    base=load_scene('scenes/iiwa14_petal_insertion.yaml')
+    base=load_scene('scenes/iiwa14_petal_original_insertion.yaml')
     for profile,after in [('lateral_released',0.),('lateral_soft',20.)]:
         scene=suite.variant(base,'combined',profile)
         assert scene.se3_impedance.contact_yaw.lateral_stiffness_after==after
@@ -127,7 +129,7 @@ def test_lateral_profiles_only_change_declared_axes_and_optional_speed():
 def test_current_controller_cannot_reuse_historical_archive():
     import json
 
-    current = grid.source_manifest(load_scene("scenes/iiwa14_petal_insertion.yaml"))
+    current = grid.source_manifest(load_scene("scenes/iiwa14_petal_original_insertion.yaml"))
     previous_dir = grid.REPO_ROOT / "runs/petal_contact_control_20261002_v2"
     previous = json.loads((previous_dir / "source_manifest.json").read_text())
     assert not grid.reusable_sources(previous, current, previous_dir)

@@ -1,0 +1,460 @@
+{
+  "scope": "八个固定代表点；只替换工作接口及匹配存储头，保留 CAD 惯量与原导纳系统。冠形存储初始预载异常，不能用于接口优劣的干净归因。",
+  "all_phase_plans_identical": true,
+  "results": {
+    "angle1": {
+      "nominal": {
+        "run": "runs/hexframe_interfaces_20261005_v3/angle1/nominal",
+        "status": "PASS",
+        "faults": [],
+        "recorded_end_s": 53.0,
+        "contact_trace_end_s": 53.0,
+        "first_physical_axial_contact_s": 35.112,
+        "controller_contact_detection_s": 35.112,
+        "lock_time_s": 36.611000000000004,
+        "final_module_error_mm": 0.0050537296599908665,
+        "final_interface_fit": {
+          "lateral_mm": 0.000638437440919053,
+          "axial_above_reference_mm": 0.0007690168660826058,
+          "phase_deg": -4.206791669503218e-05,
+          "tilt_deg": 0.0023137377655917213
+        },
+        "peak_axial_force_n": 1.7740020620431753,
+        "max_penetration_mm": 0.0022950602974747348,
+        "peak_moment_nm": 0.05884381382794038,
+        "final_locks": [
+          false,
+          false,
+          true
+        ],
+        "tail_1s_max_relative_speed_mm_s": 2.442530890198117e-08,
+        "tail_1s_seating_condition_fraction": 1.0,
+        "initial_storage_force_n": 0.0,
+        "initial_storage_penetration_mm": 0.0,
+        "storage": {
+          "module_port": "module1_port_4",
+          "storage_port": "storage_dock_port",
+          "peak_contact_force_n": 0.007420868857558598,
+          "max_penetration_mm": 2.0566575525959894e-07,
+          "final_clearance_m": 0.7530419726526546
+        },
+        "source_hashes_verified": 1114,
+        "all_saved_states_finite": true,
+        "physics_and_trace_dt_s": 0.001,
+        "nominal_joint_limit_margin_rad": 0.09400431341606375,
+        "input_sha256": {
+          "model.xml": "55782c6b77ce9a0143a11bfefaffd8fcd2f66261dd594158f0af2f2eafef3063",
+          "rollout.npz": "b6a366d9360cc5974a9fef997240473680808d1fc6f8db380ee773985decad85",
+          "validation.json": "3995ea55e940329a1653bf5afc5be31c0c20031821b419bb9b738c012e0acc33",
+          "contact_trace.npz": "50c59b1ee33f83d2443f2250b6d00af6f159614fe1918985425cba9a61f3c74f",
+          "storage_trace.npz": "a22f4dfa47afe60220fd6af86b696eb2ff6981575b914096209108b81908698d",
+          "interface_adapter.json": "db631b8b149a884c517dbfb2a94e90dd7a5537e8188f5ce0fecfce9a2c919975",
+          "source_manifest.json": "cd01eb00e1c05fc52e784f5381ac352524957cd0057fd0e7cb576ac7048574cc"
+        },
+        "prelock_last_half_second": {
+          "samples": 500,
+          "max_position_error_mm": 0.017066888216951372,
+          "max_angle_error_deg": 0.006313855688091161,
+          "seating_condition_fraction": 1.0
+        },
+        "independent_audit": {
+          "final_retreat_clearance_verified": true,
+          "status": "PASS",
+          "module": "HexFrame",
+          "geometry_mass_and_port_mapping_verified": true,
+          "handover_and_unload_verified": true,
+          "prelock_physical_samples_recomputed": 500,
+          "loaded_stop_continuous_dwell_verified": true,
+          "prelocked_base_interface_verified": true,
+          "storage_unlock_after_grip_verified": true,
+          "storage_extraction_clearance_verified": true
+        }
+      },
+      "xy": {
+        "run": "runs/hexframe_interfaces_20261005_v3/angle1/xy",
+        "status": "FAIL",
+        "faults": [
+          "contact seating timeout",
+          "final module position",
+          "incomplete handover"
+        ],
+        "recorded_end_s": 46.99,
+        "contact_trace_end_s": 46.999,
+        "first_physical_axial_contact_s": 33.435,
+        "controller_contact_detection_s": 33.435,
+        "lock_time_s": null,
+        "final_module_error_mm": 2.73483336018065,
+        "final_interface_fit": {
+          "lateral_mm": 2.0649138007074366,
+          "axial_above_reference_mm": 1.808692178998164,
+          "phase_deg": -0.10353130137425381,
+          "tilt_deg": 0.005693924370077046
+        },
+        "peak_axial_force_n": 0.6007604273759295,
+        "max_penetration_mm": 0.0010630586170072447,
+        "peak_moment_nm": 0.039912990372516735,
+        "final_locks": [
+          false,
+          true,
+          false
+        ],
+        "tail_1s_max_relative_speed_mm_s": 0.012640285444517327,
+        "tail_1s_seating_condition_fraction": 0.0,
+        "initial_storage_force_n": 0.0,
+        "initial_storage_penetration_mm": 0.0,
+        "storage": {
+          "module_port": "module1_port_4",
+          "storage_port": "storage_dock_port",
+          "peak_contact_force_n": 0.007420868857558598,
+          "max_penetration_mm": 2.0566575525959894e-07,
+          "final_clearance_m": 0.7538804042744535
+        },
+        "source_hashes_verified": 1114,
+        "all_saved_states_finite": true,
+        "physics_and_trace_dt_s": 0.001,
+        "nominal_joint_limit_margin_rad": 0.09400431341606375,
+        "input_sha256": {
+          "model.xml": "fb04962f78bbde5d0162d9b746e41df67335aafd9638c3515b217cf3ac411753",
+          "rollout.npz": "4761e202fc8e675109f501f9661f4c41c0aa38ebe7be5f17d60d97f14f885cb7",
+          "validation.json": "29c5cd8c6b76fe178652d3faba5c76e5ad7851a84462fa2c2a1e010781f86b3d",
+          "contact_trace.npz": "df8c67684d9a7bf8ba39dff6761eda3db58777d988d005baa68c0ed8aa9b0cbe",
+          "storage_trace.npz": "cb726080321ce72dac9160473bd7d9c23a3985a4718b462b8ce4351864bce8d6",
+          "interface_adapter.json": "db631b8b149a884c517dbfb2a94e90dd7a5537e8188f5ce0fecfce9a2c919975",
+          "source_manifest.json": "4ef7a5857341f3d9e84f0d79974df4291420da950ab5e4b9adc6ad1d06c84970"
+        }
+      },
+      "yaw": {
+        "run": "runs/hexframe_interfaces_20261005_v3/angle1/yaw",
+        "status": "FAIL",
+        "faults": [
+          "contact seating timeout",
+          "final module position",
+          "incomplete handover"
+        ],
+        "recorded_end_s": 46.99,
+        "contact_trace_end_s": 46.999,
+        "first_physical_axial_contact_s": 32.446,
+        "controller_contact_detection_s": 32.446,
+        "lock_time_s": null,
+        "final_module_error_mm": 2.645154873054426,
+        "final_interface_fit": {
+          "lateral_mm": 0.00015533718181495713,
+          "axial_above_reference_mm": 2.64517758106686,
+          "phase_deg": -4.960240389551288,
+          "tilt_deg": 0.00017061379844079128
+        },
+        "peak_axial_force_n": 1.713229352398477,
+        "max_penetration_mm": 0.0022985111331372504,
+        "peak_moment_nm": 0.03281108255766633,
+        "final_locks": [
+          false,
+          true,
+          false
+        ],
+        "tail_1s_max_relative_speed_mm_s": 0.042404935680173464,
+        "tail_1s_seating_condition_fraction": 0.0,
+        "initial_storage_force_n": 0.0,
+        "initial_storage_penetration_mm": 0.0,
+        "storage": {
+          "module_port": "module1_port_4",
+          "storage_port": "storage_dock_port",
+          "peak_contact_force_n": 0.007420868857558598,
+          "max_penetration_mm": 2.0566575525959894e-07,
+          "final_clearance_m": 0.7541810722376047
+        },
+        "source_hashes_verified": 1114,
+        "all_saved_states_finite": true,
+        "physics_and_trace_dt_s": 0.001,
+        "nominal_joint_limit_margin_rad": 0.09400431341606375,
+        "input_sha256": {
+          "model.xml": "c0331d27cd9aedd44ef388b2f12f642b279b840be1cb2753b15ca8e932d6a2db",
+          "rollout.npz": "206e19ada8701dfec82e76d9bc2af8711649d2a3c974431447460d04361eb66e",
+          "validation.json": "44f95a6c887bb19f57763f5a602394ccbd24edb09dade1ca31b4cae5b0a20a96",
+          "contact_trace.npz": "5ecf715f5ab54adf4160fc850c820a47c5975d85abf4a1636a3b7e48cf8052fb",
+          "storage_trace.npz": "b5be7175f73f46974691a02716cba8e10d9159078bdbf708e67b4d5d67cd0dd6",
+          "interface_adapter.json": "db631b8b149a884c517dbfb2a94e90dd7a5537e8188f5ce0fecfce9a2c919975",
+          "source_manifest.json": "34ddbb93edf09ed59489b7bedc7927b8528d40e51511f4c93350858f60d84c8b"
+        }
+      },
+      "combined": {
+        "run": "runs/hexframe_interfaces_20261005_v3/angle1/combined",
+        "status": "FAIL",
+        "faults": [
+          "contact seating timeout",
+          "final module position",
+          "incomplete handover"
+        ],
+        "recorded_end_s": 46.99,
+        "contact_trace_end_s": 46.999,
+        "first_physical_axial_contact_s": 30.445,
+        "controller_contact_detection_s": 30.445,
+        "lock_time_s": null,
+        "final_module_error_mm": 5.0966904707704055,
+        "final_interface_fit": {
+          "lateral_mm": 1.9725568288561246,
+          "axial_above_reference_mm": 4.695698022821437,
+          "phase_deg": -5.100031772508942,
+          "tilt_deg": 0.003836116820270675
+        },
+        "peak_axial_force_n": 0.6025760930143347,
+        "max_penetration_mm": 0.001146872349829945,
+        "peak_moment_nm": 0.04040938041208713,
+        "final_locks": [
+          false,
+          true,
+          false
+        ],
+        "tail_1s_max_relative_speed_mm_s": 0.0048014424156789075,
+        "tail_1s_seating_condition_fraction": 0.0,
+        "initial_storage_force_n": 0.0,
+        "initial_storage_penetration_mm": 0.0,
+        "storage": {
+          "module_port": "module1_port_4",
+          "storage_port": "storage_dock_port",
+          "peak_contact_force_n": 0.007420868857558598,
+          "max_penetration_mm": 2.0566575525959894e-07,
+          "final_clearance_m": 0.755043971943711
+        },
+        "source_hashes_verified": 1114,
+        "all_saved_states_finite": true,
+        "physics_and_trace_dt_s": 0.001,
+        "nominal_joint_limit_margin_rad": 0.09400431341606375,
+        "input_sha256": {
+          "model.xml": "5a0e8806c5d957fd3636513a3ec99ad17eb6c0e029885c212184e5a54e77757b",
+          "rollout.npz": "2574aa6f5e2aa297253ceb29c612c0636db8ba0ee66c81e4532960ab1ee574fe",
+          "validation.json": "b79a239e295c97f9e3b495cbdf9a70a114d996a08bd882015ccd042dc78040ea",
+          "contact_trace.npz": "f0bea42029ed094b36ec3e9ff2465458441f1d24f310c9115c5552300fe59f03",
+          "storage_trace.npz": "6588ef91ae192fb99660fb3d458e247ca1345033d4e680eb9b40903385a5726e",
+          "interface_adapter.json": "db631b8b149a884c517dbfb2a94e90dd7a5537e8188f5ce0fecfce9a2c919975",
+          "source_manifest.json": "91dfa7f2d78fef5a727ba8720c565169cce9bcda4e8c68ba913c5dc46bc41177"
+        }
+      }
+    },
+    "crown_stl": {
+      "nominal": {
+        "run": "runs/hexframe_interfaces_20261005/crown_stl/nominal",
+        "status": "FAIL",
+        "faults": [
+          "contact load or penetration limit",
+          "contact seating timeout",
+          "final module position",
+          "incomplete handover",
+          "storage contact load or penetration limit",
+          "torque saturation"
+        ],
+        "recorded_end_s": 46.99,
+        "contact_trace_end_s": 46.999,
+        "first_physical_axial_contact_s": 27.564,
+        "controller_contact_detection_s": 29.0,
+        "lock_time_s": null,
+        "final_module_error_mm": 10.975766221526186,
+        "final_interface_fit": {
+          "lateral_mm": 0.5901364332941008,
+          "axial_above_reference_mm": 10.971206901184063,
+          "phase_deg": 0.08139723900757338,
+          "tilt_deg": 0.05069659699198614
+        },
+        "peak_axial_force_n": 42.368451036744105,
+        "max_penetration_mm": 1.1128861605406688,
+        "peak_moment_nm": 3.576247657189086,
+        "final_locks": [
+          false,
+          true,
+          false
+        ],
+        "tail_1s_max_relative_speed_mm_s": 4.12765180854289,
+        "tail_1s_seating_condition_fraction": 0.0,
+        "initial_storage_force_n": 901.8542016882616,
+        "initial_storage_penetration_mm": 0.5591257967913333,
+        "storage": {
+          "module_port": "module1_port_4",
+          "storage_port": "storage_dock_port",
+          "peak_contact_force_n": 1410.4151737858053,
+          "max_penetration_mm": 1.9931737838084076,
+          "final_clearance_m": 0.7573572685756865
+        },
+        "source_hashes_verified": 582,
+        "all_saved_states_finite": true,
+        "physics_and_trace_dt_s": 0.001,
+        "nominal_joint_limit_margin_rad": 0.09400431341606375,
+        "input_sha256": {
+          "model.xml": "be4707a5cb8c32a6aff9f509355ab5732c109d21492b618ef0db1837b2f291d4",
+          "rollout.npz": "c5f588cf4e5708788701ba56f6259cf6b1ddd7ce685af24216f4eaa7bf7cbc43",
+          "validation.json": "fcb387031b44fe2bca6abf55ad17e063baf9388bbaba9fae8daabeb1564fbd4d",
+          "contact_trace.npz": "40f370d83f99c887bd0d71a237356f80a1dcac748572ff03782e64e450961e9f",
+          "storage_trace.npz": "cc09e2e748fb9ad1af2116510d2bf4f1699020087b79f9f9fec01ef16f92a63f",
+          "interface_adapter.json": "47bd39b850c50761082795b672411a4c14016f848a1c4e3695d83def6b53cbd3",
+          "source_manifest.json": "2ea4d4cafaae7366cfd8ff1601fb476ed5a0b3064d8c6574c3282d0556aa68c2"
+        }
+      },
+      "xy": {
+        "run": "runs/hexframe_interfaces_20261005_v3/crown_stl/xy",
+        "status": "FAIL",
+        "faults": [
+          "contact load or penetration limit",
+          "contact seating timeout",
+          "final module position",
+          "incomplete handover",
+          "storage contact load or penetration limit",
+          "torque saturation"
+        ],
+        "recorded_end_s": 46.99,
+        "contact_trace_end_s": 46.999,
+        "first_physical_axial_contact_s": 27.705000000000002,
+        "controller_contact_detection_s": 29.0,
+        "lock_time_s": null,
+        "final_module_error_mm": 10.513762825784543,
+        "final_interface_fit": {
+          "lateral_mm": 1.9980504487720858,
+          "axial_above_reference_mm": 10.322379779987214,
+          "phase_deg": -0.3880112649530567,
+          "tilt_deg": 0.001809563122464296
+        },
+        "peak_axial_force_n": 35.844264520675445,
+        "max_penetration_mm": 1.3540556158568828,
+        "peak_moment_nm": 2.937098947589262,
+        "final_locks": [
+          false,
+          true,
+          false
+        ],
+        "tail_1s_max_relative_speed_mm_s": 0.23276270313027553,
+        "tail_1s_seating_condition_fraction": 0.0,
+        "initial_storage_force_n": 901.8542016882616,
+        "initial_storage_penetration_mm": 0.5591257967913333,
+        "storage": {
+          "module_port": "module1_port_4",
+          "storage_port": "storage_dock_port",
+          "peak_contact_force_n": 1410.4151737858053,
+          "max_penetration_mm": 1.9931737838084076,
+          "final_clearance_m": 0.757531376123283
+        },
+        "source_hashes_verified": 582,
+        "all_saved_states_finite": true,
+        "physics_and_trace_dt_s": 0.001,
+        "nominal_joint_limit_margin_rad": 0.09400431341606375,
+        "input_sha256": {
+          "model.xml": "45d799666ad619c1cdb6f6c07dc832ffdc388bfd756b1869924c0d735bffa006",
+          "rollout.npz": "1ce32054db048596c90ed76d5eddd57b8984ed7d1d0bc408fb8c4986db56acf4",
+          "validation.json": "ea9080d049e0cc87c3afcebd01d51b8d60300c9eb7fe2ebabc3b5567ba00c65b",
+          "contact_trace.npz": "568dfc14267eb707d96f987e6c9c64deed0e01d2d48e3734245087f8631dff3b",
+          "storage_trace.npz": "2591bd4ff5920b2ea66f6ad30eb196d75a6dc488836b209017011cff4d6ab144",
+          "interface_adapter.json": "47bd39b850c50761082795b672411a4c14016f848a1c4e3695d83def6b53cbd3",
+          "source_manifest.json": "5f42e8e5e71ece5e802ed1c660f98b4126823df0d100403b609493d7ec946285"
+        }
+      },
+      "yaw": {
+        "run": "runs/hexframe_interfaces_20261005_v3/crown_stl/yaw",
+        "status": "FAIL",
+        "faults": [
+          "contact load or penetration limit",
+          "contact seating timeout",
+          "final module position",
+          "incomplete handover",
+          "storage contact load or penetration limit",
+          "torque saturation"
+        ],
+        "recorded_end_s": 46.99,
+        "contact_trace_end_s": 46.999,
+        "first_physical_axial_contact_s": 27.832,
+        "controller_contact_detection_s": 29.001,
+        "lock_time_s": null,
+        "final_module_error_mm": 6.557815337775083,
+        "final_interface_fit": {
+          "lateral_mm": 0.012033516123929259,
+          "axial_above_reference_mm": 6.5578141907126835,
+          "phase_deg": -5.413891107339483,
+          "tilt_deg": 0.00284347810057478
+        },
+        "peak_axial_force_n": 11.01752278010516,
+        "max_penetration_mm": 0.5276970616832704,
+        "peak_moment_nm": 0.990975719291204,
+        "final_locks": [
+          false,
+          true,
+          false
+        ],
+        "tail_1s_max_relative_speed_mm_s": 0.0016314110231187948,
+        "tail_1s_seating_condition_fraction": 0.0,
+        "initial_storage_force_n": 901.8542016882616,
+        "initial_storage_penetration_mm": 0.5591257967913333,
+        "storage": {
+          "module_port": "module1_port_4",
+          "storage_port": "storage_dock_port",
+          "peak_contact_force_n": 1410.4151737858053,
+          "max_penetration_mm": 1.9931737838084076,
+          "final_clearance_m": 0.7558884382276048
+        },
+        "source_hashes_verified": 582,
+        "all_saved_states_finite": true,
+        "physics_and_trace_dt_s": 0.001,
+        "nominal_joint_limit_margin_rad": 0.09400431341606375,
+        "input_sha256": {
+          "model.xml": "08b4b3a496e85ac5564ac9338ac79a31b2255aacc6c294c6f8b197246c2e012f",
+          "rollout.npz": "ae2d81d65f3658bff27150f25f6066ea76b2d346c3cb5475c74cc4c74b5bccc4",
+          "validation.json": "6020261d8146bc14105084d86e6046f265f01de4e7e5f3948059cc3608dea155",
+          "contact_trace.npz": "668de05fb130c62eed42b623462f393d22ce8c45e6be3c2bcc108428658a89a7",
+          "storage_trace.npz": "5493cfb1d66f34f12a5cf67b2bab0a2d03fe875967fef09a20dd34b2f6234803",
+          "interface_adapter.json": "47bd39b850c50761082795b672411a4c14016f848a1c4e3695d83def6b53cbd3",
+          "source_manifest.json": "50002e3c12f8aeb11591125ef4f76e0d01d36f8481d07ef38b3396b95e7b9a0b"
+        }
+      },
+      "combined": {
+        "run": "runs/hexframe_interfaces_20261005_v3/crown_stl/combined",
+        "status": "FAIL",
+        "faults": [
+          "contact seating timeout",
+          "final module position",
+          "incomplete handover",
+          "storage contact load or penetration limit",
+          "torque saturation"
+        ],
+        "recorded_end_s": 46.99,
+        "contact_trace_end_s": 46.999,
+        "first_physical_axial_contact_s": 28.057000000000002,
+        "controller_contact_detection_s": 32.005,
+        "lock_time_s": null,
+        "final_module_error_mm": 3.628850851204339,
+        "final_interface_fit": {
+          "lateral_mm": 2.0144177405218757,
+          "axial_above_reference_mm": 3.018313013802697,
+          "phase_deg": -4.875741938386766,
+          "tilt_deg": 0.0016256204465633388
+        },
+        "peak_axial_force_n": 2.8820124705428323,
+        "max_penetration_mm": 0.10990520518587199,
+        "peak_moment_nm": 0.31181461865862414,
+        "final_locks": [
+          false,
+          true,
+          false
+        ],
+        "tail_1s_max_relative_speed_mm_s": 0.01252269177458431,
+        "tail_1s_seating_condition_fraction": 0.0,
+        "initial_storage_force_n": 901.8542016882616,
+        "initial_storage_penetration_mm": 0.5591257967913333,
+        "storage": {
+          "module_port": "module1_port_4",
+          "storage_port": "storage_dock_port",
+          "peak_contact_force_n": 1410.4151737858053,
+          "max_penetration_mm": 1.9931737838084076,
+          "final_clearance_m": 0.754355563979603
+        },
+        "source_hashes_verified": 582,
+        "all_saved_states_finite": true,
+        "physics_and_trace_dt_s": 0.001,
+        "nominal_joint_limit_margin_rad": 0.09400431341606375,
+        "input_sha256": {
+          "model.xml": "b25ff798a0db90a64f59784527368d159438764766584d0434cbcb110320aa44",
+          "rollout.npz": "2852f4b0de208806028623f5c1712c494d4acf049ab4be48be37f30658e88e99",
+          "validation.json": "afaed3df430d51317631ba52fb9f219e3aac2de86cf3fae0162b57ededb022c1",
+          "contact_trace.npz": "16185a330dfaece29830e5aa0ce7438e818fb9e2ca1999e0b3481b0b3091c031",
+          "storage_trace.npz": "529beaacabeb876593f6e46f50bd468d4755efae8394ca5928ae40334ede8530",
+          "interface_adapter.json": "47bd39b850c50761082795b672411a4c14016f848a1c4e3695d83def6b53cbd3",
+          "source_manifest.json": "a012784f9deec915372461a16558989e890d571e9698371c899b1823f807b190"
+        }
+      }
+    }
+  },
+  "analysis_sha256": "1884c363248d0194517644dab04f011c74c85bee6d8384262a50d956a391ffac"
+}

@@ -56,7 +56,7 @@ class Log:
 
         # SE(3) Lie 控制器逐步诊断（仅 --controller se3_lie 时填充；每元素为
         # 控制器 latest_diagnostics 的标量子集 + torque_saturated，见
-        # experiments/run_docking.py）。旧控制器路径不触碰该列表。
+        # src/compliant_docking/orchestration/run_docking.py）。旧控制器路径不触碰该列表。
         self.se3_diagnostics = []
         self.docking_samples = []
         self.docking_joint_limit_violation = False
@@ -123,7 +123,7 @@ class Log:
 
 
 
-    def plot_results(self, save_path: str = "figure/",
+    def plot_results(self, save_path: str = "runs/figures/",
                      *, scene_name: str | None = None) -> list[Path]:
         """绘制仿真结果（SciencePlots IEEE 中文风格，委托 plotting 模块）/
         Plot simulation results (SciencePlots IEEE CJK style; delegates to plotting)."""
@@ -131,7 +131,7 @@ class Log:
         # Lazy import: telemetry stays importable without scienceplots installed
         from compliant_docking.plotting import plot_docking_log
 
-        # 每个场景一个子目录，避免多场景图件在 figure/ 根下混放 /
-        # One subdirectory per scene keeps multi-scene figures out of figure/ root
+        # 每个场景一个子目录，避免多场景图件在 runs/figures/ 根下混放 /
+        # One subdirectory per scene keeps multi-scene figures out of runs/figures/ root
         out_dir = Path(save_path) / scene_name if scene_name is not None else Path(save_path)
         return plot_docking_log(self, out_dir, scene_name=scene_name)

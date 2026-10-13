@@ -19,7 +19,7 @@ from compliant_docking.simulation.mujoco_env import MujRobot
 
 @pytest.fixture(scope="module")
 def scene():
-    return load_scene("scenes/iiwa14_petal_insertion.yaml")
+    return load_scene("scenes/iiwa14_petal_original_insertion.yaml")
 
 
 def test_shared_tool_model_has_matching_frames_mass_matrix_and_joint_limits(scene):

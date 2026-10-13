@@ -20,7 +20,7 @@ from compliant_docking.collision_geometry import oriented_hull
 from compliant_docking.scene import REPO_ROOT
 
 SOURCE = REPO_ROOT / "assets/interfaces/petal_dock100"
-DESTINATION = REPO_ROOT / "assets/interfaces/petal_guidance"
+DESTINATION = REPO_ROOT / "runs/generated_assets/petal_guidance"
 VARIANTS = ("narrow", "radial")
 
 
@@ -284,7 +284,8 @@ def generate(variant, destination=None):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--variant",nargs="+",choices=VARIANTS,default=list(VARIANTS))
+    parser.add_argument("--out", type=Path, default=DESTINATION)
     args = parser.parse_args()
     for name in args.variant:
-        meta = generate(name)
+        meta = generate(name, destination=args.out/name)
         print(name,meta["guide_convex_cells"],meta["body_mass_kg"],meta["inertia_convergence"])

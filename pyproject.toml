@@ -45,7 +45,7 @@ target-version = "py310"
 # Keep imported upstream sources and immutable experiment provenance untouched.
 extend-exclude = [
     "runs",
-    "experiments/orbital_showcase/assets/hexframe_module",
+    "assets/modules/hexframe",
 ]
 
 [tool.ruff.lint]
@@ -53,12 +53,10 @@ select = ["E", "F", "W", "I", "UP", "B"]
 ignore = ["E501"]
 
 [tool.pytest.ini_options]
-testpaths = [
-    "tests",
-    "experiments/orbital_showcase/test_hexframe_integration.py",
-    "experiments/orbital_showcase/contact_force_study",
-    "experiments/orbital_showcase/crown_seating",
-]
+# tests 直接导入 experiments.* 分层入口；把仓库根加入 sys.path，
+# 使 `uv run pytest` 与 IDE/`python -m pytest` 行为一致。
+pythonpath = ["."]
+testpaths = ["tests"]
 markers = [
     "slow: long physics regression runs",
 ]

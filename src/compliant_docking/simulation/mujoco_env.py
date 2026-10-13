@@ -484,7 +484,7 @@ def test_render():
         print("qpos:", qpos)
         print("qvel:", qvel)
         print("eef_pos:", eef_pos)
-    robot.to_mp4("test.mp4")
+    robot.to_mp4(os.path.join(str(ASSETS_DIR.parents[1]), "runs", "videos", "test.mp4"))
 
 
 def test_record():
@@ -499,7 +499,7 @@ def test_record():
         print("qpos:", qpos)
         print("qvel:", qvel)
         print("eef_pos:", eef_pos)
-    robot.to_mp4("result/video/simulation.mp4")
+    robot.to_mp4(os.path.join(str(ASSETS_DIR.parents[1]), "runs", "videos", "simulation.mp4"))
 
 
 if __name__ == "__main__":

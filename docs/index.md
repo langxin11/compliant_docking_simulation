@@ -1,49 +1,59 @@
 # 柔顺对接仿真
 
-一个面向研究复现与控制算法验证的 7 自由度机械臂柔顺对接平台。项目以
-**MuJoCo** 提供接触物理、以 **Pinocchio** 提供运动学与刚体动力学，在同一套
-场景、遥测和评价管线中比较经典任务空间阻抗、SE(3) Lie 群阻抗与 HQP-AC。
+七自由度机械臂的固定基座、零重力柔顺对接仿真仓库。MuJoCo 提供独立物理世界，
+Pinocchio 提供运动学和控制侧刚体动力学。本项目**以论文复现为基础，并在此基础上
+适当拓展**；演化历史见[项目演化](project_evolution.md)。
 
-项目复现并扩展了 Ren & Shan 2026（Acta Astronautica）的统一柔顺控制与轨迹
-规划框架，并实现 Kim et al. 2025（IEEE T-RO）的标称 SE(3) Lie 群阻抗控制器。
+## 项目定位
 
-## 核心能力
+- **复现基础**：Ren & Shan（2026, Acta Astronautica）在轨装配的规划—柔顺控制
+  统一框架（SE(3)-TOPP 规划器 + HQP-AC 控制器），以及 Kim et al.（2025,
+  IEEE T-RO）的 SE(3) 阻抗控制（§III-A 标称阻抗）；复现状态逐条对照见
+  [论文对照](paper_mapping.md)。
+- **适当拓展**：PetalDock / angle1 几何导向接口与交互调形工具
+  （[接口交互调形](petal_designer.md)）、绕轴释放与横向释放两组小型接触机制实验
+  （[接触阶段控制实验](control_research.md)）、HexFrame 完整装配演示
+  （[系统验证](system_validation.md)）。
 
-- **双机械臂场景**：KUKA iiwa14（零摩擦数值锚点）与 Franka FR3（真实减速器摩擦）；
-- **三类控制器**：经典任务空间阻抗（CIC）、SE(3) Lie 群阻抗（完整
-  `log6`/`dexp`/body-wrench 链路）与 HQP-AC（关节硬约束、自适应刚度、奇异性规避）；
-- **SE(3)-TOPP 规划器**：常螺旋测地线 + 解析时间最优剖面，并提供按步
-  `(T_d, V_d, Vdot_d)` body 运动参考；另含两段式五次与圆+8字跟踪轨迹；
-- **无传感器方案**：PI 广义动量观测器（Eq.23–25）替代 F/T 传感器，含接触预紧力跟踪；
-- **一致的力与耗散建模**：传感器 wrench 的坐标系/参考点变换、力矩方向摩擦
-  前馈与关节阻尼前馈；
-- **可复现实验**：自由空间跟踪门禁、Table 10 三层指标、框架对比研究，以及
-  SE(3) 惯量重塑/大角度/零刚度验证。
+## 三层组织
+
+| 从哪里开始 | 定位与内容 |
+|---|---|
+| [模型与接口](models_interfaces.md) | 仿真平台基线：固定模型、坐标/单位、接触条件、同源检查与接口候选 |
+| [规划与柔顺控制](paper_mapping.md) | 论文复现核心（规划×柔顺统一、SE(3) 阻抗）与[接触阶段控制实验](control_research.md) |
+| [完整装配系统](system_validation.md) | HexFrame 完整装配演示：全流程验收、交接与同一记录的回放 |
+
+三层是组织与导航骨架，不是开发顺序；职责、证据使用规则与有效域见
+[研究组织与范围](research_scope.md)。HexFrame 当前使用独立关节伺服与接触导纳，
+尚未集成 SE(3) 研究策略；petal_designer 是接口几何的交互调形工具，不是实验入口。
+
+## 建议阅读顺序
+
+```text
+论文对照 → 项目演化 → 研究组织与范围
+→ 阻抗控制基础 → SE(3) 阻抗 → 接触阶段控制实验
+→ 接触刚度实验结果 → HexFrame 系统验证
+```
+
+按顺序读可以不看历史细节先建立全貌；只查复现命令直接进
+[实验复现手册](experiments.md)。哈希、日期、失败协议等二级证据集中在
+[历史证据索引](historical_evidence.md)与 `results/`，不在导航页展开。
 
 ## 快速开始
 
 ```bash
-uv sync --dev
-uv run docking --quick                          # 2s 冒烟（INCOMPLETE，仅链路检查）
-uv run docking --controller se3_lie --quick     # SE(3) Lie 控制链路
-uv run pytest -q                                # 快速测试套件
-uv run pytest -q -m slow                        # 慢速接触回归（数值锚点）
-uv run docking --scene scenes/fr3_docking.yaml  # FR3 对接
-MUJOCO_GL=egl uv run python experiments/compare_frameworks.py  # 框架对比
+uv sync --frozen --dev
+uv run docking --quick
+uv run pytest -m 'not slow' -q
+uv run mkdocs build --strict
 ```
 
-## 文档导览
+`--quick` 是短时链路检查。完整 53 s 系统验收与视频回放命令见系统页。
+无显示渲染使用 EGL；Python 项目最低版本 3.10，CI 使用 3.12。
 
-| 页面 | 内容 |
-|---|---|
-| [架构总览](architecture.md) | 模块分层、数据流与关键契约 |
-| [论文-代码对照](paper_mapping.md) | Ren & Shan 2026 公式/表格 → 代码位置与复现状态 |
-| [阻抗控制基础](theory/impedance_control.md) | 关节/笛卡尔阻抗控制理论 |
-| [SE(3) Lie 群阻抗](theory/se3_lie_impedance.md) | 群上误差、`dexp`、body wrench 与惯量重塑 |
-| [主仿真理论与数据流](theory/simulation_flow.md) | 控制律公式、端到端数据流、坐标系约定 |
-| [实验复现手册](experiments.md) | 对接、跟踪、SE(3) 自由空间实验与数值基线 |
-| [API 参考](api/control.md) | 控制器、Lie 工具、规划适配器与核心模块 |
+## 继续阅读
 
-## 运行环境
-
-Python 3.12 · MuJoCo ≥ 3.2 · Pinocchio · uv 管理；无显示环境渲染走 EGL（`MUJOCO_GL=egl`）。
+[项目演化](project_evolution.md)、[架构](architecture.md)、[实验复现](experiments.md)、
+[历史证据](historical_evidence.md)、[论文对照](paper_mapping.md)、
+[SE(3) 理论](theory/se3_lie_impedance.md)、[API](api/control.md)。
+当前完善任务见[路线图](development_plan.md)。

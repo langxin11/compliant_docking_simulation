@@ -354,14 +354,14 @@ def run_simulation(muj_robot:MujRobot,
             })
         step_index += 1
     if plot:
-        log.plot_results(save_path="figure/",
+        log.plot_results(save_path="runs/figures/",
                          scene_name=scene.name if scene is not None else None)
 
     if muj_robot.record:
-        # 视频固定落在仓库根 video/，与编排器位于 experiments/ 时期一致 /
-        # Videos land in <repo>/video exactly as when this module lived in experiments/
+        # 生成视频与其它运行产物一起写入 runs/videos/ /
+        # Generated videos land in <repo>/runs/videos/
         current_dir = str(REPO_ROOT)
-        video_dir = os.path.join(current_dir, "video")
+        video_dir = os.path.join(current_dir, "runs", "videos")
         if not os.path.exists(video_dir):
             try:
                 os.makedirs(video_dir)

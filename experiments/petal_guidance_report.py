@@ -4,27 +4,31 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import sys
 from collections import Counter
 from dataclasses import asdict, replace
 from importlib.metadata import version
 from pathlib import Path
+
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 os.environ.setdefault("MUJOCO_GL", "egl")
 os.environ.setdefault("MPLBACKEND", "Agg")
 
 import matplotlib.pyplot as plt
 import numpy as np
-import petal_capture_grid as grid
-import petal_guidance_study as study
-import petal_insertion_suite as suite
-from petal_guidance_geometry import DIRECTORIES
-from petal_lateral_study import POINTS
 
 from compliant_docking.contact_diagnostics import evaluate_contact_load
 from compliant_docking.docking_task import target_rotation
 from compliant_docking.petal_geometry import evaluate_petal_seating
 from compliant_docking.plotting import apply_style
+from compliant_docking.research import petal_trials as suite
+from compliant_docking.research.cases import POINTS
 from compliant_docking.scene import REPO_ROOT, load_scene
+from experiments.control import capture_range as grid
+from experiments.models_interfaces import petal_guidance as study
+from experiments.petal_guidance_geometry import DIRECTORIES
 
 LABELS = {"original": "原轮廓", "narrow": "窄平顶 + 角向斜坡", "radial": "角向 + 径向导面"}
 COLORS = {"original": "#666666", "narrow": "#009E73", "radial": "#D55E00"}
@@ -41,7 +45,7 @@ def arrays(out, key, fields=None):
 
 def effective_scene(key):
     g,case,setting = key
-    scene = suite.variant(study.geometry_scene(load_scene("scenes/iiwa14_petal_insertion.yaml"),g),
+    scene = suite.variant(study.geometry_scene(load_scene("scenes/iiwa14_petal_original_insertion.yaml"),g),
         f"g_{g}_{case}","lateral_released",error=grid.error_tuple(POINTS[case]))
     divisor = {"dt_half":2,"dt_quarter":4}[setting]
     return replace(scene,physics=replace(scene.physics,timestep=scene.physics.timestep/divisor))
@@ -159,7 +163,7 @@ def save_figure(fig,out,name):
 
 
 def profile_figures(out):
-    import prepare_petal_guidance as generate
+    import experiments.prepare_petal_guidance as generate
     apply_style("report",cjk_first=True)
     fig,axes = plt.subplots(1,2,figsize=(12.5,4.8),constrained_layout=True)
     angle,radius = np.linspace(-45.,45.,2001),np.linspace(32.,50.,1201)
@@ -370,7 +374,7 @@ def report_text(out,records,summary,checked):
         "机器人资产的哈希另行补充保存；其文件修改时间早于本轮运行元数据创建，之后再次核验内容一致。",
         "软件检查：256 项非慢速测试通过，4 项慢速测试未运行；7 条为既有绘图库弃用警告。48 项针对控制、门禁和新几何的检查通过。","",
         "固定计划、运行源码快照、资产清单、环境、每组 JSON/NPZ/日志、静态检查、数据审计和数值对照一并保存。后处理源码单独记录，不属于冻结的物理运行源码。","",
-        "```bash","MUJOCO_GL=egl uv run python experiments/petal_insertion_suite.py --geometry-study --jobs 3 --out runs/petal_guidance_reproduction --resume",
+        "```bash","MUJOCO_GL=egl uv run python -m experiments.models_interfaces.petal_guidance --jobs 3 --out runs/petal_guidance_reproduction --resume",
         "uv run python experiments/petal_guidance_report.py runs/petal_guidance_reproduction","```","",
         "仅验证这些离散偏差、固定起点和零重力条件下的仿真落座候选；不声明连续捕获区域、真实硬件能力或锁紧完成。",""]
     return "\n".join(lines)

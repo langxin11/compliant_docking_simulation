@@ -1,11 +1,15 @@
 # 论文-代码对照表
 
+本页是复现状态的**权威对照表**：本项目以复现下述两篇论文为基础并在此基础上适当
+拓展，本页逐条记录论文组件的复现状态与代码落点；仓库自身的扩展见
+"➕ 论文之外的扩展"一节，实际演化过程见[项目演化](project_evolution.md)。
+
 复现对象：**Ren, Q. & Shan, J. (2026). A unified framework for compliant control and
 trajectory planning in robotic in-orbit assembly. _Acta Astronautica_ 243, 32–45.**
 
 图例：✅ 已复现 · ⚠️ 部分复现/等效替代 · ❌ 未复现 · ➕ 本仓库扩展（论文之外）。
 
-## 总览：论文三大贡献
+## 总览：Ren & Shan 论文的主要方法组件及仓库复现状态
 
 | 贡献 | 状态 | 落点 |
 |---|---|---|
@@ -71,18 +75,44 @@ trajectory planning in robotic in-orbit assembly. _Acta Astronautica_ 243, 32–
 
 **重要差异**：论文规划器基线（Decoupled Planner）比对接限速更激进，规划器贡献显著；本仓库单段五次基线本身慢于对接限速，故规划器贡献在时长上不显（SE(3)-TOPP 对两段式五次为 -39% 时长，见上）。
 
+## Kim et al. 2025 T-RO 的复现状态
+
+**J. Kim, M. Sung, Y. Choi, J. Park, W. K. Chung, "Impedance Control Design Framework
+Using Commutative Map Between SE(3) and se(3)", _IEEE T-RO_, Vol. 41, 2025.**
+
+| 论文组件 | 状态 | 仓库落点 |
+|---|---|---|
+| §II-C/II-D 数学工具（\(\operatorname{dexp}\) 及其导数、Adjoint） | ✅ | `control/lie_se3.py`；`tests/test_lie_se3.py`（63 项） |
+| §III-A nominal SE(3) impedance（Eq. 44-66 控制律） | ✅ | `control/se3_impedance.py`（CLI `--controller se3_lie`）；数学细节见[SE(3) Lie 群阻抗](theory/se3_lie_impedance.md) |
+| §III-B NRIC 鲁棒内环（模型失配 \(\Delta M,\Delta C,\Delta g\) 补偿） | ❌ 未实现 | 无对应代码；不新增 `experiments/nric/` 或 NRIC × impedance × geometry 矩阵 |
+
+准确表述是：**实现并验证了 Kim et al. 的 nominal SE(3) impedance formulation；NRIC
+鲁棒内环未纳入当前复现范围。** 不描述为"完整复现了 Kim T-RO 控制器"。
+
+NRIC 当前不实现的理由：当前仓库以论文复现为基础，拓展集中在接口与接触模型、
+小型控制实验和完整装配演示。当前仿真使用同源的 MuJoCo / Pinocchio 模型（质量矩阵相对误差
+< 1e-10），模型参数失配并不是当前主要研究变量，因此 \(\Delta M,\Delta C,\Delta g\)
+补偿与真机 sim-to-real 场景下的 NRIC 鲁棒内环暂不作为前置工作。
+
+仅在以下情况重新考虑 NRIC：
+
+1. 需要声明完整复现 Kim et al. 2025 T-RO；
+2. 开始系统研究模型失配、负载不确定和未建模动力学；
+3. 开始真机或 sim-to-real 工作。
+
 ## ➕ 论文之外的扩展
 
 | 功能 | 位置 |
 |---|---|
-| SE(3) Lie 群标称阻抗（Kim et al. 2025 §III-A） | `control/se3_impedance.py`、`control/lie_se3.py`；完整 `log6`/`dexp`/惯量重塑链路 |
+| SE(3) Lie 群标称阻抗（Kim et al. 2025 §III-A，见上节） | `control/se3_impedance.py`、`control/lie_se3.py`；完整 `log6`/`dexp`/惯量重塑链路 |
+| 接触阶段绕轴/横向刚度机制实验 | `experiments/control/yaw_release.py`、`lateral_release.py`；协议见[接触阶段控制实验](control_research.md) |
 | SE(3) body 运动参考适配 | `planning/motion_reference.py`；SE(3)-TOPP 透传，纯位置轨迹结合固定姿态补齐 |
 | sensor-site → EE-body wrench 变换 | `wrench.py`；同时处理坐标旋转和参考点平移矩 |
 | 力矩方向摩擦前馈（零速死区补偿，`friction_comp: torque`） | `control/task_space.py`、`control/hqp_ac.py`；FR3 对接横向偏差 5.19→2.10 mm |
 | 关节耗散（frictionloss/damping）前馈 + 工具惯量对齐 | `load_pin_model`、场景 `pin_inertia`；质量矩阵一致性 <1e-10 |
 | 跟踪测试轨迹（圆+8字，C2 平滑）与自由空间门禁 | `CircleFigure8Trajectory`、`TrackingThresholds`；iiwa14 0.23 mm / FR3 1.31 mm |
 | 框架对比研究自动化 | `experiments/compare_frameworks.py` |
-| SciencePlots IEEE 中文绘图体系 | `plotting.py`；`figure/<场景>/` 归档 |
+| SciencePlots IEEE 中文绘图体系 | `plotting.py`；`runs/figures/<场景>/` 归档 |
 
 ## 尚未复现或尚缺端到端验证
 

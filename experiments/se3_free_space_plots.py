@@ -155,7 +155,9 @@ def main():
     ax.set_ylabel("body 系位移 [m]")
     ax.set_title("(d) 零刚度方向实现（论文 Eq. 73 结构）\ny 向力撤后漂移 "
                  f"{abs(y_body[-1, 1]):.2f} m 不回位，z 向回零")
-    ax.legend(fontsize=7, loc="upper left")
+    # 图例压在外力窗口色带上：加不透明白底保证可读性（色带 alpha 0.25 仍透出图例框外）
+    ax.legend(fontsize=7, loc="upper left", frameon=True,
+              framealpha=1.0, facecolor="white", edgecolor="none")
 
     for stem in ("se3_free_space_validation",):
         fig.savefig(args.out / f"{stem}.png", dpi=300)

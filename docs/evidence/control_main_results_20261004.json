@@ -1,0 +1,525 @@
+{
+  "date": "2026-10-04",
+  "scope": "Retained JSON summary curation; not a new simulation or raw-telemetry audit",
+  "primary_record_count": 23,
+  "rq1": {
+    "combined_stiff": {
+      "source": "runs/petal_contact_control_20261002_v2/combined_stiff.json",
+      "assessment": {
+        "status": "FAIL",
+        "reasons": [
+          "benchmark: insufficient insertion",
+          "geometry: mating phase",
+          "geometry: nominal seating height",
+          "geometry: stop contact not maintained"
+        ],
+        "locking_verified": false
+      },
+      "lateral_mm": 0.019698911344883205,
+      "tilt_deg": 0.031830354096250006,
+      "phase_deg": 4.012853813306265,
+      "axial_gap_mm": 4.49078933047714,
+      "stop_fraction": 0.0,
+      "trigger_s": null,
+      "first_loaded_stop_s": null,
+      "simulation_duration_s": 23.348499999990935,
+      "contact_load_gate": "PASS",
+      "feedback_audit": "PASS"
+    },
+    "combined_compliant": {
+      "source": "runs/petal_contact_control_20261002_v2/combined_compliant.json",
+      "assessment": {
+        "status": "FAIL",
+        "reasons": [
+          "geometry: stop contact not maintained"
+        ],
+        "locking_verified": false
+      },
+      "lateral_mm": 0.008780810724380327,
+      "tilt_deg": 0.015115811307536343,
+      "phase_deg": 0.46002078498715804,
+      "axial_gap_mm": 0.3061903705654512,
+      "stop_fraction": 0.0,
+      "trigger_s": null,
+      "first_loaded_stop_s": null,
+      "simulation_duration_s": 23.348499999990935,
+      "contact_load_gate": "PASS",
+      "feedback_audit": "PASS"
+    },
+    "combined_released": {
+      "source": "runs/petal_contact_control_20261002_v2/combined_released.json",
+      "assessment": {
+        "status": "CANDIDATE_PASS",
+        "reasons": [],
+        "locking_verified": false
+      },
+      "lateral_mm": 0.16575935792773322,
+      "tilt_deg": 0.0030698423708566615,
+      "phase_deg": 0.03668921583907547,
+      "axial_gap_mm": 0.0010785466563745238,
+      "stop_fraction": 1.0,
+      "trigger_s": 12.8395000000042,
+      "first_loaded_stop_s": 15.094500000006956,
+      "simulation_duration_s": 23.348499999990935,
+      "contact_load_gate": "PASS",
+      "feedback_audit": "PASS"
+    },
+    "nominal_released": {
+      "source": "runs/petal_contact_control_20261002_v2/nominal_released.json",
+      "assessment": {
+        "status": "CANDIDATE_PASS",
+        "reasons": [],
+        "locking_verified": false
+      },
+      "lateral_mm": 0.005882671666866109,
+      "tilt_deg": 3.6222548091772e-06,
+      "phase_deg": 1.6093583603549177e-05,
+      "axial_gap_mm": 8.315216293297567e-07,
+      "stop_fraction": 1.0,
+      "trigger_s": 14.993000000006832,
+      "first_loaded_stop_s": 14.828500000006631,
+      "simulation_duration_s": 23.343499999990946,
+      "contact_load_gate": "PASS",
+      "feedback_audit": "PASS"
+    },
+    "xy_released": {
+      "source": "runs/petal_contact_control_20261002_v2/xy_released.json",
+      "assessment": {
+        "status": "CANDIDATE_PASS",
+        "reasons": [],
+        "locking_verified": false
+      },
+      "lateral_mm": 0.1536064755661768,
+      "tilt_deg": 0.003300509036475903,
+      "phase_deg": 0.0013486691992241617,
+      "axial_gap_mm": 0.0011657053512470483,
+      "stop_fraction": 1.0,
+      "trigger_s": 13.494000000005,
+      "first_loaded_stop_s": 15.026000000006873,
+      "simulation_duration_s": 23.348499999990935,
+      "contact_load_gate": "PASS",
+      "feedback_audit": "PASS"
+    }
+  },
+  "rq2": {
+    "nx6_released": {
+      "source": "runs/petal_lateral_control_20261003/nx6_released.json",
+      "assessment": {
+        "status": "FAIL",
+        "reasons": [
+          "geometry: stop contact not maintained"
+        ],
+        "locking_verified": false
+      },
+      "lateral_mm": 0.21784459444387955,
+      "tilt_deg": 0.036634333372194385,
+      "phase_deg": 0.008704209403539664,
+      "axial_gap_mm": 0.06980135110418173,
+      "stop_fraction": 0.0,
+      "trigger_s": 12.753500000004095,
+      "first_loaded_stop_s": null,
+      "simulation_duration_s": 23.263499999991133,
+      "contact_load_gate": "PASS",
+      "feedback_audit": "PASS"
+    },
+    "nx6_lateral_released": {
+      "source": "runs/petal_lateral_control_20261003/nx6_lateral_released.json",
+      "assessment": {
+        "status": "CANDIDATE_PASS",
+        "reasons": [],
+        "locking_verified": false
+      },
+      "lateral_mm": 0.14116905244164327,
+      "tilt_deg": 3.4150945850063763e-06,
+      "phase_deg": 0.0001108531187128392,
+      "axial_gap_mm": 8.373344795309379e-07,
+      "stop_fraction": 1.0,
+      "trigger_s": 12.753500000004095,
+      "first_loaded_stop_s": 14.774000000006565,
+      "simulation_duration_s": 23.263499999991133,
+      "contact_load_gate": "PASS",
+      "feedback_audit": "PASS"
+    },
+    "px6_released": {
+      "source": "runs/petal_lateral_control_20261003/px6_released.json",
+      "assessment": {
+        "status": "FAIL",
+        "reasons": [
+          "geometry: stop contact not maintained"
+        ],
+        "locking_verified": false
+      },
+      "lateral_mm": 0.24628974358609537,
+      "tilt_deg": 0.03913144696502804,
+      "phase_deg": 0.004357534728519852,
+      "axial_gap_mm": 0.11277531794579021,
+      "stop_fraction": 0.0,
+      "trigger_s": 12.915500000004293,
+      "first_loaded_stop_s": null,
+      "simulation_duration_s": 23.425499999990755,
+      "contact_load_gate": "PASS",
+      "feedback_audit": "PASS"
+    },
+    "px6_lateral_released": {
+      "source": "runs/petal_lateral_control_20261003/px6_lateral_released.json",
+      "assessment": {
+        "status": "CANDIDATE_PASS",
+        "reasons": [],
+        "locking_verified": false
+      },
+      "lateral_mm": 0.13996093315399838,
+      "tilt_deg": 3.6222548091772e-06,
+      "phase_deg": 0.003177857416041263,
+      "axial_gap_mm": 8.240083615440597e-07,
+      "stop_fraction": 1.0,
+      "trigger_s": 12.915500000004293,
+      "first_loaded_stop_s": 14.94150000000677,
+      "simulation_duration_s": 23.425499999990755,
+      "contact_load_gate": "PASS",
+      "feedback_audit": "PASS"
+    },
+    "ny6_released": {
+      "source": "runs/petal_lateral_control_20261003/ny6_released.json",
+      "assessment": {
+        "status": "FAIL",
+        "reasons": [
+          "geometry: stop contact not maintained"
+        ],
+        "locking_verified": false
+      },
+      "lateral_mm": 0.21700370612119543,
+      "tilt_deg": 0.0365877609980859,
+      "phase_deg": 0.006309329548741971,
+      "axial_gap_mm": 0.06889092070694325,
+      "stop_fraction": 0.0,
+      "trigger_s": 12.768000000004113,
+      "first_loaded_stop_s": null,
+      "simulation_duration_s": 23.2774999999911,
+      "contact_load_gate": "PASS",
+      "feedback_audit": "PASS"
+    },
+    "ny6_lateral_released": {
+      "source": "runs/petal_lateral_control_20261003/ny6_lateral_released.json",
+      "assessment": {
+        "status": "CANDIDATE_PASS",
+        "reasons": [],
+        "locking_verified": false
+      },
+      "lateral_mm": 0.1423710697214219,
+      "tilt_deg": 3.6222548091772e-06,
+      "phase_deg": 0.001513309785970307,
+      "axial_gap_mm": 8.333738699128901e-07,
+      "stop_fraction": 1.0,
+      "trigger_s": 12.768000000004113,
+      "first_loaded_stop_s": 14.785500000006579,
+      "simulation_duration_s": 23.2774999999911,
+      "contact_load_gate": "PASS",
+      "feedback_audit": "PASS"
+    },
+    "py6_released": {
+      "source": "runs/petal_lateral_control_20261003/py6_released.json",
+      "assessment": {
+        "status": "FAIL",
+        "reasons": [
+          "geometry: stop contact not maintained"
+        ],
+        "locking_verified": false
+      },
+      "lateral_mm": 0.24652840146186347,
+      "tilt_deg": 0.039153976235002046,
+      "phase_deg": 0.003405673684774513,
+      "axial_gap_mm": 0.1131705344891154,
+      "stop_fraction": 0.0,
+      "trigger_s": 12.902500000004277,
+      "first_loaded_stop_s": null,
+      "simulation_duration_s": 23.411999999990787,
+      "contact_load_gate": "PASS",
+      "feedback_audit": "PASS"
+    },
+    "py6_lateral_released": {
+      "source": "runs/petal_lateral_control_20261003/py6_lateral_released.json",
+      "assessment": {
+        "status": "CANDIDATE_PASS",
+        "reasons": [],
+        "locking_verified": false
+      },
+      "lateral_mm": 0.1437779055082999,
+      "tilt_deg": 3.6222548091772e-06,
+      "phase_deg": 0.00852902733034,
+      "axial_gap_mm": 8.327513678629828e-07,
+      "stop_fraction": 1.0,
+      "trigger_s": 12.902500000004277,
+      "first_loaded_stop_s": 14.929500000006755,
+      "simulation_duration_s": 23.411999999990787,
+      "contact_load_gate": "PASS",
+      "feedback_audit": "PASS"
+    },
+    "combo_ny6_p15_released": {
+      "source": "runs/petal_lateral_control_20261003/combo_ny6_p15_released.json",
+      "assessment": {
+        "status": "FAIL",
+        "reasons": [
+          "benchmark: insufficient insertion",
+          "benchmark: lateral offset",
+          "benchmark: tilt",
+          "geometry: lateral alignment",
+          "geometry: axis alignment",
+          "geometry: mating phase",
+          "geometry: nominal seating height",
+          "geometry: stop contact not maintained"
+        ],
+        "locking_verified": false
+      },
+      "lateral_mm": 6.3269950417073755,
+      "tilt_deg": 1.9575127457626045,
+      "phase_deg": 14.891177343046898,
+      "axial_gap_mm": 16.311526011321963,
+      "stop_fraction": 0.0,
+      "trigger_s": 11.993000000003166,
+      "first_loaded_stop_s": null,
+      "simulation_duration_s": 23.2774999999911,
+      "contact_load_gate": "PASS",
+      "feedback_audit": "PASS"
+    },
+    "combo_ny6_p15_lateral_released": {
+      "source": "runs/petal_lateral_control_20261003/combo_ny6_p15_lateral_released.json",
+      "assessment": {
+        "status": "FAIL",
+        "reasons": [
+          "benchmark: insufficient insertion",
+          "benchmark: lateral offset",
+          "benchmark: tilt",
+          "geometry: lateral alignment",
+          "geometry: axis alignment",
+          "geometry: mating phase",
+          "geometry: nominal seating height",
+          "geometry: stop contact not maintained"
+        ],
+        "locking_verified": false
+      },
+      "lateral_mm": 6.278873741901684,
+      "tilt_deg": 1.9605617268449371,
+      "phase_deg": 14.98684177643294,
+      "axial_gap_mm": 16.309347868070756,
+      "stop_fraction": 0.0,
+      "trigger_s": 11.993000000003166,
+      "first_loaded_stop_s": null,
+      "simulation_duration_s": 23.2774999999911,
+      "contact_load_gate": "PASS",
+      "feedback_audit": "PASS"
+    },
+    "combo_py6_n15_released": {
+      "source": "runs/petal_lateral_control_20261003/combo_py6_n15_released.json",
+      "assessment": {
+        "status": "FAIL",
+        "reasons": [
+          "benchmark: insufficient insertion",
+          "benchmark: lateral offset",
+          "benchmark: tilt",
+          "geometry: lateral alignment",
+          "geometry: axis alignment",
+          "geometry: mating phase",
+          "geometry: nominal seating height",
+          "geometry: stop contact not maintained"
+        ],
+        "locking_verified": false
+      },
+      "lateral_mm": 6.3013361760530975,
+      "tilt_deg": 1.957153124655767,
+      "phase_deg": 14.844915703938632,
+      "axial_gap_mm": 16.305203898399512,
+      "stop_fraction": 0.0,
+      "trigger_s": 12.12750000000333,
+      "first_loaded_stop_s": null,
+      "simulation_duration_s": 23.411999999990787,
+      "contact_load_gate": "PASS",
+      "feedback_audit": "PASS"
+    },
+    "combo_py6_n15_lateral_released": {
+      "source": "runs/petal_lateral_control_20261003/combo_py6_n15_lateral_released.json",
+      "assessment": {
+        "status": "FAIL",
+        "reasons": [
+          "benchmark: insufficient insertion",
+          "benchmark: lateral offset",
+          "benchmark: tilt",
+          "geometry: lateral alignment",
+          "geometry: axis alignment",
+          "geometry: mating phase",
+          "geometry: nominal seating height",
+          "geometry: stop contact not maintained"
+        ],
+        "locking_verified": false
+      },
+      "lateral_mm": 6.250314788406929,
+      "tilt_deg": 1.9601837988958093,
+      "phase_deg": 14.945687104091661,
+      "axial_gap_mm": 16.303074859150502,
+      "stop_fraction": 0.0,
+      "trigger_s": 12.12750000000333,
+      "first_loaded_stop_s": null,
+      "simulation_duration_s": 23.411999999990787,
+      "contact_load_gate": "PASS",
+      "feedback_audit": "PASS"
+    },
+    "nominal_released": {
+      "source": "runs/petal_lateral_control_20261003/nominal_released.json",
+      "assessment": {
+        "status": "CANDIDATE_PASS",
+        "reasons": [],
+        "locking_verified": false
+      },
+      "lateral_mm": 0.005882671666866109,
+      "tilt_deg": 3.6222548091772e-06,
+      "phase_deg": 1.6093583603549177e-05,
+      "axial_gap_mm": 8.315216293297567e-07,
+      "stop_fraction": 1.0,
+      "trigger_s": 14.993000000006832,
+      "first_loaded_stop_s": 14.828500000006631,
+      "simulation_duration_s": 23.343499999990946,
+      "contact_load_gate": "PASS",
+      "feedback_audit": "PASS"
+    },
+    "nominal_lateral_released": {
+      "source": "runs/petal_lateral_control_20261003/nominal_lateral_released.json",
+      "assessment": {
+        "status": "CANDIDATE_PASS",
+        "reasons": [],
+        "locking_verified": false
+      },
+      "lateral_mm": 0.005865070962797891,
+      "tilt_deg": 3.6222548091772e-06,
+      "phase_deg": 1.2058949614868197e-05,
+      "axial_gap_mm": 8.316100585936681e-07,
+      "stop_fraction": 1.0,
+      "trigger_s": 14.993000000006832,
+      "first_loaded_stop_s": 14.828500000006631,
+      "simulation_duration_s": 23.343499999990946,
+      "contact_load_gate": "PASS",
+      "feedback_audit": "PASS"
+    },
+    "small_combined_released": {
+      "source": "runs/petal_lateral_control_20261003/small_combined_released.json",
+      "assessment": {
+        "status": "CANDIDATE_PASS",
+        "reasons": [],
+        "locking_verified": false
+      },
+      "lateral_mm": 0.16575935792773322,
+      "tilt_deg": 0.0030698423708566615,
+      "phase_deg": 0.03668921583907547,
+      "axial_gap_mm": 0.0010785466563745238,
+      "stop_fraction": 1.0,
+      "trigger_s": 12.8395000000042,
+      "first_loaded_stop_s": 15.094500000006956,
+      "simulation_duration_s": 23.348499999990935,
+      "contact_load_gate": "PASS",
+      "feedback_audit": "PASS"
+    },
+    "small_combined_lateral_released": {
+      "source": "runs/petal_lateral_control_20261003/small_combined_lateral_released.json",
+      "assessment": {
+        "status": "CANDIDATE_PASS",
+        "reasons": [],
+        "locking_verified": false
+      },
+      "lateral_mm": 0.0017810934640248367,
+      "tilt_deg": 3.6222548091772e-06,
+      "phase_deg": 0.2089736863645868,
+      "axial_gap_mm": 8.251756500321505e-07,
+      "stop_fraction": 1.0,
+      "trigger_s": 12.8395000000042,
+      "first_loaded_stop_s": 15.124000000006992,
+      "simulation_duration_s": 23.348499999990935,
+      "contact_load_gate": "PASS",
+      "feedback_audit": "PASS"
+    },
+    "yaw_n15_released": {
+      "source": "runs/petal_lateral_control_20261003/yaw_n15_released.json",
+      "assessment": {
+        "status": "CANDIDATE_PASS",
+        "reasons": [],
+        "locking_verified": false
+      },
+      "lateral_mm": 0.0016884883760944901,
+      "tilt_deg": 3.6222548091772e-06,
+      "phase_deg": 0.20841543581663302,
+      "axial_gap_mm": 8.361795145184203e-07,
+      "stop_fraction": 1.0,
+      "trigger_s": 12.359500000003614,
+      "first_loaded_stop_s": 15.084500000006944,
+      "simulation_duration_s": 23.343499999990946,
+      "contact_load_gate": "PASS",
+      "feedback_audit": "PASS"
+    },
+    "yaw_n15_lateral_released": {
+      "source": "runs/petal_lateral_control_20261003/yaw_n15_lateral_released.json",
+      "assessment": {
+        "status": "CANDIDATE_PASS",
+        "reasons": [],
+        "locking_verified": false
+      },
+      "lateral_mm": 0.0016732306929316172,
+      "tilt_deg": 3.6222548091772e-06,
+      "phase_deg": 0.20844452211678544,
+      "axial_gap_mm": 8.361806247414449e-07,
+      "stop_fraction": 1.0,
+      "trigger_s": 12.359500000003614,
+      "first_loaded_stop_s": 15.085000000006945,
+      "simulation_duration_s": 23.343499999990946,
+      "contact_load_gate": "PASS",
+      "feedback_audit": "PASS"
+    }
+  },
+  "rq2_counts": {
+    "released": 3,
+    "lateral_released": 7
+  },
+  "rq2_current_config_check": "Nine pairs differ only in scene name and lateral_stiffness_after",
+  "historical_audits": {
+    "runs/petal_contact_control_20261002_v2": {
+      "historical_status": "PASS",
+      "records": 8,
+      "raw_npz_present": false
+    },
+    "runs/petal_lateral_control_20261003": {
+      "historical_status": "PASS",
+      "records": 23,
+      "raw_npz_present": false
+    }
+  },
+  "source_sha256": {
+    "runs/petal_contact_control_20261002_v2/summary.json": "68820b8074c60cb9bca5ad6885765531cb3c8a6a3eda6edd8c9ad864793eddd6",
+    "runs/petal_contact_control_20261002_v2/combined_stiff.json": "331a5d32a765ffecfcba15413b5574b032d0cd6eefc5c25fb6e03141dc08d370",
+    "runs/petal_contact_control_20261002_v2/combined_compliant.json": "0a370a780f74a765275037dc3d6da701ff57d9932db3776dc0b963a0885bb760",
+    "runs/petal_contact_control_20261002_v2/combined_released.json": "a6e7ed1aedb2a868cc2a1b6c94e028173a043b0cdd0d5d7fcafa40852d38e4cd",
+    "runs/petal_contact_control_20261002_v2/nominal_released.json": "dd59a09918d94d4baef0b43ce4f780007d2c9955af03a7f8c688713487139704",
+    "runs/petal_contact_control_20261002_v2/xy_released.json": "65b471e0bf9a62e1047d1855ec358f195c01915a6f0f3d9b8f7336d02c27c8a1",
+    "runs/petal_lateral_control_20261003/summary.json": "097ae9dc9ba8e761077ca10edda7487310a49ff108045c1e48a4cace4a9698c6",
+    "runs/petal_lateral_control_20261003/matched_pair_checks.json": "519a6bd37604f6da362d203d6c56873a3550cf31063d386e1c67ac5f2ec40416",
+    "runs/petal_lateral_control_20261003/nx6_released.json": "a3b2a9edaefc6d6c360ec68bc16240f0157f9005844d4f62a923869f21ab4b91",
+    "runs/petal_lateral_control_20261003/nx6_lateral_released.json": "2780ebfc4e7845e30fa5eb0653d65dc1927a93aa756fd79ae0f212ab0a184f3b",
+    "runs/petal_lateral_control_20261003/px6_released.json": "d61fe6d4f881d3ec9b0d975735cc44c9bf78a89045bb2367f493dd2914e585e6",
+    "runs/petal_lateral_control_20261003/px6_lateral_released.json": "5a47d5cf5ec290b346b17c8f3355eb861e46c17f530829b874ce7d225d8429da",
+    "runs/petal_lateral_control_20261003/ny6_released.json": "a4dce63d23bb69dc3678d7fb0ed2b89c835e636e16025686c46c7ba3532931c8",
+    "runs/petal_lateral_control_20261003/ny6_lateral_released.json": "7763af090cc1bb649a163091d3ea8b599a1ad13e5f297075f4c2925dd3c36aab",
+    "runs/petal_lateral_control_20261003/py6_released.json": "d760372c8fbaaaaf87cd10404562ef057a1d1fac28a0778db313da6f8f35368a",
+    "runs/petal_lateral_control_20261003/py6_lateral_released.json": "0ff2b50895e3725a8fff3f073b998f38f6cba02e8db4efebb776578b58db2195",
+    "runs/petal_lateral_control_20261003/combo_ny6_p15_released.json": "6d98a310a75b31700dcb7b320165199b3d362b576b8596f4891aa0da0e501f34",
+    "runs/petal_lateral_control_20261003/combo_ny6_p15_lateral_released.json": "fc95827a8ee7bd1bb1988c2976e18b29430edf20c98400f41da2815872a2e9d8",
+    "runs/petal_lateral_control_20261003/combo_py6_n15_released.json": "468154ff623ad745e3627f24d5e4bc96dfd7661232ab03fb16f3e7c38cf67092",
+    "runs/petal_lateral_control_20261003/combo_py6_n15_lateral_released.json": "b632c42460dfcd272efc7bf382b2f5f809d04528eafd9983d495f4a8c1143c04",
+    "runs/petal_lateral_control_20261003/nominal_released.json": "db088bdebc874607b74ef48958bf19ed6d737b7ec07f3a90e2c2217472d019b5",
+    "runs/petal_lateral_control_20261003/nominal_lateral_released.json": "106f004251fcbae2a1e4fd3b56dec2c24c753a63b50e74b7fe64d6981b388f2a",
+    "runs/petal_lateral_control_20261003/small_combined_released.json": "a34ce37c73c4e685efb3f648e806e6e89b981f223e6562afc861ea3ab2030cbb",
+    "runs/petal_lateral_control_20261003/small_combined_lateral_released.json": "580db2ac1b2ca91f9d66e1230f0053ce0c33688af5466d4eb57e147056c5d83c",
+    "runs/petal_lateral_control_20261003/yaw_n15_released.json": "ec99e3b6ae165dee7c6fae14fc5b4966ed18dfff4bd1196eb5a1f1ba06a5d272",
+    "runs/petal_lateral_control_20261003/yaw_n15_lateral_released.json": "695738dfc1b3accfa2835fb7a5a699f71f8874ca0a01d3fba04e0b316e443a3f",
+    "runs/petal_contact_control_20261002_v2/validation_audit.json": "d3054ea809b07f99b65685d6b9d9ee2627e93582adac8501088f9cd9859523ea",
+    "runs/petal_contact_control_20261002_v2/PURGED_NPZ_20261003.json": "23801236ec1da09d70fa47235473a9efcf9247eb699f8ad9c52bb876b80958eb",
+    "runs/petal_lateral_control_20261003/validation_audit.json": "50e08c37bf49eb3e9364cc0c11689a2ea5d7f22f99e4cac93ffd34e0d3eca6dd",
+    "runs/petal_lateral_control_20261003/PURGED_NPZ_20261003.json": "bff8f178d5e4a9ba94161c260e26f85be6dc46a8fd8177a91d62f09bbd4509ea",
+    "results/petal_contact_control_validation.md": "ca0f5515bf3acd761fc571c63b32ed2788f9673b2c74c5e647331cfa60193e90",
+    "results/petal_lateral_control_validation.md": "459d7d4ea92cfa516ec27e3f70676d51fc2af55c19a029527396e9f07c2cde9b"
+  }
+}

@@ -1,4 +1,4 @@
-"""物理回归测试：复刻 canonical 阻抗控制对接回路（与 experiments/run_docking.py 一致）。
+"""物理回归测试：复刻 canonical 阻抗控制对接回路（与 orchestration/run_docking.py 一致）。
 
 运行方式 / How to run:
     pytest -m "not slow"   # 快速套件（默认）：3 s 无接触跟踪

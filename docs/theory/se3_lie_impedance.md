@@ -8,6 +8,8 @@
 **本仓库不包含论文 §III-B 的 NRIC 鲁棒内环**（明确留作后续独立工作）；
 本控制器是论文的标称（nominal）Lie 群阻抗控制器。
 
+NRIC 的取舍理由见[论文-代码对照](../paper_mapping.md)。
+
 ## 与另两种控制器的关系
 
 | 控制器 | 性质 | 姿态误差表达 | 惯量重塑 | 出处 |
@@ -46,7 +48,7 @@ A，平移阶跃超调 0%/0%/**48.6%**（A=0.5/5/100，理论值 48.6%）——�
 
 ## 主循环接线
 
-`experiments/run_docking.py` 在 `--controller se3_lie` 下使用独立的 SE(3) 通道：
+主仿真编排 `orchestration/run_docking.py` 在 `--controller se3_lie` 下使用独立的 SE(3) 通道：
 
 1. `planning.motion_reference.get_motion_reference` 采样 `(T_d,V_d,Vdot_d)`；
 2. `SE3ToppTrajectory.get_motion_state` 可直接给出常螺旋段的 body 运动量，其他

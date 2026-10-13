@@ -1,4 +1,4 @@
-"""Contact admittance and ideal-weld handover; original gates unchanged."""
+"""接触导纳装配主循环与理想 weld 交接；落座门限保持原验收协议不变。"""
 from __future__ import annotations
 
 import json
@@ -12,7 +12,7 @@ from .sequence import reference_ik
 
 
 def control_every_steps(dt):
-    """10 ms contact-IK / 100 Hz record cadence expressed in physics steps."""
+    """接触 IK 每 10 ms 更新一次、记录通道 100 Hz，这里换算成物理步数。"""
     return max(1, round(.01/dt))
 
 
@@ -39,8 +39,8 @@ def simulate(r, model, spline, phase_list, planning):
     gripper_id = model.equality("gripper_lock").id
     low, high = np.asarray(planning["joint_limits"])
     control_every = control_every_steps(r.dt)
-    # Measurement-chain variants for the validation entries. Defaults keep the
-    # formal 1 ms run bit-identical: no noise, and the historical raw/strict gate.
+    # 测量链变体只供 P0/P1/P2 验证入口使用。默认值（无噪声、raw_strict 判定）
+    # 保持正式 1 ms 验收逐位不变；只有场景显式声明时才启用噪声或滤波判定。
     gate = getattr(r, "seating_gate", "raw_strict")
     noise_sigma = float(getattr(r, "force_noise_sigma", 0.) or 0.)
     rng = np.random.default_rng(getattr(r, "noise_seed", 0)) if noise_sigma else None
@@ -66,8 +66,9 @@ def simulate(r, model, spline, phase_list, planning):
             faults.add("joint limit")
         contact_mode = k == 9 and locked is None
         if contact_mode:
-            # axial is the measured signal: true force plus optional sensor noise.
+            # 轴向力是测量信号：真实接触力叠加可选的传感器高斯噪声（单位 N）。
             axial = f[2] if rng is None else f[2]+rng.normal(0., noise_sigma)
+            # 一阶低通，时间常数 20 ms；raw_strict 与 filtered_debounce 都用它积分导纳。
             filtered += (1-np.exp(-r.dt/.02))*(axial-filtered)
             if gate == "filtered_debounce":
                 if first_contact is None and filtered >= .1:
@@ -78,6 +79,9 @@ def simulate(r, model, spline, phase_list, planning):
                     first_contact = t
                 in_window = .15 <= axial <= .6
             if first_contact is not None:
+                # 接触导纳：目标轴向力从 0 在 1 s 内线性升到 contact_force_n（0.4 N），
+                # 进给速度按（滤波力 − 目标力）积分，积分时间 0.5 s、阻尼系数 200，
+                # 幅值限制在 ±1 mm/s，避免接触瞬间的大力阶跃把模块顶开。
                 target = contact_force_n*min(1., (t-first_contact)/1.)
                 zvelocity += r.dt*(filtered-target-200*zvelocity)/.5
                 zvelocity = float(np.clip(zvelocity, -.001, .001))
@@ -94,8 +98,9 @@ def simulate(r, model, spline, phase_list, planning):
                 yaw = .8*np.arctan2(actual[1, 0], actual[0, 0])
                 desired_rotation = Rotation.from_rotvec(correction).as_matrix()@Rotation.from_euler("z", yaw).as_matrix()@r.tip_rotation
                 qref = reference_ik(model, kin, qref, position, desired_rotation)
-                # Retain real servo damping. Feeding measured yaw velocity back
-                # as reference velocity cancels damping and permits drift.
+                # 接触阶段保持真实伺服阻尼：参考速度置零，让 PD 的速度项起阻尼作用。
+                # 若把实测关节速度直接当作参考速度反馈，会抵消该项的速度阻尼，
+                # 仿真中可能出现接触后的慢漂。
                 qdot = np.zeros(7)
             desired, velocity = qref, qdot
             error = physical_error
@@ -108,15 +113,16 @@ def simulate(r, model, spline, phase_list, planning):
                 dwell += r.dt
                 invalid_run = 0.
             elif first_contact is not None and t-first_contact >= 1.:
-                # filtered_debounce tolerates measurement blips up to 10 ms;
-                # the historical raw_strict gate resets on any single step.
+                # filtered_debounce 允许测量毛刺持续 10 ms 以内不重置 dwell；
+                # 历史 raw_strict 门限则要求每一步都满足条件，任一步失败即清零。
                 invalid_run += r.dt
                 if gate != "filtered_debounce" or invalid_run > .01:
                     dwell = 0.
             else:
                 dwell, invalid_run = 0., 0.
             if dwell >= .5:
-                # Site weld target matches measured installed pose: no snap.
+                # 持续就位满 0.5 s 后锁定：weld 目标 site 取模块 1 当前实测位姿
+                # （换算到模块 2 本体系），因此接通 weld 的瞬间不产生位置跳变。
                 anchor = model.site("assembly_anchor").id
                 module2 = data.body("module2")
                 model.site_pos[anchor] = module2.xmat.reshape(3, 3).T@(data.body("module1").xpos-module2.xpos)
@@ -134,8 +140,8 @@ def simulate(r, model, spline, phase_list, planning):
             desired, velocity = qref, np.zeros(7)
         else:
             desired, velocity = spline(t), spline(t, 1)
-            # Seed contact IK from the preceding transport reference, rather
-            # than the initial storage pose.
+            # 接触段的 IK 初值取转运段末端的参考关节角，而不是初始存储姿态，
+            # 避免从大偏差起步迭代。
             qref = desired.copy()
         phase = phase_list[k]
         if phase.event and phase.event not in done and t-starts[k] >= phase.seconds*.6:
@@ -153,8 +159,8 @@ def simulate(r, model, spline, phase_list, planning):
                *physical_error, int(data.eq_active[2]), grip_load, unload_dwell,
                int(seating_condition), int(ready), float(np.linalg.norm(data.qvel[:7]))]
         if noise_sigma or gate != "raw_strict":
-            # Measurement-modified runs record the true force and the filtered
-            # channel alongside the measured axial force in column 1.
+            # 修改过测量链的运行把真实力和滤波通道与测量轴向力（第 1 列）并列记录，
+            # 便于事后区分传感器效应与物理过程。
             row += [f[2], filtered]
         telemetry.append(row)
         if storage_contact is not None:
@@ -216,7 +222,7 @@ def simulate(r, model, spline, phase_list, planning):
     records = {key: np.asarray(value) for key, value in records.items()}
     np.savez_compressed(r.output/"rollout.npz", **records)
     (r.output/"validation.json").write_text(json.dumps(report, indent=2)+"\n")
-    # Persist the accepted anchor frame for correct replay and no pose snapping.
+    # 保存锁定时接受的 anchor 位姿，回放时从同一坐标系渲染，不出现姿态跳变。
     (r.output/"accepted_anchor.json").write_text(json.dumps(dict(pos=model.site("assembly_anchor").pos.tolist(),
                                                            quat=model.site("assembly_anchor").quat.tolist())))
     print(json.dumps(report), flush=True)

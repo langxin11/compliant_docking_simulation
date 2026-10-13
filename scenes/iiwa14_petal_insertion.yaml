@@ -1,4 +1,6 @@
-# Optional replacement interface. Pinocchio reads the same assembled MJCF.
+# 用户选择的 1° / 0.3 接口；自由空间提速，物理/控制/反馈延迟均为 1 ms。
+# Representative case: (0, -6) mm / +15 deg; no simulated locking.
+# Pinocchio reads the same assembled MJCF; no simulated locking.
 scene:
   name: iiwa14_petal_insertion
   controller: se3_lie
@@ -17,16 +19,16 @@ robot:
     joint6: [-120, 120]
     joint7: [-175, 175]
 tool:
-  mjcf: assets/interfaces/petal_dock100/active.xml
+  mjcf: assets/interfaces/petal_guidance/angle1_blend030/active.xml
   prefix: tool_
   pose: {pos: [0.0, 0.0, 0.0], quat: [1.0, 0.0, 0.0, 0.0]}
 target:
-  mjcf: assets/interfaces/petal_dock100/passive.xml
+  mjcf: assets/interfaces/petal_guidance/angle1_blend030/passive.xml
   prefix: target_
   pos: [0.0, 0.5, 0.35]
   quat: [1.0, 0.0, 0.0, 0.0]
 physics:
-  timestep: 0.0005
+  timestep: 0.001
   gravity: [0.0, 0.0, 0.0]
   integrator: implicitfast
   cone: elliptic
@@ -40,13 +42,15 @@ task:
   ik_guess: [0.6882329351413595, 0.6954397875938523, -1.3695893884291805, 1.7568197338788447, 2.462767248857433, 1.554635029645154, -1.3952621967472831]
 trajectory:
   type: waypoints
-  v_max_approach: 0.10
-  a_max_approach: 0.20
-  v_max_docking: 0.02
-  a_max_docking: 0.05
+  omega_max_approach: 0.40
+  alpha_max_approach: 0.40
+  v_max_approach: 0.20
+  a_max_approach: 0.40
+  v_max_docking: 0.10  # 此场景用于无接触下降段；插入速度由 docking 单独指定
+  a_max_docking: 0.20
 docking:
-  estimate_pos: [0.002, 0.498, 0.35]
-  estimate_yaw_deg: 5.0
+  estimate_pos: [0.0, 0.494, 0.35]
+  estimate_yaw_deg: 15.0
   mating_yaw_deg: 45.0
   # Controlled root is now the flange, not the old cylinder_link frame.
   entry_height: 0.0814
@@ -67,10 +71,11 @@ se3_impedance:
   d_diag: [80.0, 80.0, 90.0, 10.0, 10.0, 1.0]
   k_diag: [80.0, 80.0, 1500.0, 25.0, 25.0, 0.5]
   null_damping: 10.0
-  control_period: 0.0005  # held when refining the physics timestep
+  control_period: 0.001  # 每个物理步更新一次，使用上一物理步的反馈（延迟 1 ms）
   contact_yaw:
     force_threshold_N: 0.15  # below the nominal 0.225 N seating preload
     filter_s: 0.01
     dwell_s: 0.02
     release_s: 0.25
     stiffness_after: 0.0
+    lateral_stiffness_after: 0.0  # body X/Y share the same contact latch and ramp

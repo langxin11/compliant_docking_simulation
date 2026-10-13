@@ -15,10 +15,6 @@ OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MUJOCO_GL=egl uv run docking \
 MUJOCO_GL=egl uv run docking --scene scenes/hexframe_assembly.yaml \
   --replay --record --out runs/hexframe_my_run
 
-# 原实验入口仍有效，默认委托正式场景；旧模块也保留
-uv run python experiments/orbital_showcase/crown_assembly.py --video
-uv run python experiments/orbital_showcase/crown_assembly.py --module legacy --video
-
 # 原主项目场景冒烟
 uv run docking --scene scenes/iiwa14_docking.yaml --quick
 uv run docking --scene scenes/fr3_docking.yaml --quick
@@ -28,7 +24,7 @@ uv run docking --scene scenes/fr3_docking.yaml --quick
 
 ## 资源、布局与模型
 
-原始 Astra HexFrame / PetalDock100 V2 资源、CAD、网格、许可和 `IMPORT.json` 保留在 `experiments/orbital_showcase/assets/hexframe_module/`。正式配置引用此唯一资源，不重新缩放或复制原始 CAD。六侧面接口 1–6 映射为资源端口 3、4、5、0、1、2，接口 1 朝上、接口 4 朝下；端口位姿、46.4 mm 配合根间距、45° 配合相位均读取资源元数据。质量为 CAD 估算 3.5082656535 kg，完整惯量与质心同源。
+原始 Astra HexFrame / PetalDock100 V2 资源、CAD、网格、许可和 `IMPORT.json` 保留在 `assets/modules/hexframe/`。正式配置引用此唯一资源，不重新缩放或复制原始 CAD。六侧面接口 1–6 映射为资源端口 3、4、5、0、1、2，接口 1 朝上、接口 4 朝下；端口位姿、46.4 mm 配合根间距、45° 配合相位均读取资源元数据。质量为 CAD 估算 3.5082656535 kg，完整惯量与质心同源。
 
 工作区与工具片段位于 `assets/scenes/hexframe/`；模型构建复用主项目 `assets/iiwa14/iiwa14_arm.xml`，关节范围只读取机器人 URDF 的七个关节限制，不加载旧工具质量惯量。`AssemblyRuntime` 显式保存每次运行的布局、参考姿态、锁定 site、控制增益与输出目录，正式场景不导入或修改实验模块的共享变量。
 
@@ -52,4 +48,4 @@ CI 运行原快速测试和新增正式场景测试，另外通过正式入口�
 
 ## 尚未建模的机制
 
-这是固定基座零重力名义组装验证。抓取、存储及模块间锁紧为理想 weld；基座与模块 2 是初始预锁定固定连接。尚未模拟锁销、机械预紧、解锁执行机构、电气连接、结构弹性、抓取硬件标定、自由漂浮基座反作用、轨道传播或航天器姿态控制。太阳翼为固定视觉结构。尚无该完整 HexFrame 流程的误差网格、物理半步长、噪声或实机验证。
+这是固定基座零重力名义组装验证。抓取、存储及模块间锁紧为理想 weld；基座与模块 2 是初始预锁定固定连接。尚未模拟锁销、机械预紧、解锁执行机构、电气连接、结构弹性、抓取硬件标定、自由漂浮基座反作用、轨道传播或航天器姿态控制。太阳翼为固定视觉结构。已有独立 P0 系统半步长、P1 离散布局误差网格与 P2 测量噪声/判定策略对照；范围与变量见[系统验证](system_validation.md)，历史结论见[证据索引](historical_evidence.md)。P0 的伺服/导纳/滤波随物理步长更新，P2 含判定策略变量；这些结果不能替代固定采样的单接口控制研究。尚未完成实机验证。

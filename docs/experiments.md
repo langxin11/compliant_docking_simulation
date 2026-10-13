@@ -1,9 +1,54 @@
 # 实验复现手册
 
 所有命令在仓库根执行；无显示环境渲染加 `MUJOCO_GL=egl` 前缀。图件输出到
-`figure/<场景名>/`，对比研究数据落 `results/`。
+`runs/figures/<场景名>/`，新运行数据落 `runs/`，冻结摘要纳入 `results/`。
 
-新增组合接触实验使用独立的 `runs/compliant_insertion/` 输出目录：
+## 入口总览
+
+三层各有一个正式入口，从仓库根目录用 `python -m experiments.<层>.<入口>` 启动；
+每个入口只回答一个问题，不提供跨研究目的的任意切换。
+
+| 职责 | 入口 |
+|---|---|
+| 固定模型检查 | `models_interfaces.baseline` |
+| 绕轴释放实验 | `control.yaw_release` |
+| 横向释放实验 | `control.lateral_release` |
+| 离散误差范围 | `control.capture_range` |
+| 几何矩阵 | `models_interfaces.petal_guidance` |
+| 候选复核 | `models_interfaces.selected_candidate` |
+| 完整系统 | `system.hexframe precheck/accept/replay`，或 `docking --scene scenes/hexframe_assembly.yaml` |
+| P0/P1/P2 扩展 | `system.validation.run_halfstep/run_grid/run_noise` |
+
+`experiments/` 根目录仍保留有独立用途的冠形诊断、自由空间验证、框架对比和模型生成工具。
+Petal 聚合转发入口已删除，各研究使用上表的单一入口；历史命令只用于解释当时源码快照。
+
+## 输出与退出语义
+
+新运行选择新的 `runs/<问题>_<日期>/` 目录；已存在来源清单必须逐项相等才能续跑，
+不将新输出续写进旧归档。控制计算完成退出 0 不等于对照组全通过，结论读取每组
+JSON 的 `assessment`；系统验收失败退出 2，预检为 INCOMPLETE，回放须先审计。
+生成视频与其验收目录关联，不以视频存在推断 PASS。
+
+## 生成数据的位置
+
+程序运行生成的日志、轨迹、NPZ、派生图、预览和报告构建文件默认进入 `runs/`
+（Git 忽略）；机械臂与对接件的模型文件保留在 `assets/`，冻结结论摘要进入
+`results/`。常用默认位置：
+
+| 工具或用途 | 默认输出 |
+|---|---|
+| HexFrame 模块 demo / 验证 / 预览（`assets/modules/hexframe/`） | `runs/hexframe_module/` |
+| HexFrame 模型与接口 CAD 生成器 | `runs/generated_assets/` |
+| Petal 接口导入/导向生成器 | `runs/generated_assets/petal_dock100/`、`runs/generated_assets/petal_guidance/` |
+| 冠形凸分解生成器（CoACD） | `runs/generated_assets/convex_crown/` |
+| 调形候选 | `runs/designs/petal_guidance/` |
+| 框架报告、一般图件与录像 | `runs/framework_comparison/`、`runs/figures/`、`runs/videos/` |
+| 候选报告后处理 | 指定运行目录中的 `report.md`，不覆写 `results/` 冻结报告 |
+
+冷克隆不需要历史运行文件即可加载正式模型并生成新 demo/验证/预览；
+CAD/CoACD/Blender 属于离线资产工具，不加入普通仿真依赖。
+
+历史冠形组合接触实验使用独立的 `runs/compliant_insertion/` 输出目录：
 
 ```bash
 MUJOCO_GL=egl uv run python experiments/insertion_suite.py --preview
@@ -71,7 +116,7 @@ uv run docking --scene scenes/fr3_tracking.yaml --quick  # 标记 INCOMPLETE
 ```bash
 uv run python experiments/se3_free_space.py --quick
 uv run python experiments/se3_free_space.py
-uv run python experiments/se3_free_space_plots.py
+uv run python experiments/se3_free_space_plots.py --out runs/figures/se3_free_space
 # 自定义图件目录：.../se3_free_space_plots.py --out /tmp/se3-free-space
 ```
 
@@ -87,7 +132,7 @@ uv run python experiments/se3_free_space_plots.py
 
 完整平移阶跃的已验证超调为 0% / 0% / **48.6%**（A=0.5 / 5 / 100），
 与二阶理论值一致。绘图脚本将 PNG 与 PDF 写入
-`figure/se3_free_space/se3_free_space_validation.*`。这些实验验证的是 Kim et al.
+`runs/figures/se3_free_space/se3_free_space_validation.*`。这些实验验证的是 Kim et al.
 2025 §IV-A 的标称 SE(3) 阻抗；不包含该论文 §III-B 的 NRIC 鲁棒内环。
 
 ## 4. 无传感器 HQP-AC 与接触预紧
@@ -107,7 +152,7 @@ MUJOCO_GL=egl uv run python experiments/compare_frameworks.py
 ```
 
 2×2 矩阵（{单段五次, 两段式}×{CIC, HQP-AC}）按 Table 10 三层指标输出对比表
-（`results/framework_comparison_*.md`）与图件（`figure/framework_comparison/`）。
+（`runs/framework_comparison/framework_comparison_*.md`）与图件（`runs/figures/framework_comparison/`）。
 核心结论：HQP-AC 在 FR3 摩擦场景峰值力 -81%；两段式规划在慢速基线上无时长收益。
 
 ## 6. 规划器选择
@@ -141,7 +186,8 @@ uv run ruff check .
 ## 可选凸碰撞模型
 
 原始 STL 的凹面不能直接替换成整件凸包。已生成的 130 块接口代理通过了采样几何
-验收，安装、视觉与显式惯量保留；动态对照尚未通过综合验收，默认仍是 SDF。
+验收，安装、视觉与显式惯量保留；动态对照尚未通过当时综合验收。SDF 是该冠形历史场景的基线，
+当前单接口默认是 angle1_blend030 凸块模型；此处不安排新的冠形研究。
 
 ```bash
 MUJOCO_GL=egl uv run python experiments/insertion_suite.py \
@@ -154,29 +200,28 @@ uv run python experiments/compare_collision_models.py
 仅校验使用 `--validate-only`，运行时不需要 CoACD。生成资产指纹与几何门禁会在选择
 凸模型时检查。完整科学验收失败时退出码为 2，结果照常保存。
 
-详细结果与下一步见仓库中的 `results/convex_collision_iiwa14.md`。
+历史结果见仓库中的 `results/convex_collision_iiwa14.md`。
 
 ## PetalDock100 接入机械臂
 
-`experiments/petal_insertion_suite.py` 使用与原组合实验相同的机器人控制循环。
+`experiments.control.yaw_release` 使用共享机器人控制循环，固定原轮廓场景。
 固定高/低绕轴刚度分别为 25 和 0.5 N·m/rad；`released` 使用同一低刚度，
 接触后释放到零。其余 A/D/K、初始状态和轨迹相同；工况是无估计误差、
 XY 偏差 (2, −2) mm、XY 同时叠加 5° 偏航。控制周期固定为 0.5 ms，
 `dt_half` 仅把物理步长从 0.5 改为 0.25 ms。
 
-场景 `iiwa14_petal_insertion.yaml` 声明新工具的法兰根 frame、45° 配合相位、
+历史研究场景 `iiwa14_petal_original_insertion.yaml` 声明工具的法兰根 frame、45° 配合相位、
 名义落座间距 46.4 mm，以及独立的估计目标。真实目标位姿仅进入物理和评估，
 不进入轨迹生成。Pinocchio 从同一份组装 MJCF 读取完整工具惯量；初始姿态无
 接触，轨迹经过连续 IK 检查，运行时保留关节限位与非接口接触检查。
 
 ```bash
-OPENBLAS_NUM_THREADS=1 MUJOCO_GL=egl uv run python experiments/petal_insertion_suite.py \
-  --jobs 2 --preview
-OPENBLAS_NUM_THREADS=1 MUJOCO_GL=egl uv run python experiments/petal_insertion_suite.py \
-  --case combined --setting dt_half --jobs 2 --resume
+OPENBLAS_NUM_THREADS=1 MUJOCO_GL=egl uv run python -m experiments.control.yaw_release \
+  --case nominal xy combined --profile stiff compliant released \
+  --setting baseline dt_half --jobs 2 --out runs/yaw_release_new
 ```
 
-输出目录默认 `runs/petal_contact_control_current`，建议每次显式指定新的 `--out`。
+输出目录默认 `runs/yaw_release_current`，建议每次显式指定新的 `--out`。
 历史验证数据保留在 `runs/petal_contact_control_20261002_v2`。`preflight.json` 保存运动学、
 质量矩阵、关节范围与初始接触核对；`source_manifest.json` 在开始时固定源码和
 模型哈希。源码改变后拒绝续跑到同一目录，避免混合不同实现的结果。
@@ -199,7 +244,7 @@ compact 模式不保存所有接触点事件，减少多凸块模型的内存开
 
 普通矩阵自动比较 combined 的 0.5 与 0.25 ms，输出 `numerical_comparison.json`。
 `--setting dt_quarter` 可记录 0.125 ms，控制周期不变；普通矩阵不自动比较该组，
-`--lateral-study` 会保存代表点的全部相邻比较。比较要求综合状态
+横向入口的 `--stage numerics` 会保存代表点的全部相邻比较。比较要求综合状态
 相同，横向/轴向差不超过 0.1 mm、相位差不超过 0.1°；峰值力差不超过
 max(0.5 N, 10%)，峰值轴矩差不超过 max(0.05 N·m, 10%)。这是声明的研究比较
 阈值，不是数学收敛证明。
@@ -211,7 +256,7 @@ max(0.5 N, 10%)，峰值轴矩差不超过 max(0.05 N·m, 10%)。这是声明的
 
 ## PetalDock100 捕获范围的离散扫描
 
-`petal_insertion_suite.py --grid` 以 X、Y 各 −6/0/6 mm，偏航 −15/0/15° 的
+`python -m experiments.control.capture_range` 以 X、Y 各 −6/0/6 mm，偏航 −15/0/15° 的
 27 个完整流程为初始网格，直接复用 `run_case`，不重新实现控制或评分。
 每组保持零重力、同一起点、原 A/D/K、0.15 N 接触检测、8 s 保持和全部验收门槛。
 
@@ -231,20 +276,20 @@ INFEASIBLE_PLAN，不作为接触捕获失败混淆。NPZ 保存逐步位姿、F
 
 ## PetalDock100 接触后的横向释放
 
-`petal_insertion_suite.py --lateral-study` 仍使用上述 `run_case` 和同一组门禁。
+`python -m experiments.control.lateral_release --stage paired` 仍使用上述 `run_case` 和同一组门禁。
 九个声明的误差点各跑原 `released` 与新 `lateral_released`，共十八个完整流程。
 新策略只将 `contact_yaw.lateral_stiffness_after` 设为零，接触前保持 XY 刚度 80 N/m，
 触发后与绕轴刚度共用 0.25 s 的平滑下降过程。轴向预紧、倾斜刚度、惯量和阻尼不变。
 省略可选字段保持原 XY 行为；不得设置高于接触前的刚度或负值。
 
 ```bash
-OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MUJOCO_GL=egl uv run python experiments/petal_insertion_suite.py \
-  --lateral-study --jobs 3 --out runs/petal_lateral_reproduction --resume
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MUJOCO_GL=egl uv run python -m experiments.control.lateral_release \
+  --stage paired --jobs 3 --out runs/lateral_release_new
 ```
 
-三组预选代表点追加半步长；敏感点再追加四分之一步长，上限三组。
-若最新相邻比较仍敏感且该点落座，再按冻结的一点预算独立比较插入速度减半的
-0.25/0.125 ms 两组。减速不混入主配对，也不改变门禁。所有预算和源码在启动时固定，
+只有显式运行 `--stage numerics` 才对三组预选代表点追加半步长，
+敏感点再追加四分之一步长，上限三组。减速比较通过 `--stage speed` 在新目录独立运行，
+不由数值敏感结果自动触发，不混入主配对，也不改变门禁。所有预算和源码在启动时固定，
 续跑拒绝不同配置或实现。输出包括原始 NPZ、每组 JSON/log、`study_plan.json`、
 `matched_pair_checks.json`、`summary.json` 和 `numerical_comparison.json`；
 入口完成代表计划已执行，具体科学结论以各组 `assessment` 和数值比较为准。
@@ -257,14 +302,14 @@ OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MUJOCO_GL=egl uv run python experiments
 
 ## PetalDock 导向几何对照
 
-`petal_insertion_suite.py --geometry-study` 比较原模型和两个可选导面原型，继续复用
+`python -m experiments.models_interfaces.petal_guidance` 比较原模型和两个可选导面原型，继续复用
 同一个 `run_case`、F/T 接触释放和全部验收条件。三组都使用接触后 XY/yaw 释放，
 不混入其他控制策略、减速或摩擦改变。生成参数与模型清单见
 [导向模型说明](reports/petal_guidance.md)。
 
 ```bash
-OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MUJOCO_GL=egl uv run python experiments/petal_insertion_suite.py \
-  --geometry-study --jobs 3 --out runs/petal_guidance_reproduction --resume
+OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 MUJOCO_GL=egl uv run python -m experiments.models_interfaces.petal_guidance \
+  --jobs 3 --out runs/petal_guidance_reproduction --resume
 
 # 完成矩阵后，从完整逐步记录重算门禁、反馈约定和图表
 uv run python experiments/petal_guidance_report.py runs/petal_guidance_reproduction
