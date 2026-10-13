@@ -71,22 +71,22 @@ def render_review(run_dir, output, label):
                 'module1_port_4_mating', 'module2_port_1_mating')
             focus = np.mean([data.site(name).xpos for name in sites], axis=0)
             detail = camera(focus, .38 if phase <= 5 else .28, 90, -10)
-            result = Image.new('RGB', (1280, 480), '#0a1424')
+            result = Image.new('RGB', (1280, 480), '#FFFFFF')
             for x, cam in [(0, overview), (640, detail)]:
                 renderer.update_scene(data, camera=cam, scene_option=options)
                 renderer.scene.flags[mujoco.mjtRndFlag.mjRND_SHADOW] = False
                 result.paste(Image.fromarray(renderer.render().copy()), (x, 78))
             draw = ImageDraw.Draw(result)
             draw.text((18, 8), f'{label}  |  {PHASES[phase]}  |  t={times[index]:.2f} s',
-                      font=title_font, fill='#edf5ff')
+                      font=title_font, fill='#25394D')
             locks = states['locks'][index]
             status = '    '.join(f'{name}：{"锁定" if locked else "解除"}' for name, locked in
                                   zip(['存储', '机械臂抓持', '模块间'], locks, strict=True))
-            draw.text((18, 43), f'整体视角    |    {status}', font=small, fill='#8ce1cb')
+            draw.text((18, 43), f'整体视角    |    {status}', font=small, fill='#386B65')
             draw.text((654, 43), '抓取接口特写' if phase <= 5 else '模块 1 接口 4 ↔ 模块 2 接口 1',
-                      font=small, fill='#edf5ff')
+                      font=small, fill='#25394D')
             draw.text((18, 448), '同次运行保存状态 · 原速回放 · 无重新仿真 · 理想锁定模型',
-                      font=small, fill='#a9bdd6')
+                      font=small, fill='#43566A')
             return result
 
         count = int(np.floor((times[-1]-times[0])*fps))+1
