@@ -17,13 +17,14 @@ HexFrame 定位为**完整装配演示与集成验证**：场景、验收、P0/P
 
 ```bash
 # 几何、双模型一致性与全路径可达性；结果必须标为 INCOMPLETE
-uv run python -m experiments.system.hexframe precheck --out runs/hexframe_precheck_my_run
+uv run python -m experiments.system.hexframe precheck --out runs/system/hexframe_precheck
 
 # 锁定原场景、1 ms 物理步长、53 s 时长与控制器；完整验收 + 独立审计
-OPENBLAS_NUM_THREADS=1 uv run python -m experiments.system.hexframe accept --out runs/hexframe_my_run
+OPENBLAS_NUM_THREADS=1 uv run python -m experiments.system.hexframe accept --out runs/system/hexframe_accept
 
-# 复用同一运行 model/rollout/phases，不重新模拟
-MUJOCO_GL=egl uv run python -m experiments.system.hexframe replay --out runs/hexframe_my_run --record
+# 复用同一运行 model/rollout/phases 回放与人工评判视频（白底幻灯片配色，原速 24 fps 双视角）
+MUJOCO_GL=egl uv run python -m experiments.system.hexframe_review_video \
+  --run runs/system/hexframe_accept --out runs/system/hexframe_review --case nominal
 ```
 
 验收核对六侧端口、CAD 质量惯量、关节限制、完整路径、状态顺序、真实导向/止挡载荷、
@@ -31,9 +32,10 @@ MUJOCO_GL=egl uv run python -m experiments.system.hexframe replay --out runs/hex
 退出 0 但 `validation.json` 为 `INCOMPLETE`。视频生成不升级验收状态。
 正式 `docking --scene scenes/hexframe_assembly.yaml` 仍兼容并保持原限制。
 
-回放先执行独立审计，再读取已保存状态和阶段。视频来自同一运行，不以当前默认路径替代记录。
-系统证据包含 `validation.json`、`audit.json`、`runtime.json`、`source_manifest.json`、
-模型、状态与接触 trace。详细门禁与物理边界见[HexFrame 正式场景](hexframe_assembly.md)。
+回放先执行独立审计，再读取已保存状态和阶段。`hexframe_review_video` 在生成原速回放
+视频（`review.mp4`）的同时输出双视角高分辨率终态结算图（`last_frame.png`，左侧全景视角
+与右侧接口特写），便于演示与人工核对。系统证据包含 `validation.json`、`audit.json`、
+`runtime.json`、`source_manifest.json`、模型、状态与接触 trace。详细门禁与物理边界见[HexFrame 正式场景](hexframe_assembly.md)。
 
 ## 独立扩展验证
 

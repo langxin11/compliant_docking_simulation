@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- 工作规范与运行数据解耦（AGENTS.md 规范重构与分层路径统一）：
+  明确 `runs/` 属于随时可清理、可由当前代码重新生成的本地运行缓存，不再维护内部手工账本；
+  实验输出统一采用按层组织的规范路径（`runs/models_interfaces/...`、`runs/control/...`、`runs/system/...`），
+  消除脚本间对历史日期目录的硬编码耦合；确立 Git commit 为唯一代码版本溯源基准。完成历史
+  陈旧 runs 归档备份（`~/runs_archive_20261023.tar.gz`）与本地重跑验证（基础对接、模型基线、
+  yaw_release 配对、HexFrame 53 s 验收全部 PASS / 科学结论与原协议严格吻合）。
+
 - HexFrame 视频与展示图默认采用白底、深蓝灰常规字重，保留 MuJoCo 场景配色；
   展示样式变更不修改保存状态、控制、验收或历史来源指纹。
 
